@@ -1,5 +1,7 @@
 # 지식 관리 시스템
 
+> [English Version](05-knowledge-management-en.md)
+
 ## 왜 필요한가?
 
 복잡한 프로젝트에서는 **재사용 가능한 지식**을 체계적으로 관리해야 합니다.

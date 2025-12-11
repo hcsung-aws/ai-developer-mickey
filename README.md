@@ -1,5 +1,7 @@
 # AI Developer Mickey
 
+> [English Version](README-en.md)
+
 > 생성형 AI 어시스턴트를 효과적으로 활용하기 위한 실전 가이드
 
 ![Mickey](docs/images/mickey-poster.png)

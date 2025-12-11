@@ -1,5 +1,7 @@
 # 세션 연속성 (Session Continuity)
 
+> [English Version](03-session-continuity-en.md)
+
 ## 문제 정의
 
 생성형 AI 어시스턴트를 사용할 때 가장 큰 도전 과제 중 하나는 **세션 간 일관성 유지**입니다.

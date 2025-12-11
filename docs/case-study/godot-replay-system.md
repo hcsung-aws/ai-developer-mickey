@@ -1,5 +1,7 @@
 # 사례 연구: Godot 리플레이 시스템 개발
 
+> [English Version](godot-replay-system-en.md)
+
 ## 프로젝트 개요
 
 **목표**: Godot 엔진의 Pong 게임에 완전한 리플레이 및 회귀 테스트 시스템 구축

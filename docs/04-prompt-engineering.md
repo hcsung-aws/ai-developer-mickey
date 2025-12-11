@@ -1,5 +1,7 @@
 # Prompt 엔지니어링
 
+> [English Version](04-prompt-engineering-en.md)
+
 ## Mickey 프롬프트 진화 과정
 
 Mickey의 시스템 프롬프트는 작업을 거듭하면서 지속적으로 개선되었습니다.

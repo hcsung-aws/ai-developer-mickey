@@ -1,5 +1,7 @@
 # Mickey 소개
 
+> [English Version](01-introduction-en.md)
+
 ## Mickey란?
 
 **Mickey**는 세션 연속성을 유지하며 지속적으로 개선하는 AI 개발자 에이전트입니다. Kiro CLI의 agent 기능을 활용하여 만들어졌으며, 복잡한 소프트웨어 개발 프로젝트에서 발생하는 context window 한계와 세션 간 일관성 문제를 해결합니다.

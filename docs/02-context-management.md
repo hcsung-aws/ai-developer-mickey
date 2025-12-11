@@ -1,5 +1,7 @@
 # Context Window 관리
 
+> [English Version](02-context-management-en.md)
+
 ## Context Window란?
 
 Context Window는 AI 모델이 한 번에 처리할 수 있는 텍스트의 양입니다. Kiro CLI의 경우 200,000 토큰의 context window를 제공하지만, 복잡한 프로젝트에서는 이마저도 부족할 수 있습니다.
