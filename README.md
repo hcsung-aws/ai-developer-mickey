@@ -37,6 +37,7 @@
 3. [세션 연속성](docs/03-session-continuity.md) - 세션 간 일관성 유지 방법
 4. [Prompt 엔지니어링](docs/04-prompt-engineering.md) - 효과적인 프롬프트 구조화
 5. [지식 관리 시스템](docs/05-knowledge-management.md) - 재사용 가능한 지식 구축
+6. [AI 관점에서 본 Mickey](docs/ai-perspective.md) - AI의 포스트모템 및 실무 가이드 ⭐
 
 ### 실전 사례
 
