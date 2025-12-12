@@ -321,7 +321,6 @@ Mickey 3: 85% → 100% 진행
 # Sync files
 cp /home/.../pong/*.gd /mnt/c/.../pong/
 ```
-```
 
 ### 3. 지식 베이스 구축
 
