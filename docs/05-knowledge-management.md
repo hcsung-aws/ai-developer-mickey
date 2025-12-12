@@ -360,7 +360,7 @@ Mickey 3: 문서 읽기 (10분) + 작업
 4. **구조 없이 작성**
    - 읽기 어려움
    - 활용 불가
-
+```
 ## 다음 단계
 
 - [실전 사례](case-study/godot-replay-system.md) - Godot 프로젝트 적용 사례
