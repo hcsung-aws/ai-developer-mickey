@@ -70,7 +70,6 @@ var root = Node2D.new()
 var child = Sprite2D.new()
 root.add_child(child)
 ```
-```
 
 ### context_rule/
 
