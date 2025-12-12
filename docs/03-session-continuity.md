@@ -348,7 +348,7 @@ func _process(delta):
     delta = log.get_delta(frame)  # Use logged delta
     state = log.get_state(frame)
 ```
-```
+
 
 ## 다음 단계
 
