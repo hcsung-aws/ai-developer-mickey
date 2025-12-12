@@ -253,7 +253,6 @@ func get_action_strength(action: String) -> float:
         return replay_data.get_input(action)
     return Input.get_action_strength(action)
 ```
-```
 
 #### 3단계: 활용
 
