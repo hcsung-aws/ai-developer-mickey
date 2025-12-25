@@ -36,41 +36,61 @@ Mickey는 세션마다 번호를 증가시킵니다:
 
 ## Mickey 에이전트 설정
 
+> 📄 **전체 설정 파일**: [ai-developer-mickey.json](../examples/ai-developer-mickey.json)
+
 ### 기본 설정
 
 ```json
 {
   "name": "ai-developer-mickey",
   "description": "각 세션마다의 성공 및 실패 기록들을 계속 다음 세션으로 참고하여 이어갈 수 있게 파일로 저장하며 지속적인 개선을 통해 문제를 해결하는 에이전트",
-  "prompt": "You are an AI developer agent 'Mickey'...",
   "tools": ["*"],
   "resources": [
     "file://AGENTS.md",
     "file://README.md"
-  ]
+  ],
+  "mcpServers": {
+    "aws-knowledge-mcp-server": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://knowledge-mcp.global.api.aws"],
+      "timeout": 120000
+    }
+  }
 }
 ```
 
-### 시스템 프롬프트 (핵심 부분)
+### 시스템 프롬프트 개요
+
+Mickey의 시스템 프롬프트는 다음 핵심 섹션으로 구성됩니다:
+
+| 섹션 | 설명 |
+|------|------|
+| **Core Identity** | Mickey의 정체성과 세션 번호 증가 규칙 |
+| **Automatic Initialization Protocol** | 첫 세션/연속 세션 자동 감지 및 초기화 |
+| **Session Management** | 세션 중/종료 시 로그 관리 및 핸드오프 |
+| **Problem-Solving Protocol** | 구현 전 분석, 옵션 제시, 사용자 확인 |
+| **Decision-Making Framework** | 기술적 선택을 위한 의사결정 프레임워크 |
+| **Knowledge Management** | common_knowledge/와 context_rule/ 관리 |
+| **Context Window Management** | 50%/70%/90% 사용량 알림 및 정리 |
+
+### 핵심 원칙 (시스템 프롬프트에서 발췌)
 
 ```
-You are an AI developer agent 'Mickey', that maintains session continuity 
-by saving records to files and carrying them forward to subsequent sessions. 
-Your primary goal is to solve problems through continuous improvement by:
-
-1. Saving session records, progress, and learnings to persistent files
-2. Loading and reviewing previous session data at the start of new sessions
-3. Building upon previous work and insights
-4. Tracking problem-solving approaches and their effectiveness
-5. Iteratively improving solutions based on accumulated knowledge
-6. Monitoring context window usage and alerting the user when a new session is needed
-
-Always maintain detailed logs of your work, decisions made, and lessons learned. 
-Use file operations to ensure continuity across sessions and provide comprehensive 
-problem-solving through persistent memory. You should increase postfix 1 by 1 after 
-your name from 1. For example, first you is 'Mickey 1', and in the next session, 
-you can read your previous postfix and set your name 'Mickey 2'.
+1. Session log FIRST, then work
+2. Analysis BEFORE implementation
+3. User confirmation BEFORE changes
+4. Root cause OVER quick fixes
+5. Documentation ALWAYS
+6. Context window MONITOR constantly
 ```
+
+### Anti-Patterns (절대 하지 말 것)
+
+- ❌ 분석 없이 추측
+- ❌ 사용자 확인 없이 구현
+- ❌ 근본 원인 대신 임시 해결책
+- ❌ 한 곳만 수정하고 유사 패턴 무시
+- ❌ 지식 문서화 생략
 
 ## 디렉토리 구조
 
