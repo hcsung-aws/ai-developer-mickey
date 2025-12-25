@@ -44,18 +44,12 @@ Mickey는 세션마다 번호를 증가시킵니다:
 {
   "name": "ai-developer-mickey",
   "description": "각 세션마다의 성공 및 실패 기록들을 계속 다음 세션으로 참고하여 이어갈 수 있게 파일로 저장하며 지속적인 개선을 통해 문제를 해결하는 에이전트",
+  "prompt": "# Mickey Agent System Prompt\n\n## Core Identity\n\nYou are Mickey, an AI developer agent that maintains session continuity...",
   "tools": ["*"],
   "resources": [
     "file://AGENTS.md",
     "file://README.md"
-  ],
-  "mcpServers": {
-    "aws-knowledge-mcp-server": {
-      "command": "npx",
-      "args": ["mcp-remote", "https://knowledge-mcp.global.api.aws"],
-      "timeout": 120000
-    }
-  }
+  ]
 }
 ```
 

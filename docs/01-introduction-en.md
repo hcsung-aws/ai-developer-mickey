@@ -44,18 +44,12 @@ This allows clear tracking of each session's work.
 {
   "name": "ai-developer-mickey",
   "description": "An agent that saves success and failure records from each session to files for reference in subsequent sessions, solving problems through continuous improvement",
+  "prompt": "# Mickey Agent System Prompt\n\n## Core Identity\n\nYou are Mickey, an AI developer agent that maintains session continuity...",
   "tools": ["*"],
   "resources": [
     "file://AGENTS.md",
     "file://README.md"
-  ],
-  "mcpServers": {
-    "aws-knowledge-mcp-server": {
-      "command": "npx",
-      "args": ["mcp-remote", "https://knowledge-mcp.global.api.aws"],
-      "timeout": 120000
-    }
-  }
+  ]
 }
 ```
 
