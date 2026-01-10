@@ -20,6 +20,17 @@
 
 Create an AI developer agent called **"Mickey"** that saves success/failure records from each session to files, references them in subsequent sessions, and continuously improves.
 
+### 🔄 Prompt Evolution
+
+The Mickey prompt continues to evolve through real projects:
+
+| Version | Project | Sessions | Key Changes |
+|---------|---------|----------|-------------|
+| **v2.0** | Godot Replay System | Mickey 1-6 | Session continuity, knowledge management |
+| **v5.0** | Packet Capture Agent | Mickey 1-12 | Purpose-first, checklists, automation |
+
+> 💡 **Key Insight**: AI prompts should not be "write once and done" but **continuously evolved through failure experiences**. See [Prompt Evolution Guide](docs/06-prompt-evolution-en.md) for details.
+
 ## 🎯 Learning Objectives
 
 Through this project, you will learn:
@@ -29,23 +40,44 @@ Through this project, you will learn:
 - ✅ **Session Continuity**: Strategies to maintain work across sessions
 - ✅ **Prompt Structuring**: Effective prompt design and improvement methods
 - ✅ **Knowledge Management System**: Storing and utilizing reusable knowledge
+- ✅ **Prompt Evolution**: Continuous prompt improvement through failure experiences 🆕
 
 ## 📚 Documentation Structure
 
-### Core Guides
+### Core Guides (v2.0)
 
 1. [Introduction to Mickey](docs/01-introduction-en.md) - Concept and design of the Mickey agent
+   - [한글](docs/01-introduction.md)
 2. [Context Window Management](docs/02-context-management-en.md) - Strategies for efficient context utilization
+   - [한글](docs/02-context-management.md)
 3. [Session Continuity](docs/03-session-continuity-en.md) - Methods to maintain consistency across sessions
+   - [한글](docs/03-session-continuity.md)
 4. [Prompt Engineering](docs/04-prompt-engineering-en.md) - Effective prompt structuring
+   - [한글](docs/04-prompt-engineering.md)
 5. [Knowledge Management System](docs/05-knowledge-management-en.md) - Building reusable knowledge
-6. **[Mickey from AI's Perspective](docs/ai-perspective-en.md)** - AI's postmortem and practical guide ⭐
-   - [한국어 버전](docs/ai-perspective.md)
+   - [한글](docs/05-knowledge-management.md)
 
-### Real-World Case Studies
+### Prompt Evolution Guide (v5.0) 🆕
 
-- [Godot Replay System Development](docs/case-study/godot-replay-system-en.md) - Actual project application case
-- [Mickey Session Logs](sessions/) - Actual work records from Mickey 1~6
+6. **[Prompt Evolution: v2.0 → v5.0](docs/06-prompt-evolution-en.md)** - Lessons from the second project ⭐
+   - [한글](docs/06-prompt-evolution.md)
+
+### AI Perspective
+
+- [Mickey from AI's Perspective](docs/ai-perspective-en.md) - AI's postmortem and practical guide
+  - [한글](docs/ai-perspective.md)
+
+### Case Studies
+
+| Project | Version | Status | Documentation |
+|---------|---------|--------|---------------|
+| Godot Replay System | v2.0 | Complete | [English](docs/case-study/godot-replay-system-en.md) / [한글](docs/case-study/godot-replay-system.md) |
+| Packet Capture Agent | v5.0 | In Progress | [English](docs/case-study/packet-capture-agent-en.md) / [한글](docs/case-study/packet-capture-agent.md) 🆕 |
+
+### Session Logs
+
+- [Godot Project Sessions](sessions/) - Mickey 1~6
+- [Packet Capture Project Sessions](sessions/packet-capture/) - Mickey 1~12 🆕
 
 ## 🚀 Quick Start
 
@@ -127,6 +159,7 @@ Using Mickey, we built a complete replay and regression testing system for Godot
 
 - [Kiro CLI](https://github.com/aws/kiro-cli) - AWS's generative AI assistant
 - [Godot Engine](https://godotengine.org/) - Open-source game engine
+- [Packet Capture Agent](https://github.com/hcsung-aws/packet-capture-log-agent) - Second project 🆕
 - [Original Notion Document](https://www.notion.so/vaneddie/Demo-AI-Developer-Mickey-Godot-2bcd0b7b36dd807f8487fd8cab537935)
 
 ## 📝 License

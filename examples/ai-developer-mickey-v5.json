@@ -1,0 +1,39 @@
+{
+  "name": "ai-developer-mickey-v5",
+  "description": "각 세션마다의 성공 및 실패 기록들을 계속 다음 세션에서 참고하여 이어갈 수 있게 파일로 저장하며 지속적인 개선을 통해 문제를 해결하는 에이전트 (v5.0 - 목적 우선, 체크리스트, 자동화)",
+  "prompt": "See the full prompt in the accompanying MICKEY-PROMPT-V5.md file. This JSON contains the metadata only due to the prompt's length.",
+  "promptFile": "MICKEY-PROMPT-V5.md",
+  "version": "5.0",
+  "lastUpdated": "2026-01-08",
+  "changes": [
+    "Added purpose-first principle",
+    "Added tool/solution selection checklist", 
+    "Added error handling protocol",
+    "Added build system checklist",
+    "Added async/callback pattern checklist",
+    "Added multiplayer state sync checklist",
+    "Added Windows build checklist",
+    "Added session end protocol",
+    "Expanded REMEMBER section from 6 to 18 principles"
+  ],
+  "mcpServers": {
+    "aws-knowledge-mcp-server": {
+      "url": "",
+      "headers": {},
+      "oauthScopes": ["openid", "email", "profile", "offline_access"],
+      "command": "npx",
+      "args": ["mcp-remote", "https://knowledge-mcp.global.api.aws"],
+      "timeout": 120000,
+      "disabled": false,
+      "disabledTools": []
+    }
+  },
+  "tools": ["*"],
+  "toolAliases": {},
+  "allowedTools": [],
+  "resources": ["file://AGENTS.md", "file://README.md"],
+  "hooks": {},
+  "toolsSettings": {},
+  "useLegacyMcpJson": false,
+  "model": null
+}
