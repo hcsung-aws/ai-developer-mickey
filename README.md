@@ -162,6 +162,20 @@ Mickey를 활용하여 Godot 엔진의 Pong 게임에 완전한 리플레이 및
 - [패킷 캡처 에이전트](https://github.com/hcsung-aws/packet-capture-log-agent) - 두 번째 프로젝트 🆕
 - [원본 Notion 문서](https://www.notion.so/vaneddie/Demo-AI-Developer-Mickey-Godot-2bcd0b7b36dd807f8487fd8cab537935)
 
+## 🚀 진행 중인 프로젝트
+
+### AI Agent 기반 업무 자동화 플랫폼
+
+Mickey를 활용하여 **어떤 조직/업무에도 적용 가능한 Multi-Agent 시스템 템플릿**을 개발 중입니다.
+
+**목표**: 자연어로 Agent를 생성하고, 점진적으로 개선하여 업무를 자동화
+
+- Multi-Agent 협업 (Supervisor + 전문가 Agent)
+- 실행 기록 기반 점진적 개선
+- Agent Builder Agent (자연어로 Agent 생성)
+
+> 현재 Private Repository에서 개발 중이며, 완성 후 공개 예정입니다.
+
 ## 📝 라이선스
 
 MIT License
