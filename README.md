@@ -28,6 +28,7 @@ Mickey 프롬프트는 실제 프로젝트를 거치며 계속 진화하고 있�
 |------|----------|---------|----------|
 | **v2.0** | Godot 리플레이 시스템 | Mickey 1-6 | 세션 연속성, 지식 관리 체계 확립 |
 | **v5.0** | 패킷 캡처 에이전트 | Mickey 1-12 | 목적 우선, 체크리스트, 자동화 |
+| **v5.1** | AI Agent 자동화 플랫폼 | Mickey 1-6 | 전제조건 검증, Agent Builder 연동 |
 
 > 💡 **핵심 통찰**: AI 프롬프트는 "한 번 작성하고 끝"이 아니라 **실패 경험을 통해 지속적으로 진화**시켜야 합니다. 자세한 내용은 [프롬프트 진화 가이드](docs/06-prompt-evolution.md)를 참고하세요.
 
@@ -166,15 +167,28 @@ Mickey를 활용하여 Godot 엔진의 Pong 게임에 완전한 리플레이 및
 
 ### AI Agent 기반 업무 자동화 플랫폼
 
-Mickey를 활용하여 **어떤 조직/업무에도 적용 가능한 Multi-Agent 시스템 템플릿**을 개발 중입니다.
+Mickey를 활용하여 **어떤 조직/업무에도 적용 가능한 Multi-Agent 시스템 템플릿**을 개발했습니다.
 
-**목표**: 자연어로 Agent를 생성하고, 점진적으로 개선하여 업무를 자동화
-
+**주요 기능**:
 - Multi-Agent 협업 (Supervisor + 전문가 Agent)
 - 실행 기록 기반 점진적 개선
-- Agent Builder Agent (자연어로 Agent 생성)
+- 👍/👎 피드백 수집 및 분석
+- **Agent Builder**: 자연어로 새 Agent 생성 및 Supervisor 연결
 
-> 현재 Private Repository에서 개발 중이며, 완성 후 공개 예정입니다.
+**v5.1 주요 개선사항**:
+- 전제조건 검증: 구현 시작 전 목적 달성에 필요한 핵심 자원/조건 확보 여부 확인
+- Agent Builder 연동: Mickey가 Agent Builder를 subagent로 호출하여 새 Agent 생성 가능
+
+**Agent Builder 사용법**:
+```bash
+# Kiro CLI에서 Agent Builder 실행
+kiro chat --agent agent-builder
+
+# 예시 명령
+> "HR Agent 만들어줘. 휴가 신청, 직원 조회 기능으로"
+```
+
+Agent Builder는 Mickey와 연동하여 프로젝트 맥락을 참고하면서 새 Agent를 생성합니다.
 
 ## 📝 라이선스
 
