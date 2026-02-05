@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "memorygraph": {
+      "command": "memorygraph",
+      "args": ["--profile", "extended"]
+    }
+  }
+}

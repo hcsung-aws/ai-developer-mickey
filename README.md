@@ -112,8 +112,46 @@ ai-developer-mickey/
 │   ├── ai-developer-mickey.json  # 최신 프롬프트
 │   ├── common_knowledge/   # 지식 관리 예시
 │   └── context_rule/       # 컨텍스트 규칙 예시
+├── power-mickey/           # [실험적] Kiro IDE Power
 └── godot-pong/            # Godot 리플레이 시스템 코드
 ```
+
+## 🧪 실험적 기능: Kiro IDE Power
+
+> ⚠️ **주의**: 이 기능은 아직 테스트 중입니다. 안정적인 사용을 원하시면 위의 Kiro CLI 방식을 사용하세요.
+
+Mickey의 핵심 원칙을 Kiro IDE Power 형태로도 제공합니다. Power는 Kiro IDE 0.7+에서 사용할 수 있는 패키징 형식으로, 온보딩 시 세션 관리 구조와 Memory Graph MCP를 자동으로 설정합니다.
+
+### 설치 방법
+
+**로컬 설치:**
+```bash
+git clone https://github.com/hcsung/ai-developer-mickey.git
+# Kiro IDE → Powers 패널 → Add power from Local Path → power-mickey 폴더 선택
+```
+
+### Power 구조
+
+```
+power-mickey/
+├── POWER.md              # 온보딩 지침 + 키워드 설정
+├── mcp.json              # Memory Graph MCP 설정
+└── steering/             # Mickey 핵심 원칙
+    ├── mickey-core.md
+    ├── session-protocol.md
+    ├── problem-solving.md
+    ├── memory-protocol.md
+    └── self-improvement.md
+```
+
+### CLI vs Power 비교
+
+| 항목 | Kiro CLI (기존) | Kiro IDE Power (실험적) |
+|------|----------------|------------------------|
+| 안정성 | ✅ 검증됨 | ⚠️ 테스트 중 |
+| 설정 방식 | JSON 에이전트 파일 | Power 온보딩 |
+| 세션 관리 | 수동 | Hook으로 자동화 |
+| Memory Graph | 별도 설정 | 온보딩에서 설치 |
 
 ## 🔗 관련 링크
 

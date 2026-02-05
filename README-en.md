@@ -114,8 +114,46 @@ ai-developer-mickey/
 ├── examples/               # Code examples
 │   ├── common_knowledge/   # Knowledge management examples
 │   └── context_rule/       # Context rule examples
+├── power-mickey/           # [Experimental] Kiro IDE Power
 └── godot-pong/            # Godot replay system code
 ```
+
+## 🧪 Experimental: Kiro IDE Power
+
+> ⚠️ **Warning**: This feature is still under testing. For stable usage, please use the Kiro CLI method above.
+
+Mickey's core principles are also available as a Kiro IDE Power format. Power is a packaging format available in Kiro IDE 0.7+, which automatically sets up session management structure and Memory Graph MCP during onboarding.
+
+### Installation
+
+**Local installation:**
+```bash
+git clone https://github.com/hcsung/ai-developer-mickey.git
+# Kiro IDE → Powers panel → Add power from Local Path → Select power-mickey folder
+```
+
+### Power Structure
+
+```
+power-mickey/
+├── POWER.md              # Onboarding instructions + keyword settings
+├── mcp.json              # Memory Graph MCP configuration
+└── steering/             # Mickey core principles
+    ├── mickey-core.md
+    ├── session-protocol.md
+    ├── problem-solving.md
+    ├── memory-protocol.md
+    └── self-improvement.md
+```
+
+### CLI vs Power Comparison
+
+| Item | Kiro CLI (Existing) | Kiro IDE Power (Experimental) |
+|------|---------------------|-------------------------------|
+| Stability | ✅ Verified | ⚠️ Under testing |
+| Configuration | JSON agent file | Power onboarding |
+| Session Management | Manual | Automated via Hook |
+| Memory Graph | Separate setup | Installed during onboarding |
 
 ## 💡 Key Insights
 
