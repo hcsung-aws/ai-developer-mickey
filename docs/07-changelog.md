@@ -12,6 +12,41 @@
 | v5.2 | 2026-02 | AI Agent 자동화 플랫폼 | 문서화 패턴, 점진적 도입 원칙 |
 | v5.3 | 2026-02 | AI Agent 자동화 플랫폼 | 세션 종료 프로토콜, 자동 개선 제안 |
 | v5.4 | 2026-02 | AI Agent 자동화 플랫폼 | 필수 테스트 프로토콜 |
+| v6.0 | 2026-02 | 프롬프트 경량화 | 도메인 특화 제거, 스키마 전환, 3-Tier 로딩 |
+
+---
+
+## v6.0 (2026-02-08)
+
+**프로젝트**: 시스템 프롬프트 경량화/최적화 (Mickey 12)
+
+### 핵심 변화: 경량화 및 자립형 설계
+
+v5.x에서 누적된 도메인 특화 내용을 제거하고, 프롬프트 하나만으로 어떤 프로젝트에서든 동작하도록 재설계.
+
+### 주요 변경
+
+1. **템플릿 → Document Schema 전환**
+   - 8개 템플릿 전문(~200줄) → Schema 테이블 1개(~10줄)
+   - Mickey가 프로젝트 분석 결과로 내용을 채워 생성
+
+2. **도메인 특화 내용 제거**
+   - Async/Callback Pattern Checklist (C++ 특화)
+   - Multiplayer State Sync Checklist (게임 서버 특화)
+   - Windows Build Checklist (MSVC 특화)
+   - 프로젝트 유형별 상세 분석 분기 (Unity/Unreal/Godot/Web/Data Science)
+
+3. **3-Tier Context Loading 도입**
+   - T1(항상): 시스템 프롬프트 - 범용 원칙, 세션 프로토콜
+   - T2(세션 시작): PROJECT-OVERVIEW, latest HANDOFF, project-context
+   - T3(필요 시): 특정 knowledge 파일, 과거 세션 로그
+
+4. **REMEMBER 정리**: 24개 → 13개 (범용 원칙만 유지)
+
+### 설계 원칙
+- 시스템 프롬프트에는 범용 원칙만 포함
+- 도메인/기술 특화 교훈은 프로젝트별 context_rule/에서 관리
+- 프롬프트 1개만으로 어떤 프로젝트에서든 자립 가능
 
 ---
 
