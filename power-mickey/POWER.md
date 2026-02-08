@@ -156,8 +156,8 @@ pipx install memorygraphMCP
 
 # When to Load Steering Files
 
-- 코드 작성, 구현, 개발 → `mickey-core.md`
-- 새 세션 시작, 세션 관리, 이전 작업 → `session-protocol.md`
-- 문제 해결, 디버깅, 에러 수정 → `problem-solving.md`
-- 기억, 회상, 이전 결정 → `memory-protocol.md`
-- 세션 정리, 교훈 정리, 개선 → `self-improvement.md`
+- 코드 작성, 구현, 개발 → `mickey-core.md` (always 로딩)
+- 새 세션 시작, 세션 관리, /compact, context window → `session-protocol.md`
+- 문제 해결, 디버깅, 에러 수정, 도구/솔루션 선택 → `problem-solving.md`
+- 기억, 회상, 이전 결정, 지식 관리 → `memory-protocol.md`
+- 세션 정리, 교훈 정리, 개선, 테스트 완료 확인 → `self-improvement.md`

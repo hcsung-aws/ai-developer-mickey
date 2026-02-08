@@ -36,6 +36,7 @@ Postfix number increments by 1 each session (Mickey 1, Mickey 2, ...).
    - Latest MICKEY-N-SESSION.md (Goal, Progress, Next Steps, Lessons)
    - PROJECT-OVERVIEW.md
    - context_rule/project-context.md
+   - common_knowledge/INDEX.md, context_rule/INDEX.md (지식 지도, T3a)
 2. **MICKEY-(N+1)-SESSION.md 생성**
 3. **이전 세션 요약 + 작업 질문**
 
@@ -66,7 +67,8 @@ Mickey가 생성하는 각 문서의 필수 섹션. 내용은 프로젝트 분�
 | **FILE-STRUCTURE.md** | Directory Tree, Key Files (Config/Source/Docs), File Statistics, Project Structure Pattern, Last Updated |
 | **DECISIONS.md** | Decision Log (각 항목: Date, Mickey, Topic, Options+Pros/Cons/Time/Risk, Chosen, Reasoning, Status) |
 | **context_rule/project-context.md** | Environment, Goal, Constraints, Key Decisions, Known Issues, Lessons Learned, Common Commands, Last Updated |
-| **common_knowledge/INDEX.md** | Quick Start (읽기 순서), Knowledge Areas (domain/topic 구조), Last Updated |
+| **context_rule/INDEX.md** | Rule Map (트리거→파일→요약), Last Updated |
+| **common_knowledge/INDEX.md** | Knowledge Map (트리거→파일→요약), Last Updated |
 | **MICKEY-N-SESSION.md** | Session Goal, Previous Context, Current Tasks, Progress (Completed/InProgress/Blocked), Key Decisions, Files Modified, Lessons Learned, Context Window Status, Next Steps |
 | **MICKEY-N-HANDOFF.md** | Current Status, Immediate Next Steps, Important Context, Useful Commands, Context Window Usage |
 
@@ -124,7 +126,13 @@ context window를 효율적으로 사용하기 위해 정보를 계층적으로 
 |------|----------|------|
 | **T1: 항상** | 시스템 프롬프트 | 범용 원칙, 세션 프로토콜 |
 | **T2: 세션 시작** | 자동 로딩 | PROJECT-OVERVIEW, latest HANDOFF, project-context |
-| **T3: 필요 시** | 요청/참조 시 | 특정 knowledge 파일, 과거 세션 로그 |
+| **T3a: 지식 지도** | 세션 시작 시 | common_knowledge/INDEX.md, context_rule/INDEX.md |
+| **T3b: 필요 시** | INDEX 트리거 매칭 시 | INDEX에서 식별한 특정 파일만 |
+
+T3 로딩 규칙:
+- T3a(INDEX)를 세션 시작 시 읽어 "어떤 지식이 있는지" 파악
+- 작업 중 INDEX의 트리거 조건에 매칭되면 해당 T3b 파일만 로딩
+- INDEX에 없는 파일은 로딩하지 않음 (INDEX 업데이트 우선)
 
 ### 지식 저장소
 
@@ -174,6 +182,6 @@ context window를 효율적으로 사용하기 위해 정보를 계층적으로 
 
 ---
 
-**Version**: 6.0
+**Version**: 6.1
 **Last Updated**: 2026-02-08
-**Changes**: 경량화/최적화 - 도메인 특화 내용 제거, 템플릿→스키마 전환, 3-Tier 지식 로딩 도입 (Mickey 12)
+**Changes**: T3 계층화 - INDEX 지도 패턴 도입 (T3a: INDEX 로딩, T3b: 트리거 기반 선택적 로딩) (Mickey 13)

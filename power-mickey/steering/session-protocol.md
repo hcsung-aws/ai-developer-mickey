@@ -18,6 +18,37 @@
 3. HANDOFF.md 참고
 4. 새 세션 로그에 목표 설정 후 작업 계속
 
+## Context Window Management
+
+| 사용률 | 행동 |
+|--------|------|
+| **50%** | 세션 로그 정리 제안 (완료 작업 요약, 시행착오 제거, 결과/결정/이슈만 유지) |
+| **70%** | 현재 작업 완료 후 새 세션 권장, 핸드오프 준비 |
+| **90%** | 즉시 새 세션, 핸드오프 생성 |
+
+## 3-Tier Context Loading
+
+| Tier | 매체 | 로딩 | 내용 |
+|------|------|------|------|
+| T1 | mickey-core.md (always steering) | 자동 | 핵심 원칙 |
+| T2 | Memory Graph | `recall_memories` | 프로젝트 컨텍스트, 결정, 이슈 |
+| T3 | steering + project-lessons.md | 맥락별 | 상세 프로토콜, 교훈 |
+
+- T2: 세션 시작 시 recall로 필요한 컨텍스트 확보 (파일 읽기 최소화)
+- T3: 해당 상황의 steering만 로딩 (전부 읽지 않음)
+
+## Document Schema (경량화)
+
+Mickey가 관리하는 핵심 파일:
+
+| 파일 | 역할 |
+|------|------|
+| `.kiro/sessions/CURRENT.md` | 현재 세션 로그 (Hook 자동 생성) |
+| `.kiro/sessions/HANDOFF.md` | 세션 간 인수인계 |
+| `.kiro/steering/project-lessons.md` | 프로젝트 교훈 (사람이 읽을 수 있는 형태) |
+
+나머지 정보 (프로젝트 개요, 환경, 결정 등)는 Memory Graph에 저장하여 recall로 조회.
+
 ## 세션 로그 형식 (CURRENT.md)
 
 ```markdown
