@@ -2,11 +2,18 @@
 
 ## 세션 시작 시 (Mickey Session Initialize 훅)
 1. 사용자가 Agent Hooks에서 "Mickey Session Initialize" Start Hook 클릭
-2. Agent가 `python .kiro/scripts/session_init.py` 실행 (이전 세션 아카이브 + 새 CURRENT.md 생성)
-3. `.kiro/sessions/HANDOFF.md` 확인 (있으면 읽고 요약)
-4. `session-protocol.md` steering을 readSteering으로 읽고 숙지
-5. Memory Graph `recall_memories`로 프로젝트 관련 기억 조회
-6. 이전 세션 요약 + 이번 세션 이어갈 작업을 사용자에게 보고
+2. Agent가 `python .kiro/scripts/session_init.py` 실행 (이전 세션 아카이브 + 새 CURRENT.md + SESSION-BRIEF.md 생성)
+3. `.kiro/sessions/SESSION-BRIEF.md`만 읽기 (HANDOFF 전문을 읽지 않음 — context 절약)
+4. Memory Graph에서 기억 제목/태그 목록만 조회 (상세 내용은 on-demand)
+5. 이전 세션 요약 + 참고 가능한 기억 목록을 사용자에게 보고
+
+> **⚠️ Context Window 최적화**: 세션 시작 시 최소한의 정보만 로딩한다.
+> 상세 HANDOFF 내용이나 memorygraph 상세는 작업 중 필요할 때 조회한다.
+
+## 작업 중 on-demand 조회
+- HANDOFF.md 상세 내용이 필요하면 그때 읽기
+- memorygraph에서 관련 기억의 상세 내용이 필요하면 recall_memories로 조회
+- 이전 결정/교훈 참고가 필요하면 해당 기억 ID로 상세 조회
 
 ## 세션 중
 - 주요 작업 완료 시 CURRENT.md 업데이트

@@ -44,9 +44,10 @@ mkdir -p .kiro/settings
 """세션 초기화 스크립트.
 
 이전 세션을 아카이브하고 새 세션 로그를 생성한다.
+HANDOFF.md에서 핵심만 추출한 SESSION-BRIEF.md를 생성하여
+에이전트의 context window 소모를 최소화한다.
 """
 
-import os
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -55,6 +56,7 @@ from pathlib import Path
 SESSION_DIR = Path(".kiro/sessions")
 CURRENT = SESSION_DIR / "CURRENT.md"
 ARCHIVE_DIR = SESSION_DIR / "archive"
+BRIEF = SESSION_DIR / "SESSION-BRIEF.md"
 
 TEMPLATE = """# Session Log
 
@@ -70,6 +72,9 @@ TEMPLATE = """# Session Log
 ## 다음 단계
 """
 
+SECTIONS_TO_EXTRACT = ["현재 상태", "즉시 다음 단계", "중요 컨텍스트"]
+MAX_LINES_PER_SECTION = 3
+
 
 def archive_current_session():
     if not CURRENT.exists():
@@ -84,21 +89,52 @@ def archive_current_session():
 def create_new_session():
     SESSION_DIR.mkdir(parents=True, exist_ok=True)
     CURRENT.write_text(TEMPLATE, encoding="utf-8")
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
-    print(f"=== 새 세션 시작: {timestamp} ===")
+    print(f"=== 새 세션 시작: {datetime.now():%Y-%m-%d_%H%M} ===")
 
 
-def show_handoff():
+def _extract_section(lines, section_name, max_lines):
+    """HANDOFF에서 특정 섹션의 첫 N줄만 추출."""
+    result = []
+    in_section = False
+    for line in lines:
+        if section_name in line:
+            in_section = True
+            continue
+        if in_section:
+            if line.startswith("## "):
+                break
+            stripped = line.strip()
+            if stripped:
+                result.append(stripped)
+                if len(result) >= max_lines:
+                    break
+    return result
+
+
+def create_brief():
+    """HANDOFF.md에서 핵심만 추출하여 SESSION-BRIEF.md 생성."""
     handoff = SESSION_DIR / "HANDOFF.md"
+    parts = ["# Session Brief\n"]
+
     if handoff.exists():
-        print("\n=== 이전 핸드오프 ===")
-        print(handoff.read_text(encoding="utf-8"))
+        lines = handoff.read_text(encoding="utf-8").splitlines()
+        for section in SECTIONS_TO_EXTRACT:
+            extracted = _extract_section(lines, section, MAX_LINES_PER_SECTION)
+            if extracted:
+                parts.append(f"## {section}")
+                parts.extend(extracted)
+                parts.append("")
+    else:
+        parts.append("첫 세션입니다. 이전 핸드오프 없음.\n")
+
+    BRIEF.write_text("\n".join(parts), encoding="utf-8")
+    print("=== SESSION-BRIEF.md 생성 완료 ===")
 
 
 def main():
     archive_current_session()
     create_new_session()
-    show_handoff()
+    create_brief()
 
 
 if __name__ == "__main__":
@@ -123,14 +159,14 @@ if __name__ == "__main__":
 ```json
 {
   "name": "Mickey Session Initialize",
-  "version": "2.1.0",
-  "description": "새 세션 시작 시 이전 세션 아카이브 및 새 세션 로그 생성, HANDOFF 확인, memorygraph recall",
+  "version": "3.0.0",
+  "description": "경량 세션 초기화 — 스크립트가 생성한 brief만 읽고, memorygraph는 제목/태그만 조회",
   "when": {
     "type": "userTriggered"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "다음 세션 초기화 절차를 순서대로 수행하라:\n\n1. `python .kiro/scripts/session_init.py` 스크립트를 실행하여 이전 세션을 아카이브하고 새 CURRENT.md를 생성하라.\n2. `.kiro/sessions/HANDOFF.md` 파일이 존재하면 읽고 내용을 요약하여 보고하라.\n3. Mickey Power의 session-protocol.md steering을 readSteering으로 읽고 세션 프로토콜을 숙지하라.\n4. memorygraph의 recall_memories 도구로 현재 프로젝트 관련 최근 기억을 조회하라. 이때 project_path 파라미터에 반드시 현재 workspace의 절대 경로를 전달하라.\n5. memorygraph의 get_recent_activity 도구를 호출할 때는 반드시 project 파라미터에 현재 workspace의 절대 경로를 전달하라. project를 생략하면 자동감지 로직이 Windows에서 hang하는 알려진 버그가 있다.\n6. 위 결과를 종합하여 '이전 세션 요약'과 '이번 세션에서 이어갈 작업'을 사용자에게 보고하라.\n\n⚠️ 중요: memorygraph의 get_recent_activity 호출 시 project 파라미터를 절대 생략하지 마라.\n\n실행 결과를 간결하게 보고하라."
+    "prompt": "다음 세션 초기화 절차를 순서대로 수행하라:\n\n1. `python .kiro/scripts/session_init.py` 실행 (이전 세션 아카이브 + 새 CURRENT.md + SESSION-BRIEF.md 생성)\n2. `.kiro/sessions/SESSION-BRIEF.md`만 읽고 이전 세션 요약을 파악하라. HANDOFF.md를 직접 읽지 마라.\n3. memorygraph의 recall_memories로 현재 프로젝트 관련 기억의 제목과 태그만 조회하라 (상세 내용은 조회하지 마라). project_path에 현재 workspace 절대 경로를 전달하라.\n4. 위 결과를 종합하여 '이전 세션 요약'과 '참고 가능한 기억 목록'을 사용자에게 간결히 보고하라.\n\n⚠️ context window 절약이 핵심이다. 파일을 추가로 읽거나 memorygraph 상세 내용을 조회하지 마라. 필요 시 작업 중 on-demand로 조회한다.\n⚠️ memorygraph 호출 시 project 파라미터에 현재 workspace 절대 경로를 반드시 전달하라 (Windows hang 버그 방지)."
   }
 }
 ```
@@ -204,6 +240,8 @@ pipx install memorygraphMCP
 - `.kiro/settings/mcp.json`
 
 모두 확인되면 Mickey 사용 준비 완료입니다.
+
+> **💡 Context Window 최적화**: 세션 초기화 시 HANDOFF 전문이 아닌 SESSION-BRIEF.md(핵심 요약)만 로딩하고, memorygraph는 제목/태그 목록만 조회합니다. 상세 내용은 작업 중 필요할 때 on-demand로 조회합니다.
 
 ---
 
