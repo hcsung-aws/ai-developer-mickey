@@ -143,10 +143,10 @@ if __name__ == "__main__":
 
 ## Step 3: 세션 훅 생성
 
-두 개의 훅을 생성합니다. 둘 다 `userTriggered` + `askAgent` 조합입니다.
+두 개의 훅을 생성합니다. Spec task 실행 전후에 자동으로 트리거됩니다.
 
-> **참고**: Kiro에서 `userTriggered` 이벤트는 `askAgent`만 지원합니다.
-> `runCommand`는 `promptSubmit`, `agentStop`, `preToolUse`, `postToolUse`에서만 유효합니다.
+- `preTaskExecution`: spec task가 in_progress로 전환되기 직전에 세션 초기화
+- `postTaskExecution`: spec task가 completed로 전환된 직후에 세션 종료
 
 > **⚠️ 알려진 버그 (memorygraph + Windows)**: memorygraph MCP의 `get_recent_activity` 도구를 `project` 파라미터 없이 호출하면, 내부의 `detect_project_context()` 함수가 MCP 서버 프로세스 컨텍스트에서 hang한다. 반드시 `project` 파라미터에 현재 workspace의 절대 경로를 전달해야 한다. 아래 hook 템플릿에는 이 지시가 포함되어 있다.
 
@@ -159,10 +159,10 @@ if __name__ == "__main__":
 ```json
 {
   "name": "Mickey Session Initialize",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "경량 세션 초기화 — 스크립트가 생성한 brief만 읽고, memorygraph는 제목/태그만 조회",
   "when": {
-    "type": "userTriggered"
+    "type": "preTaskExecution"
   },
   "then": {
     "type": "askAgent",
@@ -178,10 +178,10 @@ if __name__ == "__main__":
 ```json
 {
   "name": "Mickey Session Close",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "세션 종료 시 세션 로그 정리, 교훈 추출, memorygraph 저장, HANDOFF 생성",
   "when": {
-    "type": "userTriggered"
+    "type": "postTaskExecution"
   },
   "then": {
     "type": "askAgent",
