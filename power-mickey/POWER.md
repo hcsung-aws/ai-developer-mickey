@@ -178,14 +178,14 @@ if __name__ == "__main__":
 ```json
 {
   "name": "Mickey Session Close",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "세션 종료 시 세션 로그 정리, 교훈 추출, memorygraph 저장, HANDOFF 생성",
   "when": {
     "type": "userTriggered"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "다음 세션 종료 절차를 순서대로 수행하라:\n\n1. Mickey Power의 self-improvement.md steering을 readSteering으로 읽고 절차를 숙지하라.\n2. `.kiro/sessions/CURRENT.md`를 이번 세션에서 수행한 작업 내용으로 업데이트하라 (목표, 진행 상황, 주요 결정, 수정 파일, 다음 단계).\n3. `.kiro/sessions/HANDOFF.md`를 생성/업데이트하라 (현재 상태, 즉시 다음 단계, 중요 컨텍스트, 유용한 명령어).\n4. 세션 중 발견한 교훈을 분석하여 프로젝트 교훈은 `.kiro/steering/project-lessons.md`에 추가하라. 형식: ## [YYYY-MM-DD] - [주제] / 문제 / 원인 / 해결 / 교훈.\n5. 중요한 교훈이나 해결책은 memorygraph의 store_memory 도구로 저장하라. 저장 시 반드시 context 파라미터에 {\"project_path\": \"<현재 workspace 절대 경로 (forward slash 사용)>\"} 를 포함하라. project_path가 없으면 project 기반 필터링이 동작하지 않는다. 관련 기억 간 create_relationship으로 연결하라.\n6. memorygraph의 get_recent_activity 도구를 호출할 때는 반드시 project 파라미터에 현재 workspace의 절대 경로를 전달하라. project를 생략하면 자동감지 로직이 Windows에서 hang하는 알려진 버그가 있다.\n7. 범용 원칙(모든 프로젝트에 적용 가능한 것)이 있으면 사용자에게 Global steering 추가를 제안하라.\n8. 최종 결과를 사용자에게 보고하라.\n\n⚠️ 중요: memorygraph의 get_recent_activity 호출 시 project 파라미터를 절대 생략하지 마라.\n\n실행 결과를 간결하게 보고하라."
+    "prompt": "다음 세션 종료 절차를 순서대로 수행하라:\n\n1. Mickey Power의 self-improvement.md steering을 readSteering으로 읽고 절차를 숙지하라.\n2. `.kiro/sessions/CURRENT.md`를 이번 세션에서 수행한 작업 내용으로 업데이트하라 (목표, 진행 상황, 주요 결정, 수정 파일, 다음 단계).\n3. `.kiro/sessions/HANDOFF.md`를 생성/업데이트하라 (현재 상태, 즉시 다음 단계, 중요 컨텍스트, 유용한 명령어).\n4. 세션 중 발견한 교훈을 분석하여 프로젝트 교훈은 `.kiro/steering/project-lessons.md`에 추가하라. 형식: ## [YYYY-MM-DD] - [주제] / 문제 / 원인 / 해결 / 교훈.\n\n⚠️ 교훈 판별 기준: '이번 세션에서 한 일'을 그대로 기록하는 것은 교훈이 아니다. 교훈이란 다른 프로젝트에서도 참고할 수 있는 새로운 발견, 예상과 다른 결과, 같은 실수의 반복, 또는 효과적인 해결책의 발견이다. 기존에 알려진 패턴(Adapter, Strategy 등)을 단순 적용한 것은 교훈으로 남기지 마라. 이번 세션에서 새로운 교훈이 없으면 '교훈 없음'으로 보고하라.\n\n5. 위 기준을 통과한 교훈만 memorygraph의 store_memory 도구로 저장하라. 저장 시 반드시 context 파라미터에 {\"project_path\": \"<현재 workspace 절대 경로 (forward slash 사용)>\"} 를 포함하라. project_path가 없으면 project 기반 필터링이 동작하지 않는다. 관련 기억 간 create_relationship으로 연결하라.\n6. memorygraph의 get_recent_activity 도구를 호출할 때는 반드시 project 파라미터에 현재 workspace의 절대 경로를 전달하라. project를 생략하면 자동감지 로직이 Windows에서 hang하는 알려진 버그가 있다.\n7. 범용 원칙(모든 프로젝트에 적용 가능한 것)이 있으면 사용자에게 Global steering 추가를 제안하라.\n8. 최종 결과를 사용자에게 보고하라.\n\n⚠️ 중요: memorygraph의 get_recent_activity 호출 시 project 파라미터를 절대 생략하지 마라.\n\n실행 결과를 간결하게 보고하라."
   }
 }
 ```
