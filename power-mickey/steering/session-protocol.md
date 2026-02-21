@@ -3,9 +3,15 @@
 ## 세션 시작 시 (Mickey Session Initialize 훅)
 1. 사용자가 Agent Hooks에서 "Mickey Session Initialize" Start Hook 클릭
 2. Agent가 `python .kiro/scripts/session_init.py` 실행 (이전 세션 아카이브 + 새 CURRENT.md + SESSION-BRIEF.md 생성)
-3. `.kiro/sessions/SESSION-BRIEF.md`만 읽기 (HANDOFF 전문을 읽지 않음 — context 절약)
-4. Memory Graph에서 기억 제목/태그 목록만 조회 (상세 내용은 on-demand)
-5. 이전 세션 요약 + 참고 가능한 기억 목록을 사용자에게 보고
+3. **PURPOSE-SCENARIO.md 최우선 로딩** — 없으면 첫 세션 절차로 전환
+4. `.kiro/sessions/SESSION-BRIEF.md`만 읽기 (HANDOFF 전문을 읽지 않음 — context 절약)
+5. Memory Graph에서 기억 제목/태그 목록만 조회 (상세 내용은 on-demand)
+6. **목적 재확인**: PURPOSE-SCENARIO.md 내용을 간략히 언급, 변경 필요 시 사용자에게 조정 여부 확인
+7. 이전 세션 요약 + 참고 가능한 기억 목록을 사용자에게 보고
+
+### 첫 세션 (PURPOSE-SCENARIO.md 없을 때)
+- 사용자에게 질문: "이 프로젝트가 완성되면 어떻게 사용하게 되나요?"
+- 답변 기반으로 PURPOSE-SCENARIO.md 생성 (필수 섹션: Ultimate Purpose, Usage Scenarios, Acceptance Criteria, Last Confirmed)
 
 > **⚠️ Context Window 최적화**: 세션 시작 시 최소한의 정보만 로딩한다.
 > 상세 HANDOFF 내용이나 memorygraph 상세는 작업 중 필요할 때 조회한다.
@@ -19,6 +25,10 @@
 - 주요 작업 완료 시 CURRENT.md 업데이트
 - 중요 결정 시 기록
 - 수정한 파일 목록 유지
+- **목적 정합성 체크**: 아래 상황 발생 시 사용자에게 알리고 PURPOSE-SCENARIO.md 조정 여부 확인
+  - 구현 방향이 PURPOSE-SCENARIO.md의 사용 시나리오와 충돌
+  - 기능 확장으로 원래 목적과 다른 방향성 발견
+  - 기술적 제약으로 목적 달성 방식 변경 필요
 
 ## 세션 종료 시 (Mickey Session Close 훅)
 1. 사용자가 Agent Hooks에서 "Mickey Session Close" Start Hook 클릭

@@ -9,6 +9,11 @@
 ### Step 2: 핸드오프 문서 생성
 - `.kiro/sessions/HANDOFF.md` 생성/업데이트
 
+### Step 2.5: 목적 정합성 리뷰
+- PURPOSE-SCENARIO.md와 이번 세션 작업 결과를 대조
+- 목적/시나리오와 실제 구현 방향이 일치하는지 확인
+- 불일치 발견 시 사용자에게 보고하고 PURPOSE-SCENARIO.md 조정 여부 확인
+
 ### Step 3: 교훈 분석 및 분류
 
 세션 중 발견한 교훈을 두 가지로 분류:
