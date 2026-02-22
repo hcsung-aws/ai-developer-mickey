@@ -8,7 +8,9 @@
 
 ## 📖 Project Overview
 
-**AI Developer Mickey** is an educational project that documents key patterns and strategies discovered while using a generative AI assistant (Kiro CLI) to execute complex software development projects.
+**AI Developer Mickey** is an educational project that documents key patterns and strategies discovered while using a generative AI assistant (Kiro) to execute complex software development projects.
+
+Currently, Mickey is also used to **improve the Mickey agent itself**, and the lessons and knowledge accumulated through this process are structured in `context_rule/` and `common_knowledge/`, automatically reflected in subsequent sessions.
 
 ### Problems We Aimed to Solve
 
@@ -85,37 +87,35 @@ Through this project, you will learn:
 
 ### Mickey Agent Setup
 
-```json
-{
-  "name": "ai-developer-mickey",
-  "description": "An AI developer that maintains session continuity and continuously improves",
-  "prompt": "You are an AI developer agent 'Mickey'..."
-}
+```bash
+# After installing Kiro CLI
+cp examples/ai-developer-mickey.json ~/.kiro/agents/
 ```
 
-For detailed setup, refer to [Introduction to Mickey](docs/01-introduction-en.md).
+### Running Mickey in a Project
+
+```bash
+kiro chat --agent ai-developer-mickey
+```
+
+### What Mickey Automatically Does
+
+- Project analysis and document generation
+- Session log creation (MICKEY-N-SESSION.md)
+- Lesson recording and next session handoff
 
 ### Directory Structure
 
 ```
 ai-developer-mickey/
 ├── docs/                    # Core guide documents
-│   ├── 01-introduction.md
-│   ├── 02-context-management.md
-│   ├── 03-session-continuity.md
-│   ├── 04-prompt-engineering.md
-│   ├── 05-knowledge-management.md
-│   └── case-study/         # Real-world case studies
-├── sessions/               # Mickey session logs
-│   ├── session_log.txt     # Mickey 1
-│   ├── MICKEY-2-SESSION.md
-│   ├── MICKEY-3-SESSION.md
-│   ├── MICKEY-4-SESSION.md
-│   ├── MICKEY-5-SESSION.md
-│   └── MICKEY-6-SESSION.md
-├── examples/               # Code examples
+├── sessions/               # Mickey session log examples
+├── examples/               # Configuration files and examples
+│   ├── ai-developer-mickey.json  # Latest prompt
 │   ├── common_knowledge/   # Knowledge management examples
 │   └── context_rule/       # Context rule examples
+├── context_rule/           # This project's context rules (used by Mickey for self-improvement)
+├── common_knowledge/       # This project's common knowledge
 ├── power-mickey/           # [Experimental] Kiro IDE Power
 └── godot-pong/            # Godot replay system code
 ```
@@ -130,7 +130,7 @@ Mickey's core principles are also available as a Kiro IDE Power format. Power is
 
 **Local installation:**
 ```bash
-git clone https://github.com/hcsung/ai-developer-mickey.git
+git clone https://github.com/hcsung-aws/ai-developer-mickey.git
 # Kiro IDE → Powers panel → Add power from Local Path → Select power-mickey folder
 ```
 

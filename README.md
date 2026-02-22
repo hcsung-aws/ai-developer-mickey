@@ -8,7 +8,9 @@
 
 ## 📖 프로젝트 소개
 
-**AI Developer Mickey**는 생성형 AI 어시스턴트(Kiro CLI)를 활용하여 복잡한 소프트웨어 개발 프로젝트를 수행하는 과정에서 발견한 핵심 패턴과 전략을 정리한 교육용 프로젝트입니다.
+**AI Developer Mickey**는 생성형 AI 어시스턴트(Kiro)를 활용하여 복잡한 소프트웨어 개발 프로젝트를 수행하는 과정에서 발견한 핵심 패턴과 전략을 정리한 교육용 프로젝트입니다.
+
+현재는 외부 프로젝트뿐 아니라 **Mickey 에이전트 자체를 개선하는 데에도 활용**하고 있으며, 이 과정에서 축적된 교훈과 지식이 `context_rule/`과 `common_knowledge/`에 구조화되어 다음 세션에 자동으로 반영됩니다.
 
 ### 해결하고자 한 문제
 
@@ -115,6 +117,8 @@ ai-developer-mickey/
 │   ├── ai-developer-mickey.json  # 최신 프롬프트
 │   ├── common_knowledge/   # 지식 관리 예시
 │   └── context_rule/       # 컨텍스트 규칙 예시
+├── context_rule/           # 이 프로젝트의 컨텍스트 규칙 (Mickey가 자기 개선 시 활용)
+├── common_knowledge/       # 이 프로젝트의 범용 지식
 ├── power-mickey/           # [실험적] Kiro IDE Power
 └── godot-pong/            # Godot 리플레이 시스템 코드
 ```
@@ -129,7 +133,7 @@ Mickey의 핵심 원칙을 Kiro IDE Power 형태로도 제공합니다. Power는
 
 **로컬 설치:**
 ```bash
-git clone https://github.com/hcsung/ai-developer-mickey.git
+git clone https://github.com/hcsung-aws/ai-developer-mickey.git
 # Kiro IDE → Powers 패널 → Add power from Local Path → power-mickey 폴더 선택
 ```
 
