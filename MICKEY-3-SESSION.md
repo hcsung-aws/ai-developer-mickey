@@ -8,12 +8,12 @@ PURPOSE-SCENARIO 체계를 power-mickey에 적용 (v6.2 반영)
 - Mickey 2: 시스템 프롬프트 v6.2 — PURPOSE-SCENARIO 기반 목적 관리 체계 도입
 
 ## Current Tasks
-- [ ] steering/session-protocol.md 수정
-- [ ] steering/problem-solving.md 수정
-- [ ] steering/mickey-core.md 수정
-- [ ] steering/self-improvement.md 수정
-- [ ] POWER.md hook prompt 수정
-- [ ] Windows 반영 + git commit & push
+- [x] steering/session-protocol.md 수정
+- [x] steering/problem-solving.md 수정
+- [x] steering/mickey-core.md 수정
+- [x] steering/self-improvement.md 수정
+- [x] POWER.md hook prompt 수정
+- [x] Windows 반영 + git commit & push
 
 ## Progress
 
@@ -39,6 +39,7 @@ PURPOSE-SCENARIO 체계를 power-mickey에 적용 (v6.2 반영)
 
 ## Lessons Learned
 - Kiro Powers는 설치 후 항상 로딩이 아닌 키워드 기반 동적 활성화 방식. Hook은 Power와 독립 동작하므로 hook prompt에 직접 지시가 필요
+- project-context.md(T2)에 특정 기능(Power) 관련 내용이 섞이면 매 세션 불필요한 context 소모 → T3b로 분리하여 필요 시에만 로딩
 
 ## Context Window Status
 양호
