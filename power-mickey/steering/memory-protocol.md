@@ -14,8 +14,10 @@ Context window 절약을 위해 2단계로 조회한다:
 
 **1단계 — 지식 지도 로딩 (세션 시작)**
 ```
-recall_memories로 기억 제목/태그 목록만 조회
+search_memories로 기억 제목/태그 목록만 조회
 → "어떤 지식이 있는지" 파악 (상세 내용은 읽지 않음)
+⚠️ recall_memories는 project_path 필터링 버그가 있어 항상 0건을 반환한다.
+   project_path 필터가 필요한 경우 반드시 search_memories를 사용하라.
 ```
 
 **2단계 — 상세 조회 (작업 중 on-demand)**
@@ -63,10 +65,13 @@ recall_memories로 기억 제목/태그 목록만 조회
 ### 기억 조회
 ```json
 {
-  "tool": "recall_memories",
-  "query": "redis timeout"
+  "tool": "search_memories",
+  "project_path": "<workspace 절대 경로>",
+  "tags": ["redis", "timeout"]
 }
 ```
+
+> **참고**: `recall_memories`는 `project_path` 필터링 버그가 있으므로, project 범위 조회 시 `search_memories`를 사용한다. `recall_memories`는 project_path 필터 없이 자연어 검색할 때만 사용한다.
 
 ### 관계 생성
 ```json

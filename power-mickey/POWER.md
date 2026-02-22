@@ -160,13 +160,13 @@ if __name__ == "__main__":
 {
   "name": "Mickey Session Initialize",
   "version": "3.1.0",
-  "description": "경량 세션 초기화 — 스크립트가 생성한 brief만 읽고, memorygraph는 제목/태그만 조회",
+  "description": "경량 세션 초기화 — 스크립트가 생성한 brief만 읽고, memorygraph는 제목/태그만 조회 (search_memories 사용, recall_memories project_path 필터 버그 우회)",
   "when": {
     "type": "preTaskExecution"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "다음 세션 초기화 절차를 순서대로 수행하라:\n\n1. `python .kiro/scripts/session_init.py` 실행 (이전 세션 아카이브 + 새 CURRENT.md + SESSION-BRIEF.md 생성)\n2. **PURPOSE-SCENARIO.md 최우선 로딩**: 프로젝트 루트의 PURPOSE-SCENARIO.md를 읽어라. 없으면 사용자에게 '이 프로젝트가 완성되면 어떻게 사용하게 되나요?'를 질문하고, 답변 기반으로 PURPOSE-SCENARIO.md를 생성하라 (필수 섹션: Ultimate Purpose, Usage Scenarios, Acceptance Criteria, Last Confirmed).\n3. `.kiro/sessions/SESSION-BRIEF.md`만 읽고 이전 세션 요약을 파악하라. HANDOFF.md를 직접 읽지 마라.\n4. memorygraph의 recall_memories로 현재 프로젝트 관련 기억의 제목과 태그만 조회하라 (상세 내용은 조회하지 마라). project_path에 현재 workspace 절대 경로를 전달하라.\n5. **목적 재확인**: PURPOSE-SCENARIO.md 내용을 간략히 언급하고, 변경 필요 시 사용자에게 조정 여부를 확인하라.\n6. 위 결과를 종합하여 '목적 확인', '이전 세션 요약', '참고 가능한 기억 목록'을 사용자에게 간결히 보고하라.\n\n⚠️ context window 절약이 핵심이다. 파일을 추가로 읽거나 memorygraph 상세 내용을 조회하지 마라. 필요 시 작업 중 on-demand로 조회한다.\n⚠️ memorygraph 호출 시 project 파라미터에 현재 workspace 절대 경로를 반드시 전달하라 (Windows hang 버그 방지)."
+    "prompt": "다음 세션 초기화 절차를 순서대로 수행하라:\n\n1. `python .kiro/scripts/session_init.py` 실행 (이전 세션 아카이브 + 새 CURRENT.md + SESSION-BRIEF.md 생성)\n2. **PURPOSE-SCENARIO.md 최우선 로딩**: 프로젝트 루트의 PURPOSE-SCENARIO.md를 읽어라. 없으면 사용자에게 '이 프로젝트가 완성되면 어떻게 사용하게 되나요?'를 질문하고, 답변 기반으로 PURPOSE-SCENARIO.md를 생성하라 (필수 섹션: Ultimate Purpose, Usage Scenarios, Acceptance Criteria, Last Confirmed).\n3. `.kiro/sessions/SESSION-BRIEF.md`만 읽고 이전 세션 요약을 파악하라. HANDOFF.md를 직접 읽지 마라.\n4. memorygraph의 search_memories로 현재 프로젝트 관련 기억의 제목과 태그만 조회하라 (상세 내용은 조회하지 마라). project_path에 현재 workspace 절대 경로를 전달하라.\\n   ⚠️ recall_memories는 project_path 필터링 버그가 있어 항상 0건을 반환한다. 반드시 search_memories를 사용하라.\n5. **목적 재확인**: PURPOSE-SCENARIO.md 내용을 간략히 언급하고, 변경 필요 시 사용자에게 조정 여부를 확인하라.\n6. 위 결과를 종합하여 '목적 확인', '이전 세션 요약', '참고 가능한 기억 목록'을 사용자에게 간결히 보고하라.\n\n⚠️ context window 절약이 핵심이다. 파일을 추가로 읽거나 memorygraph 상세 내용을 조회하지 마라. 필요 시 작업 중 on-demand로 조회한다.\n⚠️ memorygraph 호출 시 project 파라미터에 현재 workspace 절대 경로를 반드시 전달하라 (Windows hang 버그 방지)."
   }
 }
 ```

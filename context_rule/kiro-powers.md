@@ -13,6 +13,7 @@
 
 ## 알려진 이슈
 - memorygraph `get_recent_activity`: Windows에서 `project` 파라미터 필수 (누락 시 hang)
+- memorygraph `recall_memories`: `project_path` 필터링 버그로 항상 0건 반환 → `search_memories`로 우회
 - memorygraph `store_memory`: context에 `{"project_path": "..."}` 키 사용 (`{"project": "..."}` 는 무시됨)
 - Kiro IDE `userTriggered` hook은 `askAgent`만 지원
 
