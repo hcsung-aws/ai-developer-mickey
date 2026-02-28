@@ -32,6 +32,7 @@ The Mickey prompt continues to evolve through real projects:
 | **v5.0** | Packet Capture Agent | Mickey 1-12 | Purpose-first, checklists, automation |
 | **v6.1** | Mickey Self-Improvement | Mickey 13 | T3 layering, INDEX map pattern, Power steering evolution |
 | **v6.2** | Mickey Self-Improvement | Mickey 14 | PURPOSE-SCENARIO based purpose management system |
+| **v6.3** | Mickey Self-Improvement | Mickey 4 (planning) | 🚧 Auto Memory pattern adoption (planned) |
 
 > 💡 **Key Insight**: AI prompts should not be "write once and done" but **continuously evolved through failure experiences**. See [Prompt Evolution Guide](docs/06-prompt-evolution-en.md) for details.
 

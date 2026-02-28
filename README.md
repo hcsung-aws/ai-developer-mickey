@@ -69,8 +69,10 @@ Mickey 프롬프트는 실제 프로젝트를 거치며 계속 진화합니다:
 | **v6.0** | 경량화/최적화 - 도메인 특화 제거, 스키마 전환, 3-Tier 로딩 |
 | **v6.1** | T3 계층화 - INDEX 지도 패턴 도입, Power steering 진화 |
 | **v6.2** | PURPOSE-SCENARIO 기반 목적 관리 체계 도입 |
+| **v6.3** | 🚧 Auto Memory 패턴 도입 (계획 수립 완료, 구현 예정) |
 
 > 💡 자세한 변경 이력은 [변경 이력 문서](docs/07-changelog.md)를 참고하세요.
+> 📋 v6.3 개선 계획은 [IMPROVEMENT-PLAN-v6.3.md](IMPROVEMENT-PLAN-v6.3.md)를 참고하세요.
 
 ## 🚀 빠른 시작
 
