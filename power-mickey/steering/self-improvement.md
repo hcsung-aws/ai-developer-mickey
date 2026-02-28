@@ -3,7 +3,7 @@
 ## 세션 종료 시 ("세션 정리" 요청)
 
 ### Step 1: 세션 로그 완료
-- `.kiro/sessions/CURRENT.md` 업데이트
+- `.kiro/sessions/CURRENT.md` 업데이트 (작업 단위 트리거로 이미 최신이므로 최소 작업)
 - 완료 작업, 수정 파일, 다음 단계 기록
 
 ### Step 2: 핸드오프 문서 생성
@@ -37,6 +37,16 @@
 **해결**: [해결 방법]
 **교훈**: [앞으로 적용할 점]
 ```
+
+> **항목 수 제한**: project-lessons.md는 최대 10개 항목 유지. 초과 시 오래된 항목은 Memory Graph에만 보존하고 파일에서 제거.
+
+### Step 4.5: 교훈 승격 (세션 중에도 가능)
+
+사용자가 "교훈 승격" 또는 "패턴 정리"를 요청하면:
+1. project-lessons.md + CURRENT.md Lessons + Memory Graph 리뷰
+2. 반복 패턴 → project-lessons.md, 범용 원칙 → Global steering 후보로 분류
+3. 항목별 승격 제안 (내용, 근거, 대상) → 사용자 확인
+4. 승인 시 반영 + 원본에서 "승격 완료" 표시
 
 ### Step 5: Memory Graph 저장 (사용 중인 경우)
 중요한 교훈은 Memory Graph에도 저장:
