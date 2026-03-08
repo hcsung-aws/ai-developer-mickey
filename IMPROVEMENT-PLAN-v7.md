@@ -8,6 +8,42 @@
 
 핵심 발견: Mickey는 이미 "점진적 harness 구축" 모델의 기반을 가지고 있으며, 이것이 Greenfield 최적화된 트렌드와의 차별점. Brownfield에서도 세션이 쌓일수록 정교해지는 에이전트라는 고유 포지션 확보 가능.
 
+## 핵심 원칙: 프롬프트 최소화 + 점진적 구축
+
+> **v7의 모든 구현은 이 원칙을 준수해야 한다.**
+
+시스템 프롬프트(T1)는 범용 원칙만 포함하고, 상세 프로토콜은 프로젝트별 파일에서 점진적으로 구축한다.
+이것은 v6.0 경량화의 핵심이자, "점진적 harness 구축"의 자기 적용이다.
+
+### 구현 규칙
+
+| 넣을 위치 | 기준 | 예시 |
+|---|---|---|
+| 시스템 프롬프트 (REMEMBER) | 한 줄로 표현 가능한 근본 원칙만 | "Completion Criteria 명확 시 자율 실행 가능" |
+| AGENTS.md (resources 자동 로딩) | 구체적 실행 지침, 판단 기준 | 자율성 모드 판단 기준, Completion Criteria 작성 가이드 |
+| context_rule/ (T3b) | 프로젝트 특화 규칙 | Brownfield 탐색 절차, 프로젝트별 린트 규칙 |
+| 첫 세션에서 생성 | Mickey가 프로젝트 분석 후 구축 | 프로젝트별 INDEX 확장, auto_notes 초기 기록 |
+
+### 배포 형태별 반영
+
+| 형태 | 원칙 전달 방법 | 변경량 |
+|---|---|---|
+| Kiro CLI | agent JSON의 resources → AGENTS.md | JSON 변경 없음, AGENTS.md 수정만 |
+| Kiro IDE Power | steering/ 디렉토리에 파일 추가 | 파일 1개 추가 |
+
+### 각 개선 항목의 프롬프트 영향
+
+| 항목 | 프롬프트 변경 | AGENTS.md/context_rule 변경 |
+|---|---|---|
+| Brownfield 온보딩 | 없음 | 구체적 탐색 절차는 첫 세션에서 context_rule/에 생성 |
+| Completion Criteria | SESSION.md 스키마에 1줄 추가 | 기준 작성 가이드는 AGENTS.md에 |
+| 엔트로피 관리 | Continuing Session에 1줄 추가 | 구체적 정리 규칙은 context_rule/에 |
+| 자율성 모드 | REMEMBER에 1줄 추가 | 모드 판단 기준은 AGENTS.md에 |
+| Subagent Delegation | 없음 | 위임 가이드라인은 AGENTS.md에 |
+| Backpressure | REMEMBER #12 강화 (기존) | 없음 |
+
+**시스템 프롬프트 총 증가량: 2~3줄**
+
 ## 개선 항목
 
 ### Phase 1: 핵심 기반 (우선)
