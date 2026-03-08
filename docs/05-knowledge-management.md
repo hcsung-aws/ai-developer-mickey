@@ -4,363 +4,201 @@
 
 ## 왜 필요한가?
 
-복잡한 프로젝트에서는 **재사용 가능한 지식**을 체계적으로 관리해야 합니다.
-
-### 문제 상황
-
 ```
-Mickey 1: Godot 씬 시스템 분석 → 이해
-Mickey 2: (세션 재시작) → 다시 분석 필요
-Mickey 3: (세션 재시작) → 또 다시 분석...
+Mickey 1: Godot 씬 시스템 분석 → 이해 (2시간)
+Mickey 2: (세션 재시작) → 다시 분석 (1.5시간)
+Mickey 3: (세션 재시작) → 또 다시 분석 (1시간)
+→ 4.5시간 중복 작업
 ```
 
-### 해결
+지식을 파일로 저장하면:
 
 ```
-Mickey 1: Godot 씬 시스템 분석 → common_knowledge/godot/scene-system.md 저장
-Mickey 2: scene-system.md 읽기 → 즉시 이해
-Mickey 3: scene-system.md 읽기 → 즉시 이해
+Mickey 1: 분석 + 문서화 (2.5시간)
+Mickey 2: 문서 읽기 (10분) → 즉시 작업
+Mickey 3: 문서 읽기 (10분) → 즉시 작업
+→ 중복 제거, 누적 학습
 ```
 
-## 디렉토리 구조
+하지만 지식이 늘어나면 새로운 문제가 생깁니다: **"어떤 지식을 언제 로딩할 것인가?"**, **"사용자가 작성한 규칙과 AI가 관찰한 사실을 어떻게 구분할 것인가?"**
+
+## 4개 저장소 체계
+
+### 왜 (WHY)
+
+모든 지식을 한 곳에 넣으면 신뢰도와 관리 방식이 뒤섞입니다. 성격에 따라 분리하면 각각의 확인 절차와 로딩 시점을 다르게 할 수 있습니다.
+
+### 무엇을 (WHAT)
+
+| 저장소 | 성격 | 확인 시점 | 예시 |
+|--------|------|----------|------|
+| **auto_notes/** | AI가 관찰한 사실 (서술적) | 세션 종료 시 일괄 | 빌드 명령, 파일 역할, 에러 해결법 |
+| **context_rule/adaptive.md** | AI 자가 생성 규칙 (적응형) | 세션 종료 시 일괄 | "README 수정 시 한글/영문 동시" |
+| **context_rule/** | 검증된 프로젝트 규칙 (규범적) | 즉시 사용자 확인 | 반복 실패 방지, 환경 제약, 알려진 이슈 |
+| **common_knowledge/** | 범용 재사용 패턴 (규범적) | 즉시 사용자 확인 | 아키텍처 패턴, 기술 비교, 구현 패턴 |
+
+### 어떻게 (HOW)
 
 ```
 project-root/
-├── common_knowledge/          # 재사용 가능한 지식
-│   ├── INDEX.md              # 지식 인덱스 (필수)
-│   ├── godot/
-│   │   ├── overview.md       # Godot 개요
-│   │   ├── scene-system.md   # 씬 시스템
-│   │   └── input-system.md   # 입력 시스템
-│   └── testing/
-│       ├── overview.md       # 테스팅 개요
-│       └── replay-system.md  # 리플레이 시스템
-└── context_rule/             # 프로젝트별 규칙
-    ├── project-context.md    # 환경 설정
-    ├── troubleshooting.md    # 트러블슈팅
-    └── mickey-improvements.md # 개선 사항
+├── auto_notes/                  # AI 자동 관찰 기록
+│   ├── NOTES.md                # 인덱스 (T3a)
+│   ├── commands.md             # 빌드/테스트/린트 커맨드
+│   ├── file-roles.md           # 파일 경로와 역할
+│   └── error-fixes.md          # 검증 완료된 에러 해결법
+├── context_rule/                # 프로젝트 특화 규칙
+│   ├── INDEX.md                # 규칙 지도 (T3a)
+│   ├── project-context.md      # 환경/목표/제약/교훈
+│   └── adaptive.md             # AI 자가 생성 규칙 (T2)
+└── common_knowledge/            # 범용 재사용 패턴
+    ├── INDEX.md                # 지식 지도 (T3a)
+    └── agent-design-patterns.md # 에이전트 설계 패턴
 ```
 
-## common_knowledge vs context_rule
+**context_rule/ vs common_knowledge/ 구분 기준**:
+- 다른 프로젝트에서도 쓸 수 있는가? → `common_knowledge/`
+- 이 프로젝트에서만 의미 있는가? → `context_rule/`
 
-### common_knowledge/
+## 자동 메모리: auto_notes + adaptive.md
 
-**목적**: 재사용 가능한 일반 지식
+### 왜 (WHY)
 
-**특징**:
-- 프로젝트 독립적
-- 다른 프로젝트에서도 활용 가능
-- 기술/개념 설명
+매번 "이것 기록해"라고 지시하는 것은 비효율적입니다. AI가 작업 중 발견한 사실을 자동으로 기록하되, **검증된 규칙과 분리**하면 신뢰도를 관리할 수 있습니다.
 
-**예시**:
-```markdown
-# common_knowledge/godot/scene-system.md
+### auto_notes/ — 관찰한 사실
 
-## Godot Scene System
-
-### Core Concepts
-- Scene = Node Tree
-- Parent-Child Hierarchy
-- Signal-based Communication
-
-### Example
-```gdscript
-# Create node hierarchy
-var root = Node2D.new()
-var child = Sprite2D.new()
-root.add_child(child)
-```
-
-### context_rule/
-
-**목적**: 프로젝트별 규칙과 제약사항
-
-**특징**:
-- 프로젝트 특화
-- 환경 설정 정보
-- 알려진 문제와 해결책
-
-**예시**:
-```markdown
-# context_rule/project-context.md
-
-## Development Environment
-- OS: Windows + WSL
-- Godot: Windows에서 실행
-- 개발: WSL에서 수행
-- **중요**: 파일 동기화 필수
-
-## File Locations
-- Windows: C:\Users\hcsung\work\q\ai-developer-mickey\pong\
-- WSL: /home/hcsung/ai-develop-by-mickey/godot-demo-projects/2d/pong/
-
-## Known Issues
-- ❌ C++ 엔진 수정: 19배 작업량
-- ✅ GDScript: 간단하고 충분
-```
-
-## INDEX.md 패턴
-
-### 목적
-
-- 모든 지식의 진입점
-- Context window 최소 사용
-- 필요한 문서만 선택적 로드
-
-### 구조
+자동 기록 대상 (사용자 확인 불필요):
+- 빌드/테스트/린트 커맨드
+- 파일 경로와 역할
+- 도구 버전, 환경 상세
+- 검증 완료된 에러 해결법
+- API 엔드포인트와 용도
 
 ```markdown
-# Knowledge Index
+# auto_notes/commands.md
 
-## Quick Links
-- [Godot Overview](godot/overview.md) - 엔진 구조 개요
-- [Testing Overview](testing/overview.md) - 테스팅 전략
+## Build
+- `npm run build` — 프로덕션 빌드
+- `npm run dev` — 개발 서버 (port 3000)
 
-## Godot Engine
-### Core Systems
-- [Scene System](godot/scene-system.md) - 씬-노드 트리
-- [Input System](godot/input-system.md) - 입력 처리
-- [Collision System](godot/collision-system.md) - 충돌 감지
-
-### Advanced Topics
-- [Replay System](godot/replay-system.md) - 리플레이 구현
-- [State Validation](godot/state-validation.md) - 상태 검증
-
-## Testing
-- [Replay Testing](testing/replay-testing.md) - 리플레이 기반 테스트
-- [CI/CD Integration](testing/ci-cd.md) - 자동화 통합
+## Test
+- `npm test` — 전체 테스트
+- `npm test -- --watch` — 변경 감지 모드
 ```
 
-### 사용 방법
+크기 관리:
+- `NOTES.md`가 50줄 초과 시 카테고리별 파일 분리
+- 토픽 파일도 비대해지면 세분화
+- `NOTES.md`는 항상 인덱스 역할만 유지
+
+### adaptive.md — AI 자가 생성 규칙
+
+Mickey가 작업 중 스스로 학습한 행동 규칙:
+
+```markdown
+# Adaptive Rules
+
+## 이 프로젝트에서 학습한 규칙
+- README 수정 시 한글/영문 동시 수정 필요
+- install.sh 변경 시 3곳 동기화 확인 (agent JSON, repo, ~/.kiro/)
+- 시스템 프롬프트 변경 시 examples/ 폴더도 업데이트
+```
+
+auto_notes와의 차이: auto_notes는 **사실** ("빌드 명령은 npm run build"), adaptive.md는 **규칙** ("README 수정 시 한글/영문 동시 수정").
+
+세션 종료 시 auto_notes와 adaptive.md 변경 내역을 **일괄 제시**하여 사용자가 확인/수정/삭제합니다.
+
+## 교훈 승격 경로
+
+### 왜 (WHY)
+
+auto_notes의 관찰 사실 중 반복되는 패턴은 더 높은 계층으로 올려야 합니다. 그래야 다음 세션에서 더 빠르게, 더 확실하게 참조됩니다.
+
+### 무엇을 (WHAT)
 
 ```
-Mickey: "Godot 입력 시스템 정보 필요"
-1. INDEX.md 읽기 (작은 context)
-2. "Input System" 찾기
-3. godot/input-system.md만 로드
-→ 효율적인 context 사용
+auto_notes (관찰) → context_rule (프로젝트 규칙) → common_knowledge (범용 패턴) → REMEMBER (핵심 원칙)
 ```
+
+| 승격 조건 | 대상 |
+|----------|------|
+| 같은 실수 2번 이상 반복 | → context_rule/ |
+| 프로젝트 무관 재사용 패턴 발견 | → common_knowledge/ |
+| 근본 원칙 수준의 교훈 | → REMEMBER (시스템 프롬프트) |
+
+### 어떻게 (HOW)
+
+사용자가 "교훈 승격" 또는 "패턴 정리"를 요청하면:
+
+1. auto_notes/, SESSION.md Lessons, HANDOFF.md 리뷰
+2. 항목별 분류: context_rule / common_knowledge / REMEMBER 후보
+3. 승격 제안 (내용, 근거, 대상) → 사용자 확인
+4. 승인 시 반영 + auto_notes에서 "승격 완료" 표시
+
+**실전 사례**: Mickey 9에서 MICKEY-1~5의 교훈 14건을 분석하여 3건을 `common_knowledge/agent-design-patterns.md`로 승격했습니다.
 
 ## 문서 작성 원칙
 
-### 1. 간결성 (Conciseness)
+### 간결성
 
-**나쁜 예**:
-```markdown
-Godot 엔진은 오픈소스 게임 엔진입니다. 
-2014년에 처음 공개되었으며, MIT 라이선스를 사용합니다.
-많은 개발자들이 사용하고 있으며...
-(500 단어 계속)
+```
+❌ "Godot 엔진은 오픈소스 게임 엔진입니다. 2014년에 처음 공개되었으며..." (500단어)
+✅ "## Godot Engine
+    - 오픈소스 (MIT), 씬-노드 구조, GDScript (Python-like)"
 ```
 
-**좋은 예**:
-```markdown
-## Godot Engine
+### 구조화
 
-### Key Features
-- 오픈소스 (MIT License)
-- 씬-노드 구조
-- GDScript (Python-like)
-
-### Core Concepts
-1. Scene = Node Tree
-2. Signals for Communication
-3. Built-in Physics Engine
+```
+개요 → 핵심 개념 → 사용 예시 → 상세 참조
 ```
 
-### 2. 구조화 (Structure)
-
-**계층적 구성**:
-```
-개요 (Overview)
-  ↓
-핵심 개념 (Core Concepts)
-  ↓
-사용 예시 (Examples)
-  ↓
-상세 참조 (Detailed Reference)
-```
-
-### 3. 상호 참조 (Cross-Reference)
+### 상호 참조
 
 ```markdown
-## Scene System
-
-씬은 노드 트리로 구성됩니다.
-
-**관련 문서**:
-- [Node System](node-system.md) - 노드 상세
-- [Signal System](signal-system.md) - 통신 방법
-
-**참고**:
-입력 처리는 [Input System](input-system.md) 참조
+**관련 문서**: [Node System](node-system.md), [Signal System](signal-system.md)
 ```
 
-## 실전 예시
+## 실전 적용 사례
 
-### Godot 엔진 분석 사례
+### Godot 엔진 분석 (13,666개 파일)
 
-**문제**: 13,666개 파일의 거대한 코드베이스
+1. `common_knowledge/godot/overview.md` — 엔진 구조 개요 (Context 5%)
+2. INDEX에 트리거 등록 — 필요한 주제만 선택적 로딩
+3. 세션 거듭할수록 지식 축적 → 분석 시간 2시간 → 10분
 
-**해결 과정**:
+**인사이트**: "한 번 분석한 것을 다시 분석하지 않는다."
 
-#### 1단계: 개요 작성
-
-```markdown
-# common_knowledge/godot/overview.md
-
-## Godot Engine Structure
-
-### Main Directories
-- `core/`: 엔진 핵심
-- `scene/`: 씬/노드 시스템
-- `servers/`: 렌더링/물리 서버
-- `modules/`: 확장 모듈
-
-### Key Concepts
-- Scene-Node Tree
-- Signals
-- GDScript
-
-**상세 문서**:
-- [Scene System](scene-system.md)
-- [Input System](input-system.md)
-```
-
-#### 2단계: 필요한 부분만 상세화
-
-```markdown
-# common_knowledge/godot/input-system.md
-
-## Input System
-
-### Input Class
-```gdscript
-# Check if key pressed
-if Input.is_action_pressed("move_up"):
-    position.y -= speed * delta
-```
-
-### Custom Actions
-Project Settings → Input Map에서 정의
-
-### Replay Mode
-```gdscript
-# Override input
-func get_action_strength(action: String) -> float:
-    if replay_mode:
-        return replay_data.get_input(action)
-    return Input.get_action_strength(action)
-```
-
-#### 3단계: 활용
+### Mickey 자체 개선 (교훈 승격)
 
 ```
-Mickey 3: "입력 시스템 정보 필요"
-→ INDEX.md 확인
-→ input-system.md 로드
-→ 즉시 구현 가능
+Mickey 1~5: auto_notes에 관찰 사실 축적
+Mickey 9: 14건 분석 → 3건 common_knowledge 승격
+  - 스크립트 위임 패턴
+  - 이벤트 기반 트리거
+  - 계획 구체성→실행 속도 상관관계
 ```
 
-## 지식 업데이트 전략
-
-### 언제 업데이트하나?
-
-1. **새로운 개념 학습 시**
-   ```
-   Mickey: "Godot Signal 시스템 이해"
-   → common_knowledge/godot/signal-system.md 생성
-   ```
-
-2. **문제 해결 후**
-   ```
-   Mickey: "Delta 동기화로 에러 해결"
-   → common_knowledge/testing/replay-system.md 업데이트
-   ```
-
-3. **패턴 발견 시**
-   ```
-   Mickey: "리셋 프레임 감지 패턴 발견"
-   → common_knowledge/testing/state-validation.md 추가
-   ```
-
-### 업데이트 방법
-
-```markdown
-## 기존 문서에 추가
-
-### State Validation
-
-#### Ball Reset Detection (Added: 2025-12-11)
-```gdscript
-func _is_ball_reset(expected: Vector2, actual: Vector2) -> bool:
-    var diff = (expected - actual).length()
-    return diff > 200.0  # Position jump > 200px
-```
-
-**Context**: Phase 1-1에서 발견
-**Problem**: Ball reset 시 validation 실패
-**Solution**: 큰 위치 점프 감지하여 스킵
-```
-
-## 측정 가능한 효과
-
-### 지식 관리 없이
-
-```
-Mickey 1: Godot 분석 (2시간)
-Mickey 2: Godot 재분석 (1.5시간)
-Mickey 3: Godot 또 재분석 (1시간)
-→ 총 4.5시간 (중복 작업)
-```
-
-### 지식 관리 사용
-
-```
-Mickey 1: Godot 분석 + 문서화 (2.5시간)
-Mickey 2: 문서 읽기 (10분) + 작업
-Mickey 3: 문서 읽기 (10분) + 작업
-→ 총 2.5시간 + 작업 (효율적)
+**인사이트**: "관찰 → 패턴 발견 → 규칙화 → 원칙화. 지식은 계층을 올라간다."
 
 ## 모범 사례
 
 ### DO ✅
 
-1. **INDEX.md 먼저 작성**
-   - 전체 구조 파악
-   - 진입점 제공
-
-2. **간결하게 작성**
-   - 핵심만 담기
-   - 예시 코드 포함
-
-3. **상호 참조 추가**
-   - 관련 문서 링크
-   - 컨텍스트 제공
-
-4. **정기적 업데이트**
-   - 새로운 학습 즉시 반영
-   - 오래된 정보 제거
+1. **INDEX 먼저 작성**: 지식의 진입점 제공
+2. **간결하게**: 핵심만, 예시 코드 포함
+3. **성격별 분리**: 사실(auto_notes) / 규칙(context_rule) / 패턴(common_knowledge)
+4. **정기적 승격**: 반복 패턴은 상위 계층으로
 
 ### DON'T ❌
 
-1. **모든 것을 한 파일에**
-   - Context window 낭비
-   - 검색 어려움
-
-2. **장황한 설명**
-   - 불필요한 배경 설명
-   - 역사적 맥락 과다
-
-3. **업데이트 미루기**
-   - 정보 유실
-   - 중복 학습
-
-4. **구조 없이 작성**
-   - 읽기 어려움
-   - 활용 불가
+1. **모든 것을 한 파일에**: Context window 낭비, 검색 어려움
+2. **INDEX 없이 파일 추가**: 로딩되지 않는 고아 파일 발생
+3. **승격 미루기**: auto_notes가 비대해지고 패턴이 묻힘
+4. **사실과 규칙 혼재**: 신뢰도 관리 불가
 
 ## 다음 단계
 
+- [프롬프트 진화](06-prompt-evolution.md) - v2.0 → v7.2 진화 과정
+- [진화 인사이트](08-evolution-insight.md) - "AI를 잘 쓰는 법"이 어떻게 진화해 왔는가
 - [실전 사례](case-study/godot-replay-system.md) - Godot 프로젝트 적용 사례
-- [예시 파일](../examples/) - 실제 지식 관리 예시

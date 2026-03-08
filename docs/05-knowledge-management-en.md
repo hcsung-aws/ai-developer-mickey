@@ -4,366 +4,201 @@
 
 ## Why Is It Needed?
 
-Complex projects require systematic management of **reusable knowledge**.
-
-### Problem Situation
-
 ```
-Mickey 1: Analyze Godot scene system → Understand
-Mickey 2: (Session restart) → Need to analyze again
-Mickey 3: (Session restart) → Analyze again...
+Mickey 1: Analyze Godot scene system → Understand (2 hours)
+Mickey 2: (Session restart) → Re-analyze (1.5 hours)
+Mickey 3: (Session restart) → Analyze again (1 hour)
+→ 4.5 hours of duplicate work
 ```
 
-### Solution
+Saving knowledge to files:
 
 ```
-Mickey 1: Analyze Godot scene system → Save to common_knowledge/godot/scene-system.md
-Mickey 2: Read scene-system.md → Immediate understanding
-Mickey 3: Read scene-system.md → Immediate understanding
+Mickey 1: Analyze + document (2.5 hours)
+Mickey 2: Read document (10 min) → Start working immediately
+Mickey 3: Read document (10 min) → Start working immediately
+→ No duplication, cumulative learning
 ```
 
-## Directory Structure
+But as knowledge grows, new problems emerge: **"Which knowledge to load when?"** and **"How to distinguish user-written rules from AI-observed facts?"**
+
+## 4-Store System
+
+### Why
+
+Putting all knowledge in one place mixes trust levels and management approaches. Separating by nature allows different review procedures and loading timing for each.
+
+### What
+
+| Store | Nature | Review Timing | Example |
+|-------|--------|--------------|---------|
+| **auto_notes/** | AI-observed facts (descriptive) | Batch at session end | Build commands, file roles, error fixes |
+| **context_rule/adaptive.md** | AI self-generated rules (adaptive) | Batch at session end | "Update Korean/English simultaneously for README" |
+| **context_rule/** | Verified project rules (normative) | Immediate user confirmation | Preventing repeated failures, environment constraints |
+| **common_knowledge/** | Universal reusable patterns (normative) | Immediate user confirmation | Architecture patterns, technology comparisons |
+
+### How
 
 ```
 project-root/
-├── common_knowledge/          # Reusable knowledge
-│   ├── INDEX.md              # Knowledge index (required)
-│   ├── godot/
-│   │   ├── overview.md       # Godot overview
-│   │   ├── scene-system.md   # Scene system
-│   │   └── input-system.md   # Input system
-│   └── testing/
-│       ├── overview.md       # Testing overview
-│       └── replay-system.md  # Replay system
-└── context_rule/             # Project-specific rules
-    ├── project-context.md    # Environment settings
-    ├── troubleshooting.md    # Troubleshooting
-    └── mickey-improvements.md # Improvements
+├── auto_notes/                  # AI automatic observation records
+│   ├── NOTES.md                # Index (T3a)
+│   ├── commands.md             # Build/test/lint commands
+│   ├── file-roles.md           # File paths and roles
+│   └── error-fixes.md          # Verified error fixes
+├── context_rule/                # Project-specific rules
+│   ├── INDEX.md                # Rule map (T3a)
+│   ├── project-context.md      # Environment/goals/constraints/lessons
+│   └── adaptive.md             # AI self-generated rules (T2)
+└── common_knowledge/            # Universal reusable patterns
+    ├── INDEX.md                # Knowledge map (T3a)
+    └── agent-design-patterns.md # Agent design patterns
 ```
 
-## common_knowledge vs context_rule
+**context_rule/ vs common_knowledge/ distinction**:
+- Usable in other projects? → `common_knowledge/`
+- Only meaningful in this project? → `context_rule/`
 
-### common_knowledge/
+## Auto Memory: auto_notes + adaptive.md
 
-**Purpose**: Reusable general knowledge
+### Why
 
-**Characteristics**:
-- Project-independent
-- Usable in other projects
-- Technical/conceptual explanations
+Having to say "record this" every time is inefficient. If AI automatically records facts discovered during work while **separating them from verified rules**, trust levels can be managed.
 
-**Example**:
-```markdown
-# common_knowledge/godot/scene-system.md
+### auto_notes/ — Observed Facts
 
-## Godot Scene System
-
-### Core Concepts
-- Scene = Node Tree
-- Parent-Child Hierarchy
-- Signal-based Communication
-
-### Example
-```gdscript
-# Create node hierarchy
-var root = Node2D.new()
-var child = Sprite2D.new()
-root.add_child(child)
-```
-```
-
-### context_rule/
-
-**Purpose**: Project-specific rules and constraints
-
-**Characteristics**:
-- Project-specific
-- Environment configuration information
-- Known issues and solutions
-
-**Example**:
-```markdown
-# context_rule/project-context.md
-
-## Development Environment
-- OS: Windows + WSL
-- Godot: Runs on Windows
-- Development: Performed in WSL
-- **Important**: File synchronization required
-
-## File Locations
-- Windows: C:\Users\hcsung\work\q\ai-developer-mickey\pong\
-- WSL: /home/hcsung/ai-develop-by-mickey/godot-demo-projects/2d/pong/
-
-## Known Issues
-- ❌ C++ engine modification: 19x workload
-- ✅ GDScript: Simple and sufficient
-```
-
-## INDEX.md Pattern
-
-### Purpose
-
-- Entry point for all knowledge
-- Minimal context window usage
-- Selective loading of needed documents
-
-### Structure
+Automatic recording targets (no user confirmation needed):
+- Build/test/lint commands
+- File paths and roles
+- Tool versions, environment details
+- Verified error fixes
+- API endpoints and purposes
 
 ```markdown
-# Knowledge Index
+# auto_notes/commands.md
 
-## Quick Links
-- [Godot Overview](godot/overview.md) - Engine structure overview
-- [Testing Overview](testing/overview.md) - Testing strategy
+## Build
+- `npm run build` — Production build
+- `npm run dev` — Dev server (port 3000)
 
-## Godot Engine
-### Core Systems
-- [Scene System](godot/scene-system.md) - Scene-node tree
-- [Input System](godot/input-system.md) - Input handling
-- [Collision System](godot/collision-system.md) - Collision detection
-
-### Advanced Topics
-- [Replay System](godot/replay-system.md) - Replay implementation
-- [State Validation](godot/state-validation.md) - State verification
-
-## Testing
-- [Replay Testing](testing/replay-testing.md) - Replay-based testing
-- [CI/CD Integration](testing/ci-cd.md) - Automation integration
+## Test
+- `npm test` — All tests
+- `npm test -- --watch` — Watch mode
 ```
 
-### Usage
+Size management:
+- Split into category files when `NOTES.md` exceeds 50 lines
+- Further subdivide topic files when they grow too large
+- `NOTES.md` always maintains index role only
+
+### adaptive.md — AI Self-Generated Rules
+
+Behavioral rules Mickey learns on its own during work:
+
+```markdown
+# Adaptive Rules
+
+## Rules Learned in This Project
+- When modifying README, update Korean/English simultaneously
+- When changing install.sh, verify 3-way sync (agent JSON, repo, ~/.kiro/)
+- When changing system prompt, also update examples/ folder
+```
+
+Difference from auto_notes: auto_notes are **facts** ("build command is npm run build"), adaptive.md are **rules** ("update Korean/English simultaneously when modifying README").
+
+At session end, changes to auto_notes and adaptive.md are **presented in batch** for user review/edit/delete.
+
+## Lesson Promotion Path
+
+### Why
+
+Recurring patterns among auto_notes observations should be elevated to higher tiers. This ensures faster, more reliable reference in the next session.
+
+### What
 
 ```
-Mickey: "Need Godot input system information"
-1. Read INDEX.md (small context)
-2. Find "Input System"
-3. Load only godot/input-system.md
-→ Efficient context usage
+auto_notes (observations) → context_rule (project rules) → common_knowledge (universal patterns) → REMEMBER (core principles)
 ```
+
+| Promotion Condition | Target |
+|--------------------|--------|
+| Same mistake repeated 2+ times | → context_rule/ |
+| Project-independent reusable pattern discovered | → common_knowledge/ |
+| Fundamental principle-level lesson | → REMEMBER (system prompt) |
+
+### How
+
+When user requests "promote lessons" or "organize patterns":
+
+1. Review auto_notes/, SESSION.md Lessons, HANDOFF.md
+2. Classify per item: context_rule / common_knowledge / REMEMBER candidate
+3. Propose promotion (content, rationale, target) → User confirmation
+4. Apply on approval + mark "promoted" in auto_notes
+
+**Practical example**: In Mickey 9, 14 lessons from MICKEY-1~5 were analyzed and 3 were promoted to `common_knowledge/agent-design-patterns.md`.
 
 ## Document Writing Principles
 
-### 1. Conciseness
+### Conciseness
 
-**Bad Example**:
-```markdown
-Godot engine is an open-source game engine.
-First released in 2014, it uses the MIT license.
-Many developers use it...
-(continues for 500 words)
+```
+❌ "Godot engine is an open-source game engine. First released in 2014..." (500 words)
+✅ "## Godot Engine
+    - Open source (MIT), scene-node structure, GDScript (Python-like)"
 ```
 
-**Good Example**:
-```markdown
-## Godot Engine
+### Structure
 
-### Key Features
-- Open-source (MIT License)
-- Scene-node structure
-- GDScript (Python-like)
-
-### Core Concepts
-1. Scene = Node Tree
-2. Signals for Communication
-3. Built-in Physics Engine
+```
+Overview → Core Concepts → Usage Examples → Detailed Reference
 ```
 
-### 2. Structure
-
-**Hierarchical Organization**:
-```
-Overview
-  ↓
-Core Concepts
-  ↓
-Examples
-  ↓
-Detailed Reference
-```
-
-### 3. Cross-Reference
+### Cross-References
 
 ```markdown
-## Scene System
-
-Scenes are composed of node trees.
-
-**Related Documents**:
-- [Node System](node-system.md) - Node details
-- [Signal System](signal-system.md) - Communication methods
-
-**Reference**:
-For input handling, see [Input System](input-system.md)
+**Related docs**: [Node System](node-system.md), [Signal System](signal-system.md)
 ```
 
-## Real-World Example
+## Practical Examples
 
-### Godot Engine Analysis Case
+### Godot Engine Analysis (13,666 files)
 
-**Problem**: Massive codebase with 13,666 files
+1. `common_knowledge/godot/overview.md` — Engine structure overview (Context 5%)
+2. Register triggers in INDEX — Selectively load only needed topics
+3. Knowledge accumulates across sessions → Analysis time from 2 hours → 10 minutes
 
-**Solution Process**:
+**Insight**: "Don't re-analyze what you've already analyzed."
 
-#### Step 1: Write Overview
-
-```markdown
-# common_knowledge/godot/overview.md
-
-## Godot Engine Structure
-
-### Main Directories
-- `core/`: Engine core
-- `scene/`: Scene/node system
-- `servers/`: Rendering/physics servers
-- `modules/`: Extension modules
-
-### Key Concepts
-- Scene-Node Tree
-- Signals
-- GDScript
-
-**Detailed Documents**:
-- [Scene System](scene-system.md)
-- [Input System](input-system.md)
-```
-
-#### Step 2: Detail Only What's Needed
-
-```markdown
-# common_knowledge/godot/input-system.md
-
-## Input System
-
-### Input Class
-```gdscript
-# Check if key pressed
-if Input.is_action_pressed("move_up"):
-    position.y -= speed * delta
-```
-
-### Custom Actions
-Define in Project Settings → Input Map
-
-### Replay Mode
-```gdscript
-# Override input
-func get_action_strength(action: String) -> float:
-    if replay_mode:
-        return replay_data.get_input(action)
-    return Input.get_action_strength(action)
-```
-```
-
-#### Step 3: Utilize
+### Mickey Self-Improvement (Lesson Promotion)
 
 ```
-Mickey 3: "Need input system information"
-→ Check INDEX.md
-→ Load input-system.md
-→ Can implement immediately
+Mickey 1~5: Accumulate observed facts in auto_notes
+Mickey 9: Analyze 14 items → Promote 3 to common_knowledge
+  - Script delegation pattern
+  - Event-based triggers
+  - Plan specificity → execution speed correlation
 ```
 
-## Knowledge Update Strategy
-
-### When to Update?
-
-1. **When Learning New Concepts**
-   ```
-   Mickey: "Understanding Godot Signal system"
-   → Create common_knowledge/godot/signal-system.md
-   ```
-
-2. **After Problem Resolution**
-   ```
-   Mickey: "Solved error with Delta synchronization"
-   → Update common_knowledge/testing/replay-system.md
-   ```
-
-3. **When Discovering Patterns**
-   ```
-   Mickey: "Discovered reset frame detection pattern"
-   → Add to common_knowledge/testing/state-validation.md
-   ```
-
-### Update Method
-
-```markdown
-## Add to Existing Document
-
-### State Validation
-
-#### Ball Reset Detection (Added: 2025-12-11)
-```gdscript
-func _is_ball_reset(expected: Vector2, actual: Vector2) -> bool:
-    var diff = (expected - actual).length()
-    return diff > 200.0  # Position jump > 200px
-```
-
-**Context**: Discovered in Phase 1-1
-**Problem**: Validation fails during Ball reset
-**Solution**: Detect large position jumps and skip
-```
-
-## Measurable Effects
-
-### Without Knowledge Management
-
-```
-Mickey 1: Godot analysis (2 hours)
-Mickey 2: Godot re-analysis (1.5 hours)
-Mickey 3: Godot re-analysis again (1 hour)
-→ Total 4.5 hours (duplicate work)
-```
-
-### With Knowledge Management
-
-```
-Mickey 1: Godot analysis + documentation (2.5 hours)
-Mickey 2: Read docs (10 min) + work
-Mickey 3: Read docs (10 min) + work
-→ Total 2.5 hours + work (efficient)
-```
+**Insight**: "Observation → Pattern discovery → Rule formation → Principle formation. Knowledge climbs tiers."
 
 ## Best Practices
 
 ### DO ✅
 
-1. **Write INDEX.md First**
-   - Understand overall structure
-   - Provide entry point
-
-2. **Write Concisely**
-   - Include only essentials
-   - Include example code
-
-3. **Add Cross-References**
-   - Link related documents
-   - Provide context
-
-4. **Update Regularly**
-   - Reflect new learning immediately
-   - Remove outdated information
+1. **Write INDEX first**: Provide entry point to knowledge
+2. **Keep it concise**: Core only, include example code
+3. **Separate by nature**: Facts (auto_notes) / Rules (context_rule) / Patterns (common_knowledge)
+4. **Regular promotion**: Recurring patterns to higher tiers
 
 ### DON'T ❌
 
-1. **Put Everything in One File**
-   - Wastes context window
-   - Difficult to search
-
-2. **Verbose Explanations**
-   - Unnecessary background
-   - Excessive historical context
-
-3. **Delay Updates**
-   - Information loss
-   - Duplicate learning
-
-4. **Write Without Structure**
-   - Difficult to read
-   - Cannot utilize
+1. **Everything in one file**: Wastes context window, hard to search
+2. **Add files without INDEX**: Creates orphan files that never get loaded
+3. **Delay promotion**: auto_notes bloats and patterns get buried
+4. **Mix facts and rules**: Makes trust management impossible
 
 ## Next Steps
 
-- [Real-World Case Study](case-study/godot-replay-system-en.md) - Godot project application case
-- [Example Files](../examples/) - Actual knowledge management examples
+- [Prompt Evolution](06-prompt-evolution-en.md) - v2.0 → v7.2 evolution
+- [Evolution Insights](08-evolution-insight-en.md) - How "using AI well" has evolved
+- [Case Study](case-study/godot-replay-system.md) - Godot project case study

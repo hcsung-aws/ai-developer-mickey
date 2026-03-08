@@ -70,8 +70,9 @@ Mickey 프롬프트는 실제 프로젝트를 거치며 계속 진화합니다:
 | **v6.0** | 경량화/최적화 - 도메인 특화 제거, 스키마 전환, 3-Tier 로딩 |
 | **v6.1** | T3 계층화 - INDEX 지도 패턴 도입, Power steering 진화 |
 | **v6.2** | PURPOSE-SCENARIO 기반 목적 관리 체계 도입 |
-| **v6.3** | Auto Memory 패턴 도입 (구현 완료) |
-| **v7** | 🆕 자율 실행 + Subagent 협업 + Brownfield 온보딩 (계획 수립 완료) |
+| **v6.3** | Auto Memory 패턴 도입 (자동 메모리 이원화) |
+| **v7** | 자율 실행 + Subagent 협업 + Brownfield 온보딩 |
+| **v7.2** | 🆕 Adaptive Rules (자가 개선) + Autonomy Preference (사용자별 자율성) |
 
 > 💡 자세한 변경 이력은 [변경 이력 문서](docs/07-changelog.md)를 참고하세요.
 > 📋 v6.3 개선 계획은 [IMPROVEMENT-PLAN-v6.3.md](IMPROVEMENT-PLAN-v6.3.md)를 참고하세요.
@@ -80,17 +81,24 @@ Mickey 프롬프트는 실제 프로젝트를 거치며 계속 진화합니다:
 
 ## 🚀 빠른 시작
 
-### 1. Mickey 에이전트 설정
+### 1. 설치
 
 ```bash
-# Kiro CLI 설치 후
-cp examples/ai-developer-mickey.json ~/.kiro/agents/
+# Kiro CLI 설치 후 (https://github.com/aws/kiro-cli)
+git clone https://github.com/hcsung-aws/ai-developer-mickey.git
+cd ai-developer-mickey
+./install.sh
 ```
+
+`install.sh`가 수행하는 것:
+- Agent JSON → `~/.kiro/agents/`
+- 글로벌 가이드 → `~/.kiro/mickey/`
 
 ### 2. 프로젝트에서 Mickey 실행
 
 ```bash
-kiro chat --agent ai-developer-mickey
+cd <프로젝트 디렉토리>
+kiro-cli chat --agent ai-developer-mickey
 ```
 
 ### 3. Mickey가 자동으로 수행하는 것

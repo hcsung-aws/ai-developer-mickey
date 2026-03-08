@@ -2,151 +2,154 @@
 
 > [English Version](04-prompt-engineering-en.md)
 
-## Mickey 프롬프트 진화 과정
+## 프롬프트는 왜 중요한가?
 
-Mickey의 시스템 프롬프트는 작업을 거듭하면서 지속적으로 개선되었습니다.
+시스템 프롬프트는 AI 에이전트의 **행동 규칙**입니다. 잘 구조화된 프롬프트는 AI가 일관되게 행동하게 하고, 부족한 프롬프트는 매 세션마다 다른 결과를 만듭니다.
 
-### 초기 버전 (Mickey 1)
+Mickey의 프롬프트는 "한 번 작성하고 끝"이 아니라, **실패 경험을 통해 지속적으로 진화**해 왔습니다.
+
+## 시스템 프롬프트의 진화
+
+### 초기 (v1~v2): 핵심 아이디어만
 
 ```
-각 세션마다의 성공 및 실패 기록들을 계속 다음 세션으로 참고하여 
+각 세션마다의 성공 및 실패 기록들을 계속 다음 세션으로 참고하여
 이어갈 수 있게 파일로 저장하며 지속적인 개선을 통해 문제를 해결하는 에이전트
 ```
 
-**특징**: 간단하고 핵심만 담음
+간단하지만 핵심은 담겨 있었습니다: **파일 기반 기억 + 지속적 개선**.
 
-### 개선 버전 (Mickey 3 이후)
+### 성장 (v3~v5): 구체적 행동 지침 추가
 
-Godot 엔진 분석 과정에서 context window 한계 문제를 겪으면서 **지식 관리** 섹션 추가:
+Godot 프로젝트를 거치며 부족한 점이 드러났습니다:
+
+| 문제 | 추가된 지침 |
+|------|-----------|
+| 지식이 context에 흩어짐 | KNOWLEDGE MANAGEMENT 섹션 |
+| 같은 실수 반복 | CONTEXT RULES 섹션 |
+| 목적 없이 작업에 몰입 | REMEMBER: 목적 우선 |
+| 분석 없이 구현 시작 | PROBLEM-SOLVING PROTOCOL |
+| context overflow 대응 없음 | Context Window 모니터링 |
+
+v5.0에서 **체크리스트 기반 프로토콜**이 확립되었습니다.
+
+### 전환 (v6.0~v6.3): 경량화와 자동화
+
+v5까지의 프롬프트는 도메인 특화 내용(Godot, 패킷 캡처 등)이 섞여 있었습니다. v6.0에서 근본적인 구조 변경:
+
+| 변화 | 이유 |
+|------|------|
+| 도메인 특화 내용 제거 | 범용 에이전트로 전환 |
+| 3-Tier Context Loading 도입 | context window 효율화 |
+| INDEX 지도 패턴 (v6.1) | 선택적 지식 로딩 |
+| PURPOSE-SCENARIO 독립 문서 (v6.2) | 목적 추적 강화 |
+| auto_notes 자동 메모리 (v6.3) | 관찰 사실과 규칙 분리 |
+
+**인사이트**: "프롬프트에 모든 것을 넣는 것"에서 "프롬프트는 원칙만, 상세는 파일로" 전환.
+
+### 현재 (v7~v7.2): 자율성과 자가 개선
+
+| 변화 | 이유 |
+|------|------|
+| 자율 실행 조건 (v7) | CC 명확 + rollback 가능 시 자율 진행 |
+| Backpressure (v7) | 검증 실패 시 다음 단계 진행 금지 |
+| Adaptive Rules (v7.1) | AI가 스스로 행동 규칙 학습 |
+| Autonomy Preference (v7.2) | 사용자별 자율성 수준 선택 |
+
+## 프롬프트 구조화 원칙
+
+### 왜 (WHY)
+
+프롬프트가 길어지면 AI가 중요한 부분을 놓칩니다. 계층적으로 구조화하면 "항상 지켜야 할 것"과 "필요할 때 참조할 것"을 분리할 수 있습니다.
+
+### 무엇을 (WHAT)
+
+Mickey v7.2의 프롬프트는 두 계층으로 구성됩니다:
+
+| 계층 | 위치 | 내용 | 크기 |
+|------|------|------|------|
+| **T1** | 시스템 프롬프트 | 정체성, 세션 프로토콜, REMEMBER | 핵심만 |
+| **T1.5** | `~/.kiro/mickey/` | 상세 실행 지침 (Brownfield, 자율성, Backpressure 등) | 확장 가능 |
+
+### 어떻게 (HOW)
+
+**T1 (시스템 프롬프트)에 넣는 것**:
+- 핵심 정체성 ("You are Mickey")
+- 세션 프로토콜 (First/Continuing/During/End)
+- 문제 해결 프로토콜
+- 3-Tier 로딩 규칙
+- REMEMBER (15개 핵심 원칙)
+
+**T1.5 (확장 지침)에 넣는 것**:
+- Brownfield 온보딩 절차
+- Autonomy Preference 상세 가이드
+- Backpressure 규칙
+- Architectural Guard
+- Adaptive Rules 안전장치
+
+**핵심**: T1은 "무엇을 해야 하는가", T1.5는 "어떻게 해야 하는가".
+
+### REMEMBER 섹션
+
+프롬프트 끝에 위치하는 **핵심 원칙 목록**입니다. AI가 작업 중 참조하는 최우선 규칙:
 
 ```
-KNOWLEDGE MANAGEMENT:
-- Store reusable knowledge for future Mickey sessions in ./common_knowledge/ directory
-- Structure information in semantic units that minimize context window usage when loaded
-- Add cross-references between documents
+1. 목적 우선: PURPOSE-SCENARIO.md가 모든 판단의 최우선 기준
+2. 단순함 우선: 복잡한 솔루션보다 단순한 대안 먼저
+3. Session log FIRST, then work
+4. Analysis BEFORE implementation
+5. 에러 로그 즉시 확인 (추측 금지)
+...
 ```
 
-**추가된 이유**: 거대한 코드베이스 분석 시 효율적인 정보 구조화 필요
+각 항목에는 **어느 세션에서 배웠는지** 표시합니다 (예: "Mickey 10"). 이를 통해 원칙의 출처를 추적할 수 있습니다.
 
-### 최종 버전 (현재)
+### Document Schema
 
-```
-You are an AI developer agent 'Mickey', that maintains session continuity 
-by saving records to files and carrying them forward to subsequent sessions.
-
-Your primary goal is to solve problems through continuous improvement by:
-1. Saving session records, progress, and learnings to persistent files
-2. Loading and reviewing previous session data at the start of new sessions
-3. Building upon previous work and insights
-4. Tracking problem-solving approaches and their effectiveness
-5. Iteratively improving solutions based on accumulated knowledge
-6. Monitoring context window usage and alerting when a new session is needed
-
-KNOWLEDGE MANAGEMENT:
-- Store reusable knowledge in ./common_knowledge/ directory
-- Structure information in semantic units
-- Add cross-references between documents
-
-CONTEXT RULES:
-- Document repeated failures in ./context_rule/ directory
-- Store as actionable guidelines
-- Organize by semantic meaning
-
-IMPORTANT: If context window lacks sufficient space, inform the user 
-to restart the session. Save all progress before recommending restart.
-```
-
-## 핵심 프롬프트 원칙
-
-### 1. 명확한 역할 정의
+Mickey가 생성하는 문서의 **필수 섹션**을 프롬프트에 정의합니다:
 
 ```
-You are an AI developer agent 'Mickey'
+| 문서 | 필수 섹션 |
+| SESSION.md | Goal, Tasks(+CC), Progress, Decisions, Files, Lessons, Next |
+| HANDOFF.md | Status(1~2줄), Next(1~2줄), Important Context, Quick Reference |
+| PURPOSE-SCENARIO.md | Purpose, Scenarios, Acceptance Criteria, Last Confirmed |
 ```
 
-**왜 중요한가**: AI가 자신의 역할을 명확히 이해해야 일관된 행동 가능
-
-### 2. 구체적인 행동 지침
-
-```
-1. Saving session records...
-2. Loading and reviewing...
-3. Building upon...
-```
-
-**왜 중요한가**: 추상적인 목표보다 구체적인 행동이 실행 가능
-
-### 3. 제약 조건 명시
-
-```
-IMPORTANT: If context window lacks sufficient space, inform the user...
-```
-
-**왜 중요한가**: 문제 상황에서의 행동 규칙 필요
+스키마를 정의하면 AI가 매번 다른 형식으로 문서를 만드는 것을 방지합니다.
 
 ## 효과적인 사용자 프롬프트
 
+시스템 프롬프트만큼 **사용자가 주는 지시**도 중요합니다.
+
 ### DO ✅
 
-#### 1. 맥락 제공
-
-**나쁜 예**:
+**1. 맥락 제공**
 ```
-"에러 고쳐줘"
-```
-
-**좋은 예**:
-```
-"Godot Pong 게임의 리플레이 시스템에서 Ball 위치 검증 시 
-Frame 139에서 velocity diff=209.45 에러가 발생합니다. 
-이전 Mickey 4가 Delta 동기화로 position 에러를 해결했는데, 
-velocity 에러도 비슷한 원인일 수 있습니다. 분석해주세요."
+❌ "에러 고쳐줘"
+✅ "리플레이 시스템에서 Frame 139에서 velocity diff=209.45 에러 발생.
+    이전 Mickey가 Delta 동기화로 position 에러를 해결했는데,
+    velocity도 비슷한 원인일 수 있어. 분석해줘."
 ```
 
-#### 2. 단계별 확인 요청
-
-**나쁜 예**:
+**2. 단계별 확인 요청**
 ```
-"전부 구현해줘"
-```
-
-**좋은 예**:
-```
-"먼저 현재 구현을 분석하고, 문제점을 파악한 후, 
-해결 방안을 제안해주세요. 각 단계마다 확인받겠습니다."
+❌ "전부 구현해줘"
+✅ "먼저 현재 구현을 분석하고, 문제점을 파악한 후,
+    해결 방안을 제안해줘. 각 단계마다 확인받겠습니다."
 ```
 
-#### 3. 이전 작업 참조
-
-**좋은 예**:
+**3. 이전 작업 참조 유도**
 ```
-"이전 Mickey가 알려준 내용이랑 지침을 확인하라고"
-"기존 구현에서 문제 없는지 전부 분석해서 확인하고 알려줘"
+✅ "이전 Mickey들의 기록이랑 지침을 확인하라고"
+✅ "context_rule 확인해서 알려진 이슈 있는지 봐줘"
 ```
 
 ### DON'T ❌
 
-#### 1. 모호한 지시
-
 ```
-"잘 해줘"
-"알아서 해줘"
-"좋게 만들어줘"
-```
-
-#### 2. 맥락 없는 요청
-
-```
-"에러 났어"
-"안 돼"
-"이상해"
-```
-
-#### 3. 한 번에 너무 많은 요구
-
-```
-"A도 하고 B도 하고 C도 하고 D도 하고 E도 해줘"
-→ 단계별로 나누기
+❌ "잘 해줘" / "알아서 해줘"          → 모호한 지시
+❌ "에러 났어" / "안 돼"              → 맥락 없는 요청
+❌ "A도 B도 C도 D도 E도 해줘"        → 한 번에 너무 많은 요구
 ```
 
 ## 실전 프롬프트 패턴
@@ -154,82 +157,49 @@ velocity 에러도 비슷한 원인일 수 있습니다. 분석해주세요."
 ### 패턴 1: 분석 → 제안 → 확인
 
 ```
-사용자: "현재 구현에서 기존에 동작 잘 하던 것들에 문제는 없을지 
-        한번 전부 분석해서 확인하고 알려줘"
-
-Mickey: [분석 수행]
-        "다음 문제가 발견되었습니다:
-         1. SimpleAI가 replay 모드에서 간섭
-         2. 해결 방법: replay_mode 체크 추가
-         수정하시겠습니까?"
-
+사용자: "현재 구현에서 문제 없는지 전부 분석해서 알려줘"
+Mickey: [분석] → "문제 2건 발견. 수정하시겠습니까?"
 사용자: "그래, 수정해줘"
 ```
 
-### 패턴 2: 맥락 제공 → 작업 요청
+### 패턴 2: 맥락 + 제약 → 작업 요청
 
 ```
-사용자: "지금 Phase 3-1 진행 중이야. 
-        Left와 Right 패들 모두 AI로 제어하고,
-        다양한 시나리오(잘 쫓아가기, 실수로 골 먹기)를 
-        만들 수 있어야 해. 
-        현재 구현과 내 요구사항을 종합해서 제안해줘"
-
-Mickey: [분석 후 제안]
+사용자: "Phase 3-1 진행 중. 양쪽 패들 모두 AI 제어,
+        다양한 시나리오 필요. 현재 구현과 요구사항 종합해서 제안해줘"
 ```
 
-### 패턴 3: 문제 상황 → 이전 해결책 참조
+### 패턴 3: 문제 + 이전 해결책 참조
 
 ```
-사용자: "Total frames played: 0이 혹시 초기화 과정에서 
-        값이 0이 되어 버려서 생긴 문제일 수 있는지 
+사용자: "Total frames played: 0이 초기화 문제인지
         기존 구현 분석해서 알려줘"
-
-Mickey: [코드 분석]
-        "ReplayInput.disable_replay()에서 _current_frame = 0으로 
-         리셋됩니다. 이는 정상 동작입니다."
 ```
 
 ## 프롬프트 개선 사례
 
-### 사례 1: 파일 경로 찾기
+### 사례 1: 기존 지식 활용 유도
 
-**초기 시도** (실패):
 ```
-사용자: "Windows 경로 찾아줘"
-Mickey: [전체 디렉토리 검색 시도] → 취소됨
-```
-
-**개선된 시도** (성공):
-```
-사용자: "이전 Mickey들의 기록이나 지침 참고해서 
-        Windows 환경에서 어디 pong.tscn이 있는지 찾아서 계속 진행해"
-Mickey: [context_rule/project-context.md 확인]
-        "C:\Users\hcsung\work\q\ai-developer-mickey\pong\ 발견"
+❌ "Windows 경로 찾아줘" → 전체 디렉토리 검색 시도 → 실패
+✅ "이전 Mickey 기록 참고해서 Windows 경로 찾아줘"
+   → context_rule/project-context.md에서 즉시 발견
 ```
 
-**교훈**: 기존 지식 활용 유도
+**교훈**: AI에게 "어디를 봐야 하는지" 힌트를 주면 효율적.
 
-### 사례 2: 설정 확인
+### 사례 2: 전제조건 확인 유도
 
-**초기 시도** (불충분):
 ```
-사용자: "테스트해줘"
-Mickey: [테스트 실행] → 실패
-```
-
-**개선된 시도** (성공):
-```
-사용자: "BatchTestRunner 실행하기 위한 설정이 다 되어 있지 않은 것 같아.
-        이전 Mickey에게 들었던 내용 확인해서 수정 필요한 것들 알려줘"
-Mickey: [이전 기록 확인]
-        "ReplayLogger: enable_logging = false 필요
-         BatchTestRunner: auto_start = true 필요"
+❌ "테스트해줘" → 설정 미비로 실패
+✅ "테스트 실행 전에 설정이 다 되어 있는지 이전 기록 확인해줘"
+   → 누락된 설정 2건 발견 후 수정
 ```
 
-**교훈**: 구체적인 문제 상황 설명
+**교훈**: "바로 실행"보다 "확인 후 실행"이 빠르다.
 
 ## 다음 단계
 
-- [지식 관리 시스템](05-knowledge-management.md) - 재사용 가능한 지식 구축
-- [실전 사례](case-study/godot-replay-system.md) - Godot 프로젝트 적용 사례
+- [지식 관리 시스템](05-knowledge-management.md) - 자동 메모리와 교훈 승격
+- [프롬프트 진화](06-prompt-evolution.md) - v2.0 → v7.2 상세 진화 과정
+- [진화 인사이트](08-evolution-insight.md) - "AI를 잘 쓰는 법"이 어떻게 진화해 왔는가

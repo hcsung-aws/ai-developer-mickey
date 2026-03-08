@@ -21,10 +21,15 @@ Documentation + Agent Configuration (Markdown, JSON, Python)
 
 ## Key Paths
 - CLI 에이전트: examples/ai-developer-mickey.json
+- 글로벌 가이드: mickey/extended-protocols.md (install.sh → ~/.kiro/mickey/)
 - Power Mickey: power-mickey/
 - Windows Power 테스트: /mnt/c/Users/hcsung/work/q/power-mickey/
 - 문서: docs/
 - 세션 예시: sessions/
+- 설치 스크립트: install.sh
+
+## Dependencies
+- Kiro CLI (https://github.com/aws/kiro-cli)
 
 ## Last Updated
-2026-02-19
+2026-03-09

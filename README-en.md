@@ -32,7 +32,9 @@ The Mickey prompt continues to evolve through real projects:
 | **v5.0** | Packet Capture Agent | Mickey 1-12 | Purpose-first, checklists, automation |
 | **v6.1** | Mickey Self-Improvement | Mickey 13 | T3 layering, INDEX map pattern, Power steering evolution |
 | **v6.2** | Mickey Self-Improvement | Mickey 14 | PURPOSE-SCENARIO based purpose management system |
-| **v6.3** | Mickey Self-Improvement | Mickey 4 (planning) | Auto Memory pattern adoption (implemented) |
+| **v6.3** | Mickey Self-Improvement | Mickey 4 | Auto Memory pattern (auto_notes/ + knowledge promotion) |
+| **v7** | Mickey Self-Improvement | Mickey 7-8 | Autonomous execution + Subagent + Brownfield onboarding |
+| **v7.2** | Mickey Self-Improvement | Mickey 9 | 🆕 Adaptive Rules (self-improvement) + Autonomy Preference |
 
 > 💡 **Key Insight**: AI prompts should not be "write once and done" but **continuously evolved through failure experiences**. See [Prompt Evolution Guide](docs/06-prompt-evolution-en.md) for details.
 
@@ -86,14 +88,20 @@ Through this project, you will learn:
 
 ## 🚀 Quick Start
 
-### Mickey Agent Setup
+### 1. Installation
 
 ```bash
-# After installing Kiro CLI
-cp examples/ai-developer-mickey.json ~/.kiro/agents/
+# After installing Kiro CLI (https://github.com/aws/kiro-cli)
+git clone https://github.com/hcsung-aws/ai-developer-mickey.git
+cd ai-developer-mickey
+./install.sh
 ```
 
-### Running Mickey in a Project
+What `install.sh` does:
+- Agent JSON → `~/.kiro/agents/`
+- Global guide → `~/.kiro/mickey/`
+
+### 2. Running Mickey in a Project
 
 ```bash
 kiro chat --agent ai-developer-mickey

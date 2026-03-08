@@ -2,356 +2,285 @@
 
 > [한국어 버전](03-session-continuity.md)
 
-## Problem Definition
+## The Problem
 
-One of the biggest challenges when using generative AI assistants is **maintaining consistency across sessions**.
-
-### Typical Scenario
+AI assistants forget everything when a session ends. Conversations are volatile, but files persist.
 
 ```
 [Session 1 - Morning]
-User: "Add a logging system to Godot engine"
-AI: Analysis → Design → Start implementation
-→ Context 70% reached, lunch time
+User: "Add a logging system"
+AI: Analyze → Design → Start implementation → Context 70%
 
 [Session 2 - Afternoon]
-User: "Continue from where we left off"
+User: "Continue where we left off"
 AI: "What should I continue?"
 → No previous context, need to explain from scratch
 ```
 
-## Mickey's Solution
+Mickey solves this with a **file-based session protocol**.
 
-### 1. Session Log
+## Session Protocol
 
-Each Mickey leaves a detailed log at the end of the session.
+### Why
 
-#### Session Log Structure
+Session continuity isn't just "remembering previous work." It's about **maintaining purpose, accumulating lessons, and enabling the next session to start working immediately**. Without a protocol, every session starts from zero.
+
+### What
+
+Mickey's sessions follow a 4-stage lifecycle:
+
+| Stage | When | Key Actions |
+|-------|------|-------------|
+| **First Session** | Mickey 1 | Environment scan → Confirm purpose → Generate initial documents |
+| **Continuing Session** | Mickey N+1 | Load context → Reconfirm purpose → Create session log |
+| **During Session** | Working | Trigger-based log updates + purpose alignment checks |
+| **Session End** | Cleanup | Review auto records → Promote lessons → Generate handoff |
+
+### How
+
+#### First Session (Mickey 1)
+
+When starting in a project with no Mickey files:
+
+```
+1. Environment scan (OS, directory, git)
+2. "When this project is complete, how will it be used?" → Confirm purpose + scenarios
+3. Confirm autonomy level (Conservative / Balanced / Autonomous)
+4. Project analysis → Generate initial documents
+5. Start work after user confirmation
+```
+
+Generated documents: PURPOSE-SCENARIO.md, PROJECT-OVERVIEW.md, ENVIRONMENT.md, FILE-STRUCTURE.md, DECISIONS.md, MICKEY-1-SESSION.md
+
+#### Continuing Session (Mickey N+1)
+
+When continuing in a project with existing Mickey files:
+
+```
+1. Context loading (by priority):
+   PURPOSE-SCENARIO.md ← Top priority
+   → Latest HANDOFF.md
+   → Latest SESSION.md
+   → PROJECT-OVERVIEW.md
+   → context_rule/project-context.md
+   → adaptive.md
+   → INDEX files (knowledge maps)
+
+2. Reconfirm purpose + entropy check
+3. Create MICKEY-(N+1)-SESSION.md
+4. Summarize previous session + start work
+```
+
+#### During Session
+
+Session logs are updated **per work unit**, not all at once at session end:
+
+| Trigger | Action |
+|---------|--------|
+| TODO item completed | Update session log Progress |
+| Error investigation→fix→verification complete | Record in Lessons Learned |
+| Decision confirmed with user | Record in Key Decisions |
+| 3+ files modified | Update Files Modified |
+| context_rule/ or common_knowledge/ changed | Update session log + INDEX |
+
+#### Session End
+
+```
+1. Final session log review (minimal work since triggers keep it current)
+2. Present auto_notes/ + adaptive.md changes in batch → User review
+3. Lesson promotion review → Apply after user confirmation
+4. Generate lightweight HANDOFF (internal document for next Mickey)
+```
+
+## PURPOSE-SCENARIO: Purpose Management
+
+### Why
+
+AI works hard on given tasks but doesn't judge whether they're **optimal for the original purpose**. The deeper it gets into work, the easier it is to lose the big picture. If "purpose" is just a checklist item, it gets formally checked and skipped.
+
+### What
+
+`PURPOSE-SCENARIO.md` manages the project's **ultimate purpose and usage scenarios** as an independent document:
+
+```markdown
+# PURPOSE-SCENARIO
+
+## Ultimate Purpose
+A practical guide for naturally learning how to use AI well
+
+## Usage Scenarios
+1. Developer applies Mickey to their project → incremental improvement
+2. Addressing issues during infra operations with Mickey → cross-session memory
+3. Improving Mickey itself → agent system evolution
+
+## Acceptance Criteria
+...
+
+## Last Confirmed
+2026-03-01 (Mickey 5)
+```
+
+### How
+
+- Loaded as **top priority** at session start (T2 highest)
+- Alert user when these situations occur during work:
+  - Implementation direction conflicts with usage scenarios
+  - Feature expansion reveals different direction from original purpose
+  - Technical constraints require changing approach to achieve purpose
+- Track last confirmation with `Last Confirmed` field
+
+## Session Logs and Handoffs
+
+### Why
+
+Session logs (SESSION.md) are **detailed records of the current session**, while handoffs (HANDOFF.md) are **summary transfers for the next session**. Separating them lets the next Mickey read only the HANDOFF and start immediately, referencing SESSION if needed.
+
+### Session Log (MICKEY-N-SESSION.md)
 
 ```markdown
 # Mickey N Session Log
-Date: 2025-11-29T01:07:41+09:00
 
 ## Session Goal
-Clear goal of this session
+Clear goal for this session
 
-## Previous Context (Mickey N-1)
-- Work completed in previous session
-- Important decisions
-- Incomplete tasks
+## Previous Context
+Completed work from previous session, important decisions
 
 ## Current Tasks
-1. [ ] Task 1
-2. [x] Task 2 (completed)
-3. [ ] Task 3 (in progress)
+- [ ] Task 1 | CC: Specify completion criteria
+- [x] Task 2 | CC: Specify completion criteria
 
 ## Progress
-### Completed Tasks
-- ✅ Feature A implemented
-- ✅ Test B written
-
+### Completed
+1. Implemented feature A
 ### In Progress
-- 🔄 Feature C debugging (80% complete)
-
-### Pending
-- ⏳ Documentation
+2. Debugging feature B (80%)
 
 ## Key Decisions
-### Decision 1: Approach Selection
-- Option A: C++ engine modification
-- Option B: GDScript plugin
-- **Selected**: Option B (Reason: Simple and sufficient)
-
-### Decision 2: Log Format
-- **Selected**: JSON Lines
-- **Reason**: Easy frame-by-frame parsing
-
-## Problems Encountered
-### Problem 1: Delta Mismatch
-- **Symptom**: Editor ≠ Headless results
-- **Cause**: Delta value difference
-- **Solution**: Use delta from log
-
-## Lessons Learned
-1. Tolerance adjustment is a temporary fix
-2. Finding root cause is important
-3. Environment differences suspect Delta
+- GDScript > C++: 19x efficiency difference
 
 ## Files Modified
-- `godot-demo-projects/2d/pong/replay_logger.gd` (new)
-- `godot-demo-projects/2d/pong/replay_controller.gd` (new)
-- `godot-demo-projects/2d/pong/logic/ball.gd` (modified)
+- replay_logger.gd (new)
+
+## Lessons Learned
+- Delta synchronization is the fundamental fix
+
+## Context Window Status
+65% — Safe range
 
 ## Next Steps
-1. Implement replay validation system
-2. Build batch testing infrastructure
-3. CI/CD integration
-
-## Context Window
-- Current: 65% (130,000 / 200,000 tokens)
-- Status: Safe to continue
+- Implement replay verification system
 ```
 
-### 2. Session Start Protocol
+Key: Each task specifies **Completion Criteria (CC)** to clarify what "done" means.
 
-Procedure followed when a new Mickey starts:
-
-#### Step 1: Check Previous Session Log
-
-```
-Mickey 2 starts:
-1. Scan directory
-2. Find MICKEY-1-SESSION.md
-3. Read log
-4. Restore context
-```
-
-#### Step 2: State Declaration
-
-```
-"Starting as Mickey 2."
-"Previous session (Mickey 1) completed:"
-- Godot engine analysis
-- Pong game logging system added
-- Replay feature designed
-
-"This session will implement the replay validation system."
-```
-
-#### Step 3: Continue Work
-
-```
-- Reference previous decisions
-- Prioritize incomplete tasks
-- Start new tasks
-```
-
-### 3. Real Transition Case
-
-#### Mickey 1 → Mickey 2
-
-**Mickey 1's final work**:
-```
-Context Window Usage: 61%
-
-> Completed! Fully verified that AI can follow player actions 
-> using engine logs.
-
-[Save session log]
-- Engine analysis complete
-- Logging system design complete
-- Next: Implement automated test scripts
-```
-
-**Context Overflow occurs**:
-```
-The context window has overflowed, summarizing the history...
-✔ Conversation history has been compacted successfully!
-```
-
-**Mickey 2 starts**:
-```
-> Will review previous session and start automated test script design.
-
-Reading: /home/hcsung/ai-develop-by-mickey/session_log.txt
-Reading: /home/hcsung/ai-develop-by-mickey/godot-analysis/...
-
-> Reviewed previous session. Starting as Mickey 2.
-
-## Automated Test Script Design Summary
-
-Based on what was built in the previous session, will design 
-learning data collection + automated test system.
-```
-
-**Key**: Restore information lost in Compact from session log!
-
-## Core Principles of Session Continuity
-
-### 1. Clear State Transfer
-
-#### Bad Example
-```markdown
-## Progress
-Did a lot of work today. Modified several files...
-```
-
-#### Good Example
-```markdown
-## Progress
-- [x] replay_logger.gd implemented (frame-by-frame state recording)
-- [x] replay_controller.gd implemented (playback control)
-- [ ] state_validator.gd in progress (50% complete)
-```
-
-### 2. Document Decisions
-
-Record all important decisions **with reasons**:
+### Handoff (MICKEY-N-HANDOFF.md)
 
 ```markdown
-## Key Decisions
+# Mickey N Handoff
 
-### GDScript vs C++ Engine Modification
-**Selected**: GDScript
-**Reasons**: 
-- C++: 19x workload, requires engine build
-- GDScript: Simple, sufficient functionality
-- Easy maintenance
+## Current Status
+Replay system implementation complete. Verification system not started.
 
-### Log Format: JSON vs Binary
-**Selected**: JSON Lines
-**Reasons**:
-- Human readable
-- Easy frame-by-frame parsing
-- Convenient debugging
-```
-
-### 3. Share Failure Experiences
-
-Failures are also important learning materials:
-
-```markdown
-## Problems Encountered
-
-### Attempt 1: Increase Tolerance
-- **Approach**: TOLERANCE = 250.0
-- **Result**: Failed (root cause unresolved)
-- **Lesson**: Temporary fixes only hide problems
-
-### Attempt 2: Delta Synchronization
-- **Approach**: Use delta from log
-- **Result**: Success (99.88% → 100%)
-- **Lesson**: Root cause resolution is important
-```
-
-### 4. Specify Next Steps
-
-Clear guide for next Mickey:
-
-```markdown
 ## Next Steps
+Implement state_validator.gd → Build batch test infrastructure
 
-### Priority 1: Batch Testing Infrastructure
-- [ ] Implement BatchTestRunner.gd
-- [ ] Sequential execution of multiple log files
-- [ ] Game state reset mechanism
+## Important Context
+Only things NOT in SESSION.md/auto_notes
 
-### Priority 2: CI/CD Integration
-- [ ] GitHub Actions workflow
-- [ ] Headless mode testing
-- [ ] Automatic report generation
-
-### Priority 3: Documentation
-- [ ] Write user guide
-- [ ] Generate API documentation
+## Quick Reference
+- Session log: MICKEY-N-SESSION.md
+- Context window: 65%
 ```
 
-## Session Transition Checklist
+Handoffs are **generated automatically without user confirmation** — they're internal documents for the next Mickey.
 
-### At Session End (Current Mickey)
+## Entropy Management
 
-- [ ] Session log writing complete
-- [ ] All decisions documented
-- [ ] Modified files list recorded
-- [ ] Next steps specified
-- [ ] Context window usage recorded
-- [ ] Files saved confirmed
+### Why
 
-### At Session Start (Next Mickey)
+As sessions accumulate, documents grow, INDEX and actual files diverge, old SESSION files pile up, and auto_notes bloat — **entropy increases**. Left unchecked, 3-Tier loading efficiency degrades.
 
-- [ ] Read previous session log
-- [ ] Confirm and increment Mickey number
-- [ ] State declaration ("Starting as Mickey N")
-- [ ] Summarize previous work
-- [ ] Specify current goal
-- [ ] Start work
+### What
 
-## Measurable Effects
+Entropy checks are performed at Continuing Session start:
 
-### Without Session Continuity
+| Check Item | Action |
+|-----------|--------|
+| INDEX consistency | File found not in INDEX → Update INDEX |
+| auto_notes freshness | Old/duplicate notes → Clean up or promote |
+| SESSION archiving | Old SESSION/HANDOFF → Move to `sessions/` folder |
+| File size | T2/T3a files exceeding line limits → Condense/split |
+
+### How
 
 ```
-Session 1: 0% → 60% progress
-Session 2: 0% → 40% progress (20% duplicate)
-Session 3: 0% → 50% progress (30% duplicate)
-→ Total progress: 60% (much duplicate work)
+Session Start
+  ├─ Context loading
+  ├─ Entropy check:
+  │    ├─ Knowledge files not in INDEX? → Update INDEX
+  │    ├─ auto_notes over 50 lines? → Split by category
+  │    ├─ MICKEY-1~N-3 SESSION exists? → Archive to sessions/
+  │    └─ project-context.md Lessons over 5? → Promote to context_rule/
+  └─ Start work
 ```
 
-### With Mickey
+## Practical Examples
 
+### Godot Project: Mickey 1 → Mickey 2 Transition
+
+**Mickey 1 ending**:
 ```
-Mickey 1: 0% → 60% progress
-Mickey 2: 60% → 85% progress (minimal duplication)
-Mickey 3: 85% → 100% progress
-→ Total progress: 100% (efficient)
-```
-
-## Practical Tips
-
-### 1. Write Session Log Immediately
-
-Don't write after work completion, **update during work**:
-
-```
-Work start → Create log (specify goal)
-↓
-Partial completion → Update log (progress)
-↓
-Problem occurs → Update log (record problem)
-↓
-Resolution → Update log (solution method)
-↓
-Session end → Final log review
+Context 61% → Save session log
+Completed: Engine analysis, logging system design
+Next: Implement auto test script
 ```
 
-### 2. Utilize Context Rules
+**Context Overflow occurs** → Compact loses detailed information
 
-Store repeated information in context_rule/:
-
-```markdown
-# context_rule/project-context.md
-
-## File Sync Pattern
-- Edit in WSL: /home/.../pong/
-- Copy to Windows: /mnt/c/.../pong/
-- Godot opens: C:\...\pong\
-
-## Common Commands
-```bash
-# Sync files
-cp /home/.../pong/*.gd /mnt/c/.../pong/
+**Mickey 2 starting**:
 ```
+Read previous SESSION.md → Restore context
+"Starting as Mickey 2. Logging system design was completed in previous session."
+→ Information lost to Compact restored from session log
 ```
 
-### 3. Build Knowledge Base
+**Insight**: "Conversations are volatile, but files persist."
 
-Store reusable knowledge in common_knowledge/:
+### Mickey Self-Improvement: 9 Consecutive Sessions
 
-```markdown
-# common_knowledge/godot/replay-system.md
+The Mickey project itself is a practical example of session continuity:
 
-## Replay System Design
-
-### Core Concepts
-1. Frame-by-frame recording
-2. Delta synchronization
-3. State validation
-
-### Implementation Pattern
-```gdscript
-# Record
-func _process(delta):
-    logger.log_frame(frame, delta, state)
-
-# Replay
-func _process(delta):
-    delta = log.get_delta(frame)  # Use logged delta
-    state = log.get_state(frame)
 ```
+Mickey 1~6: Foundation building (v2→v5)
+  → 14 lessons analyzed, 3 promoted to common_knowledge
+  → SESSION files archived to sessions/self/
+
+Mickey 7~9: v7.2 implementation
+  → Referencing previous lessons for autonomous execution, Backpressure, etc.
+  → Preventing purpose drift with PURPOSE-SCENARIO
 ```
+
+**Insight**: "Knowledge thickens as sessions accumulate. But only with entropy management."
+
+## Best Practices
+
+### DO ✅
+
+1. **Update logs per work unit**: Don't write everything at session end
+2. **Decisions with reasons**: "Chose GDScript" → "Chose GDScript (19x more efficient than C++)"
+3. **Record failures too**: Attempted approaches and failure reasons save time in next sessions
+4. **Regular entropy cleanup**: INDEX consistency, SESSION archiving
+
+### DON'T ❌
+
+1. **Verbose session logs**: Results/decisions/issues only, not essays
+2. **Copy SESSION content to HANDOFF**: HANDOFF is 1-2 line summaries only
+3. **Leave old SESSIONs**: Don't let SESSION files accumulate in root directory
+4. **Skip purpose confirmation**: Don't drift from PURPOSE-SCENARIO while immersed in work
 
 ## Next Steps
 
 - [Prompt Engineering](04-prompt-engineering-en.md) - Effective prompt structuring
-- [Knowledge Management System](05-knowledge-management-en.md) - Building reusable knowledge
-- [Real-World Case Study](case-study/godot-replay-system-en.md) - Godot project application case
+- [Knowledge Management](05-knowledge-management-en.md) - Auto memory and lesson promotion
+- [Prompt Evolution](06-prompt-evolution-en.md) - v2.0 → v7.2 evolution

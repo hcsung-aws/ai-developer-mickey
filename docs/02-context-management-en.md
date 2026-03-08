@@ -4,278 +4,231 @@
 
 ## What is a Context Window?
 
-A context window is the amount of text an AI model can process at once. While Kiro CLI provides a 200,000 token context window, even this can be insufficient for complex projects.
+A context window is the amount of text an AI model can process at once. Kiro CLI provides a 200,000 token context window, but even this can be insufficient for complex projects.
 
-## Problem Scenarios
+## The Problem
 
 ### Typical Failure Scenario
 
 ```
 1. Start analyzing complex codebase
-2. Read multiple files → 50% context used
-3. Additional analysis and code writing → 70% context used
-4. Need more information → 90% context used
+2. Read multiple files → Context 50% used
+3. Additional analysis and coding → Context 70% used
+4. Need more information → Context 90% used
 5. Context overflow → Session summary (Compact)
-6. Loss of important context → Task failure
+6. Important context lost → Work fails
 ```
 
-### Session Restart Without Mickey
+### Restarting Without Mickey
 
 ```
-[Previous Session]
-- Detailed analysis results
-- Design decisions
-- Attempted approaches
-- Reasons for failures
-
-[After Compact]
-- "Analyzing Godot engine"
-- "Need to implement logging system"
-→ Most specific context lost
+[Previous Session]                    [After Compact]
+- Detailed analysis results           - "Analyzing Godot engine"
+- Design decisions                    - "Need to implement logging"
+- Attempted approaches                → Most specific context lost
+- Reasons for failure
 ```
 
-## Mickey's Solution
+Core problem: **"Loading everything into context causes you to miss what actually matters."**
 
-### 1. Knowledge Abstraction
+## Mickey's Solution: 3-Tier Context Loading
 
-**Principle**: Don't put all information in context; selectively load only what's needed
+### Why
 
-#### Hierarchical Document Structure
+Context window is finite. Loading everything at once buries important information and leaves no room for later in the session. **"Give a map, not an encyclopedia"** — load only what's needed, when it's needed.
+
+### What
+
+Information is classified hierarchically by importance and loading timing:
+
+| Tier | Loading Time | Content | Example |
+|------|-------------|---------|---------|
+| **T1** | Always | Core identity, universal principles | System prompt |
+| **T1.5** | Session start | Detailed execution guidelines | `~/.kiro/mickey/extended-protocols.md` |
+| **T2** | Session start | Project core documents | PURPOSE-SCENARIO, HANDOFF, adaptive.md |
+| **T3a** | Session start | Knowledge maps (INDEX) | `common_knowledge/INDEX.md` |
+| **T3b** | Only when needed | Detailed knowledge | Files matched by INDEX triggers |
+
+### How
 
 ```
-common_knowledge/
-├── INDEX.md                    # Top-level index (always load)
-├── godot/
-│   ├── overview.md            # Overview (load as needed)
-│   ├── scene-system.md        # Details (load as needed)
-│   └── collision-system.md    # Details (load as needed)
-└── testing/
-    ├── overview.md
-    └── replay-system.md
+Session Start
+  ├─ T1: System prompt (always loaded)
+  ├─ T1.5: ~/.kiro/mickey/ (loaded if exists)
+  ├─ T2: PURPOSE-SCENARIO → HANDOFF → PROJECT-OVERVIEW → adaptive.md
+  ├─ T3a: Load INDEX files (knowledge maps only)
+  │
+  └─ During work...
+       └─ "error fix" keyword occurs → INDEX trigger match
+            └─ T3b: Load auto_notes/error-fixes.md (that file only)
 ```
 
-#### INDEX.md Example
+**Key**: T3a (INDEX) is a map that only tells you "what knowledge exists." Actual detailed content (T3b) is loaded only when needed during work.
+
+## INDEX Pattern: Trigger-Based Knowledge Maps
+
+### Why
+
+As knowledge files grow, figuring out "what's in which file" itself consumes context. INDEX solves this as a table of contents.
+
+### What
+
+INDEX is a mapping table in **trigger → file → summary** format:
 
 ```markdown
-# Knowledge Index
+# Common Knowledge INDEX
 
-## Godot Engine
-- [Overview](godot/overview.md) - Engine structure overview
-- [Scene System](godot/scene-system.md) - Scene-node tree structure
-- [Collision System](godot/collision-system.md) - Collision detection system
+## Knowledge Map
 
-## Testing
-- [Overview](testing/overview.md) - Testing strategy
-- [Replay System](testing/replay-system.md) - Replay system design
+| Trigger | File | Summary |
+|---------|------|---------|
+| INDEX design, knowledge map | progressive-disclosure.md | INDEX=TOC pattern principles |
+| agent design, context window | agent-design-patterns.md | Script delegation, event-based triggers |
 ```
 
-**Usage**:
-1. Load only INDEX.md first (small context usage)
-2. Identify needed topics
-3. Selectively load only relevant documents
+### How
 
-### 2. Context Rules
+1. Load only INDEX at session start (dozens of lines)
+2. When keywords/paths match triggers during work, load only that file
+3. Files not in INDEX are not loaded (update INDEX first)
 
-**Principle**: Document repeated failures or impossible tasks to prevent wasting time
+Triggers can be **path patterns** as well as keywords:
+- When modifying `power-mickey/*` files → load `kiro-powers.md`
+- Keywords `error`, `에러` → load `error-fixes.md`
 
-#### context_rule/project-context.md
+Mickey manages 3 INDEXes:
 
+| INDEX | Location | Purpose |
+|-------|----------|---------|
+| `context_rule/INDEX.md` | Project rules | Preventing repeated failures, environment settings, known issues |
+| `common_knowledge/INDEX.md` | Universal patterns | Project-independent reusable patterns |
+| `auto_notes/NOTES.md` | Observation records | Facts automatically recorded by AI |
+
+## Auto Memory: auto_notes + adaptive.md
+
+### Why
+
+"Rules written by users" and "facts observed by AI" have different natures. Separating them allows different trust levels and management approaches for each.
+
+### What
+
+| Store | Nature | Review Timing | Example |
+|-------|--------|--------------|---------|
+| `auto_notes/` | Observed facts (descriptive) | Batch at session end | Build commands, file roles, error fixes |
+| `context_rule/adaptive.md` | AI self-generated rules (adaptive) | Batch at session end | "In this project, run lint before tests" |
+| `context_rule/` | Verified rules (normative) | Immediate user confirmation | Preventing repeated failures, environment constraints |
+| `common_knowledge/` | Universal patterns (normative) | Immediate user confirmation | Architecture patterns, technology comparisons |
+
+### How
+
+**auto_notes/** — Record facts discovered during work immediately (no user confirmation needed):
+```
+auto_notes/
+├── NOTES.md          # Index (loaded at session start as T3a)
+├── commands.md       # Build/test/lint commands
+├── file-roles.md     # File paths and roles
+└── error-fixes.md    # Verified error fixes
+```
+
+**adaptive.md** — Behavioral rules Mickey learns on its own:
 ```markdown
-# Project Context
-
-## Environment
-- OS: Windows + WSL
-- Godot: Running on Windows
-- Development: WSL
-- File Sync: WSL → Windows required
-
-## Known Issues
-- ❌ C++ engine modification: 19x workload, minimal benefit
-- ✅ GDScript approach: Simple and sufficient
-
-## File Locations
-- Windows Project: C:\Users\...\pong\
-- WSL Project: /home/.../godot-demo-projects/2d/pong/
-- Logs: C:\Users\...\AppData\Roaming\Godot\...
+# Adaptive Rules
+- When modifying README in this project, update both Korean/English simultaneously
+- When changing install.sh, verify 3-way sync (agent JSON, repo, ~/.kiro/)
 ```
 
-**Benefits**:
-- Prevent repeating already-tried approaches
-- Quick reference for environment settings
-- Clear awareness of known constraints
+At session end, changes to auto_notes and adaptive.md are presented in batch for user review/edit/delete.
 
-### 3. Session Log Compression
-
-**Principle**: Record only essential information concisely in session logs
-
-#### Bad Example (Verbose)
-
-```markdown
-## Progress
-Starting today's work, I first analyzed the Godot engine structure.
-The engine was very complex and required reading many files.
-Initially tried C++ approach but it was too complex...
-(continues for 500 words)
+**Lesson promotion path**: Recurring patterns are promoted to higher tiers:
+```
+auto_notes → context_rule → common_knowledge → system prompt (REMEMBER)
 ```
 
-#### Good Example (Concise)
+## File Size Limits
 
-```markdown
-## Progress
-- [x] Godot engine structure analysis complete
-- [x] C++ approach reviewed → GDScript selected (19x efficiency)
-- [x] Pong game logging system added
-- [ ] Replay system implementation in progress
+### Why
 
-## Key Decisions
-- GDScript > C++: Simple and sufficient
-- Log format: JSON Lines (frame-by-frame state)
+If files loaded at session start become bloated, 3-Tier loses its meaning. Size guards on each file maintain context efficiency.
+
+### Limits
+
+| File | Line Limit | Item Limit |
+|------|-----------|------------|
+| T2 files (each) | 50 lines | Max 5 items per key section |
+| project-context.md | 80 lines | Lessons Learned max 5 |
+| T3a indexes (each) | 50 lines | — |
+| auto_notes/NOTES.md | 50 lines | — |
+
+### When Exceeded
+
+- Condense, promote/remove old items, split detailed content
+- Lessons Learned over 5 → promote old ones to `context_rule/`
+- Similar INDEX triggers → merge
+- Check line count on file modification → clean up immediately when approaching limit
+
+## Context Window Monitoring
+
+Mickey adjusts behavior based on context window usage:
+
+| Usage | Action |
+|-------|--------|
+| **50%** | Suggest session log cleanup (summarize completed work, remove trial-and-error) |
+| **70%** | Recommend new session after current task, prepare handoff |
+| **90%** | Immediate new session, generate handoff |
+
+### Without Mickey vs With Mickey
+
+```
+[Without Mickey]                      [With Mickey]
+Session 1: 100% → Compact → Info lost  Mickey 1: 70% → Save session log
+Session 2: Start from scratch           Mickey 2: Continue previous work → 50%
+Session 3: Compact again...              Mickey 3: Additional work → 65%
+→ Repeated work, slow progress           → Cumulative learning, fast progress
 ```
 
-### 4. Context Window Monitoring
+## Practical Examples
 
-Mickey always tracks context window usage:
+### Godot Engine Analysis (13,666 files)
 
-```
-Context Window Usage: 52% (104,000 / 200,000 tokens)
-→ Safe range
+**Problem**: Can't fit a massive codebase into context
 
-Context Window Usage: 70% (140,000 / 200,000 tokens)
-→ Cleanup recommended
+**Solution** (3-Tier applied):
+1. Grasp overview → write `common_knowledge/godot/overview.md` (Context 5%)
+2. Register triggers in INDEX → selectively load only needed topics (2-3% each)
+3. Complete work without loading the entire engine into context
 
-Context Window Usage: 85% (170,000 / 200,000 tokens)
-→ Session restart required
-```
+**Insight**: "You don't need to know everything. You just need to know where everything is."
 
-**Thresholds**:
-- **< 70%**: Normal operation
-- **70-85%**: Start cleanup (remove unnecessary information)
-- **> 85%**: Save session log and restart
+### Mickey Self-Improvement (v2 → v7.2)
 
-## Real-World Application
-
-### Godot Engine Analysis
-
-**Problem**: Godot engine is a massive codebase with 13,666 files
+**Problem**: As prompts grew complex, loading volume at session start increased
 
 **Solution**:
+- v6.0: Remove domain-specific content, introduce 3-Tier → lightweight system prompt
+- v6.1: INDEX map pattern → selective T3b loading
+- v6.3: Separate auto_notes → separate observed facts from rules
+- v7.2: adaptive.md → separate AI self-learning rules
 
-1. **Step 1: Understand Overview**
-   ```
-   - Read README.md
-   - Understand directory structure
-   - Identify core modules
-   → Context usage: 5%
-   ```
-
-2. **Step 2: Structure Knowledge**
-   ```
-   - Write common_knowledge/godot/overview.md
-   - Extract only core concepts (scene, node, signal)
-   - Separate detailed content into separate documents
-   → Context usage: additional 3%
-   ```
-
-3. **Step 3: Load Details as Needed**
-   ```
-   - Need collision system → load collision-system.md
-   - Need input system → load input-system.md
-   → Context usage: 2-3% each
-   ```
-
-**Result**: Completed necessary work without putting entire engine in context
-
-### Replay System Development
-
-**Problem**: Complex design decisions and multiple attempts required
-
-**Solution**:
-
-1. **Record Design Decisions**
-   ```markdown
-   ## Key Decisions (Mickey 3)
-   - Input Replay vs State Replay
-     → State Replay selected (100% accuracy)
-   - Delta synchronization required
-     → Use delta from log
-   ```
-
-2. **Share Failure Experiences**
-   ```markdown
-   ## Lessons Learned (Mickey 4)
-   - ❌ Tolerance adjustment: Temporary fix, not root solution
-   - ✅ Delta synchronization: Root cause resolution
-   - ✅ Direction log usage: Collision error resolution
-   ```
-
-3. **Next Mickey Utilization**
-   ```
-   When Mickey 5 starts:
-   - Reference previous decisions
-   - Avoid failed approaches
-   - Apply verified methods
-   ```
+**Insight**: "Classifying information matters more than adding information."
 
 ## Best Practices
 
 ### DO ✅
 
-1. **Use Hierarchical Document Structure**
-   - Overview → Details order
-   - Load only what's needed
-
-2. **Concise Session Logs**
-   - Record only essential information
-   - Use bullet points
-
-3. **Utilize Context Rules**
-   - Document repeated failures
-   - Specify environment information
-
-4. **Regular Monitoring**
-   - Track context usage
-   - Cleanup when reaching 70%
+1. **Hierarchical loading**: INDEX first, details only when needed
+2. **Concise records**: Key information only, use bullet points
+3. **Respect size guards**: Check line count when modifying files
+4. **Regular cleanup**: Clean session logs when reaching 50%
 
 ### DON'T ❌
 
-1. **Load All Files at Once**
-   - Wastes context
-   - Excessive unnecessary information
-
-2. **Verbose Explanations**
-   - Write essays in session logs
-   - Repeat duplicate information
-
-3. **Ignore Context**
-   - Work beyond 90%
-   - Restart after Compact (information loss)
-
-4. **Save Without Structure**
-   - Put all information in one file
-   - Unsearchable format
-
-## Measurable Effects
-
-### Without Mickey
-
-```
-Session 1: Context 100% → Compact → Information loss
-Session 2: Start from scratch
-Session 3: Compact again...
-→ Progress speed: Slow, many repeated tasks
-```
-
-### With Mickey
-
-```
-Mickey 1: Context 70% → Save session log
-Mickey 2: Continue previous work → Context 50%
-Mickey 3: Additional work → Context 65%
-→ Progress speed: Fast, cumulative learning
-```
+1. **Load all files at once**: Wastes context, buries important info
+2. **Verbose session logs**: Results/decisions/issues only, not essays
+3. **Work past 90%**: Risk of information loss after Compact
+4. **Add knowledge files without INDEX**: Creates orphan files that never get loaded
 
 ## Next Steps
 
-- [Session Continuity](03-session-continuity-en.md) - Methods to maintain consistency across sessions
-- [Knowledge Management System](05-knowledge-management-en.md) - Building reusable knowledge
-- [Real-World Case Study](case-study/godot-replay-system-en.md) - Actual application case
+- [Session Continuity](03-session-continuity-en.md) - Session protocol and purpose management
+- [Knowledge Management](05-knowledge-management-en.md) - Auto memory and lesson promotion
+- [Case Study](case-study/godot-replay-system.md) - Godot replay system case study

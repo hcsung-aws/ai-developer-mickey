@@ -2,234 +2,204 @@
 
 > [한국어 버전](04-prompt-engineering.md)
 
-## Mickey Prompt Evolution
+## Why Prompts Matter
 
-Mickey's system prompt has continuously improved through iterations.
+A system prompt is the **behavioral rulebook** for an AI agent. A well-structured prompt makes AI behave consistently; a poor one produces different results every session.
 
-### Initial Version (Mickey 1)
+Mickey's prompt isn't "write once and done" — it has **continuously evolved through failure experiences**.
 
-```
-An agent that saves success and failure records from each session to files 
-for reference in subsequent sessions, solving problems through continuous improvement
-```
+## System Prompt Evolution
 
-**Characteristics**: Simple and contains only the core
-
-### Improved Version (After Mickey 3)
-
-Added **knowledge management** section after experiencing context window limitations during Godot engine analysis:
+### Early (v1~v2): Core Idea Only
 
 ```
-KNOWLEDGE MANAGEMENT:
-- Store reusable knowledge for future Mickey sessions in ./common_knowledge/ directory
-- Structure information in semantic units that minimize context window usage when loaded
-- Add cross-references between documents
+An agent that saves success and failure records from each session to files,
+carries them forward to subsequent sessions, and solves problems through continuous improvement
 ```
 
-**Reason for addition**: Need for efficient information structuring when analyzing massive codebases
+Simple, but the core was there: **file-based memory + continuous improvement**.
 
-### Final Version (Current)
+### Growth (v3~v5): Specific Action Guidelines Added
+
+Gaps became apparent through the Godot project:
+
+| Problem | Added Guideline |
+|---------|----------------|
+| Knowledge scattered in context | KNOWLEDGE MANAGEMENT section |
+| Repeating same mistakes | CONTEXT RULES section |
+| Working without purpose | REMEMBER: Purpose first |
+| Starting implementation without analysis | PROBLEM-SOLVING PROTOCOL |
+| No context overflow response | Context Window monitoring |
+
+v5.0 established **checklist-based protocols**.
+
+### Transition (v6.0~v6.3): Lightweight and Automated
+
+Prompts up to v5 had domain-specific content (Godot, packet capture, etc.) mixed in. v6.0 brought fundamental structural change:
+
+| Change | Reason |
+|--------|--------|
+| Remove domain-specific content | Transition to universal agent |
+| Introduce 3-Tier Context Loading | Context window efficiency |
+| INDEX map pattern (v6.1) | Selective knowledge loading |
+| PURPOSE-SCENARIO independent document (v6.2) | Strengthen purpose tracking |
+| auto_notes auto memory (v6.3) | Separate observed facts from rules |
+
+**Insight**: Shifted from "putting everything in the prompt" to "prompt has principles only, details in files."
+
+### Current (v7~v7.2): Autonomy and Self-Improvement
+
+| Change | Reason |
+|--------|--------|
+| Autonomous execution conditions (v7) | Autonomous when CC clear + rollback possible |
+| Backpressure (v7) | No proceeding on verification failure |
+| Adaptive Rules (v7.1) | AI self-learns behavioral rules |
+| Autonomy Preference (v7.2) | Per-user autonomy level selection |
+
+## Prompt Structuring Principles
+
+### Why
+
+As prompts get longer, AI misses important parts. Hierarchical structuring separates "always follow" from "reference when needed."
+
+### What
+
+Mickey v7.2's prompt consists of two layers:
+
+| Layer | Location | Content | Size |
+|-------|----------|---------|------|
+| **T1** | System prompt | Identity, session protocol, REMEMBER | Core only |
+| **T1.5** | `~/.kiro/mickey/` | Detailed execution guidelines (Brownfield, autonomy, Backpressure, etc.) | Extensible |
+
+### How
+
+**What goes in T1 (system prompt)**:
+- Core identity ("You are Mickey")
+- Session protocol (First/Continuing/During/End)
+- Problem-solving protocol
+- 3-Tier loading rules
+- REMEMBER (15 core principles)
+
+**What goes in T1.5 (extended guidelines)**:
+- Brownfield onboarding procedure
+- Autonomy Preference detailed guide
+- Backpressure rules
+- Architectural Guard
+- Adaptive Rules safeguards
+
+**Key**: T1 is "what to do", T1.5 is "how to do it."
+
+### REMEMBER Section
+
+A **core principles list** at the end of the prompt. The top-priority rules AI references during work:
 
 ```
-You are an AI developer agent 'Mickey', that maintains session continuity 
-by saving records to files and carrying them forward to subsequent sessions.
-
-Your primary goal is to solve problems through continuous improvement by:
-1. Saving session records, progress, and learnings to persistent files
-2. Loading and reviewing previous session data at the start of new sessions
-3. Building upon previous work and insights
-4. Tracking problem-solving approaches and their effectiveness
-5. Iteratively improving solutions based on accumulated knowledge
-6. Monitoring context window usage and alerting when a new session is needed
-
-KNOWLEDGE MANAGEMENT:
-- Store reusable knowledge in ./common_knowledge/ directory
-- Structure information in semantic units
-- Add cross-references between documents
-
-CONTEXT RULES:
-- Document repeated failures in ./context_rule/ directory
-- Store as actionable guidelines
-- Organize by semantic meaning
-
-IMPORTANT: If context window lacks sufficient space, inform the user 
-to restart the session. Save all progress before recommending restart.
+1. Purpose first: PURPOSE-SCENARIO.md is the top priority for all decisions
+2. Simplicity first: Simple alternatives before complex solutions
+3. Session log FIRST, then work
+4. Analysis BEFORE implementation
+5. Check error logs immediately (no guessing)
+...
 ```
 
-## Core Prompt Principles
+Each item notes **which session it was learned from** (e.g., "Mickey 10"). This enables tracing the origin of principles.
 
-### 1. Clear Role Definition
+### Document Schema
 
-```
-You are an AI developer agent 'Mickey'
-```
-
-**Why important**: AI needs to clearly understand its role for consistent behavior
-
-### 2. Specific Action Guidelines
+Defines **required sections** for documents Mickey generates:
 
 ```
-1. Saving session records...
-2. Loading and reviewing...
-3. Building upon...
+| Document | Required Sections |
+| SESSION.md | Goal, Tasks(+CC), Progress, Decisions, Files, Lessons, Next |
+| HANDOFF.md | Status(1-2 lines), Next(1-2 lines), Important Context, Quick Reference |
+| PURPOSE-SCENARIO.md | Purpose, Scenarios, Acceptance Criteria, Last Confirmed |
 ```
 
-**Why important**: Specific actions are more executable than abstract goals
-
-### 3. Explicit Constraints
-
-```
-IMPORTANT: If context window lacks sufficient space, inform the user...
-```
-
-**Why important**: Need behavior rules for problem situations
+Defining schemas prevents AI from creating documents in different formats each time.
 
 ## Effective User Prompts
 
+**User instructions** matter as much as system prompts.
+
 ### DO ✅
 
-#### 1. Provide Context
-
-**Bad Example**:
+**1. Provide context**
 ```
-"Fix the error"
-```
-
-**Good Example**:
-```
-"In the Godot Pong game's replay system, Ball position validation 
-shows velocity diff=209.45 error at Frame 139. 
-Previous Mickey 4 solved position errors with Delta synchronization, 
-and velocity errors might have similar causes. Please analyze."
+❌ "Fix the error"
+✅ "In the replay system, velocity diff=209.45 error at Frame 139.
+    Previous Mickey fixed position errors with Delta sync,
+    velocity might have similar cause. Analyze please."
 ```
 
-#### 2. Request Step-by-Step Confirmation
-
-**Bad Example**:
+**2. Request step-by-step confirmation**
 ```
-"Implement everything"
-```
-
-**Good Example**:
-```
-"First analyze the current implementation, identify problems, 
-then propose solutions. I'll confirm at each step."
+❌ "Implement everything"
+✅ "First analyze current implementation, identify issues,
+    then suggest solutions. I'll confirm at each step."
 ```
 
-#### 3. Reference Previous Work
-
-**Good Example**:
+**3. Guide to reference previous work**
 ```
-"Check what previous Mickey told you and the guidelines"
-"Analyze the existing implementation thoroughly and let me know if there are any issues"
+✅ "Check previous Mickey records and guidelines"
+✅ "Check context_rule for any known issues"
 ```
 
 ### DON'T ❌
 
-#### 1. Vague Instructions
-
 ```
-"Do it well"
-"Figure it out"
-"Make it good"
-```
-
-#### 2. Requests Without Context
-
-```
-"There's an error"
-"It doesn't work"
-"It's weird"
-```
-
-#### 3. Too Many Requests at Once
-
-```
-"Do A and B and C and D and E"
-→ Break into steps
+❌ "Do it well" / "Figure it out"          → Vague instructions
+❌ "Got an error" / "Doesn't work"         → No context
+❌ "Do A and B and C and D and E"          → Too many requests at once
 ```
 
 ## Practical Prompt Patterns
 
-### Pattern 1: Analyze → Propose → Confirm
+### Pattern 1: Analyze → Suggest → Confirm
 
 ```
-User: "Analyze the current implementation thoroughly to check 
-      if there are any issues with things that were working well before"
-
-Mickey: [Performs analysis]
-        "Found the following issues:
-         1. SimpleAI interferes in replay mode
-         2. Solution: Add replay_mode check
-         Should I proceed with the fix?"
-
-User: "Yes, please fix it"
+User: "Analyze current implementation for any issues"
+Mickey: [Analyze] → "Found 2 issues. Shall I fix them?"
+User: "Yes, fix them"
 ```
 
-### Pattern 2: Provide Context → Request Task
+### Pattern 2: Context + Constraints → Work Request
 
 ```
-User: "We're currently in Phase 3-1. 
-      Both Left and Right paddles need to be controlled by AI,
-      and we need to create various scenarios (good tracking, missing goals).
-      Please synthesize the current implementation with my requirements 
-      and make a proposal"
-
-Mickey: [Analyzes and proposes]
+User: "Working on Phase 3-1. Both paddles AI-controlled,
+       need various scenarios. Suggest based on current implementation and requirements"
 ```
 
-### Pattern 3: Problem Situation → Reference Previous Solutions
+### Pattern 3: Problem + Reference Previous Solutions
 
 ```
-User: "Could 'Total frames played: 0' be caused by the value 
-      being reset to 0 during initialization? 
-      Analyze the existing implementation and let me know"
-
-Mickey: [Analyzes code]
-        "ReplayInput.disable_replay() resets _current_frame = 0. 
-         This is normal behavior."
+User: "Could Total frames played: 0 be an initialization issue?
+       Analyze existing implementation"
 ```
 
 ## Prompt Improvement Cases
 
-### Case 1: Finding File Paths
+### Case 1: Leveraging Existing Knowledge
 
-**Initial Attempt** (Failed):
 ```
-User: "Find the Windows path"
-Mickey: [Attempts full directory search] → Cancelled
-```
-
-**Improved Attempt** (Success):
-```
-User: "Refer to previous Mickey's records or guidelines to find 
-      where pong.tscn is in the Windows environment and continue"
-Mickey: [Checks context_rule/project-context.md]
-        "Found C:\Users\hcsung\work\q\ai-developer-mickey\pong\"
+❌ "Find the Windows path" → Full directory search attempt → Failed
+✅ "Check previous Mickey records to find the Windows path"
+   → Found immediately in context_rule/project-context.md
 ```
 
-**Lesson**: Encourage use of existing knowledge
+**Lesson**: Giving AI hints about "where to look" is efficient.
 
-### Case 2: Configuration Check
+### Case 2: Verifying Prerequisites
 
-**Initial Attempt** (Insufficient):
 ```
-User: "Test it"
-Mickey: [Runs test] → Fails
-```
-
-**Improved Attempt** (Success):
-```
-User: "It seems the configuration for running BatchTestRunner isn't complete.
-      Check what previous Mickey told you and let me know what needs fixing"
-Mickey: [Checks previous records]
-        "ReplayLogger: enable_logging = false needed
-         BatchTestRunner: auto_start = true needed"
+❌ "Run the test" → Failed due to incomplete setup
+✅ "Check previous records to verify all settings are in place before running tests"
+   → Found 2 missing settings, fixed them
 ```
 
-**Lesson**: Explain specific problem situation
+**Lesson**: "Verify then execute" is faster than "execute immediately."
 
 ## Next Steps
 
-- [Knowledge Management System](05-knowledge-management-en.md) - Building reusable knowledge
-- [Real-World Case Study](case-study/godot-replay-system-en.md) - Godot project application case
+- [Knowledge Management](05-knowledge-management-en.md) - Auto memory and lesson promotion
+- [Prompt Evolution](06-prompt-evolution-en.md) - v2.0 → v7.2 detailed evolution
+- [Evolution Insights](08-evolution-insight-en.md) - How "using AI well" has evolved

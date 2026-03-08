@@ -15,6 +15,115 @@
 | v6.0 | 2026-02 | 프롬프트 경량화 | 도메인 특화 제거, 스키마 전환, 3-Tier 로딩 |
 | v6.1 | 2026-02 | Mickey 자기 개선 | T3 계층화 - INDEX 지도 패턴, Power steering 진화 |
 | v6.2 | 2026-02 | Mickey 자기 개선 | PURPOSE-SCENARIO 기반 목적 관리 체계 도입 |
+| v6.3 | 2026-03 | Mickey 자기 개선 | Auto Memory 패턴 (자동 메모리 이원화) |
+| v7 | 2026-03 | Mickey 자기 개선 | 자율 실행 + Subagent 협업 + Brownfield 온보딩 |
+| v7.1 | 2026-03 | Mickey 자기 개선 | Adaptive Rules (자가 개선 sub-prompt) |
+| v7.2 | 2026-03 | Mickey 자기 개선 | Autonomy Preference (사용자별 자율성 수준) |
+
+---
+
+## v7.2 (2026-03-09)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 9)
+
+### 핵심 변화: Autonomy Preference (사용자별 자율성 수준)
+
+사용자마다 원하는 자율성 수준이 다른 문제를 해결. 첫 세션에서 자율성 수준을 확인하고 ENVIRONMENT.md에 기록.
+
+### 주요 변경
+
+1. **3단계 자율성 수준**
+   - Conservative: 모든 파일 변경 전 확인
+   - Balanced (기본): 메모/로그는 자율, 그 외는 확인
+   - Autonomous: CC 명확한 작업은 자율 실행
+
+2. **CLI 연계**: `--trust-tools` 플래그로 자율성 수준에 맞는 도구 자동 승인
+
+3. **T1.5 섹션 4 확장**: 자율성 수준별 상세 가이드
+
+---
+
+## v7.1 (2026-03-09)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 9)
+
+### 핵심 변화: Adaptive Rules (자가 개선 sub-prompt)
+
+프로젝트마다 다른 행동 규칙을 사용자가 일일이 알려줘야 하는 문제를 해결.
+
+### 주요 변경
+
+1. **context_rule/adaptive.md**: AI가 자가 수정 가능한 sub-prompt
+   - 작업 중 패턴 발견 시 스스로 규칙 추가
+   - 세션 종료 시 사용자 일괄 확인
+
+2. **안전장치**: 기존 context_rule/ 파일은 수정 불가, adaptive.md만 자가 수정
+
+3. **승격 경로**: adaptive.md → context_rule/ → common_knowledge/ → REMEMBER
+
+4. **T1.5 섹션 8**: Adaptive Rules 상세 지침
+
+---
+
+## v7 (2026-03-08)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 8-9)
+
+### 핵심 변화: 자율 실행 + Subagent 협업 + Brownfield 온보딩
+
+단일 에이전트의 한계를 극복하기 위한 자율성 확보와 협업 체계 도입.
+
+### 주요 변경
+
+1. **자율 실행 조건**
+   - Completion Criteria 명확 + rollback 가능 + 검증 가능 시 자율 진행
+   - REMEMBER #14로 추가
+
+2. **Backpressure**
+   - 검증 실패 시 다음 단계 진행 금지
+   - 수정 → 재검증 통과 후에만 진행
+   - REMEMBER #15로 추가
+
+3. **Brownfield 온보딩**
+   - 기존 코드베이스 감지 시 자동 분석 절차
+   - T1.5에 상세 온보딩 프로토콜
+
+4. **T1.5 계층 도입**
+   - `~/.kiro/mickey/extended-protocols.md`로 상세 지침 분리
+   - `install.sh`로 배포 자동화
+
+5. **Subagent 협업 가이드**
+   - T1.5에 subagent 위임 지침 추가
+
+---
+
+## v6.3 (2026-03-01)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 5)
+
+### 핵심 변화: Auto Memory 패턴 (자동 메모리 이원화)
+
+"사용자가 작성하는 규칙"과 "AI가 기록하는 관찰 사실"을 분리.
+
+### 주요 변경
+
+1. **auto_notes/ 도입**
+   - AI가 관찰한 사실을 자동 기록 (사용자 확인 불필요)
+   - NOTES.md 인덱스 + 토픽별 파일 (commands.md, file-roles.md 등)
+   - 세션 종료 시 일괄 확인
+
+2. **파일 크기 제한**
+   - T2 파일: 50줄 (project-context만 80줄)
+   - T3a 인덱스: 50줄
+   - 초과 시 축약/승격/분리
+
+3. **작업 단위 트리거**
+   - 세션 로그를 세션 종료 시가 아닌 작업 단위로 업데이트
+   - 5가지 트리거 조건 정의
+
+4. **교훈 승격 경로**
+   - auto_notes → context_rule → common_knowledge → REMEMBER
+   - 승격 기준: 같은 실수 2회 이상, 범용 패턴 발견, 근본 원칙 수준
 
 ---
 

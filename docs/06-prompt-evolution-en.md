@@ -1,359 +1,210 @@
-# Prompt Evolution: v2.0 → v5.0
+# Prompt Evolution: v2.0 → v7.2
 
 > [한국어 버전](06-prompt-evolution.md)
 
-> Lessons from the Second Project: AI Prompts Should Be "Evolved," Not Just "Written"
+> AI prompts aren't "written" — they're "evolved"
 
 ## Overview
 
-This document explains how the Mickey prompt evolved from the first project (Godot Replay System, v2.0) through the second project (Packet Capture Agent, v5.0), and **why it had to evolve that way**.
+This document explains how Mickey's prompt evolved through real projects, and **why it had to evolve that way**.
 
-**Key Message**: The driving force behind prompt evolution is **failure experience**.
+**Core message**: The driving force of prompt evolution is **failure experience**.
 
-## Evolution Summary
+## Evolution Flow
+
+```
+v2.0 (Foundation) → v5.0 (Specificity) → v6.0 (Lightweight) → v7.2 (Autonomy)
+  File-based          Checklists           3-Tier separation    Self-improvement
+  memory              Protocols            INDEX pattern         Autonomous execution
+```
+
+---
+
+## Phase 1: v2.0 → v5.0 (Foundation → Specificity)
+
+### Evolution Summary
 
 | Area | v2.0 | v5.0 | Reason for Change |
 |------|------|------|-------------------|
-| REMEMBER Principles | 6 | 18 | New failure patterns discovered |
-| Checklists | None | 7 | General guidelines couldn't prevent specific mistakes |
-| Automation | None | Session end protocol | Repetitive instructions inefficient |
-| Purpose Check | None | Required | Lost sight of purpose, focused on means |
+| REMEMBER principles | 6 | 18 | New failure patterns discovered |
+| Checklists | None | 7 | General guidelines can't prevent specific mistakes |
+| Automation | None | Session end protocol | Repeated instructions inefficient |
+| Purpose check | None | Required | Lost purpose while focused on means |
 
----
+### 1. "Record" → "Confirm Purpose First"
 
-## 1. "Record It" → "Check Purpose First"
-
-### v2.0 Approach
-
-```
-Focus on writing session logs
-→ Record what was done
-→ Continue in next session
-```
-
-### Added in v5.0
-
-```markdown
-## Question at Session Start
-
-"What is the **ultimate purpose** of today's work?"
-
-→ After clarifying purpose, suggest the most **simple and direct** method first
-```
-
-### Why Did It Have to Change?
-
-**Mickey 7's Failure:**
+**Mickey 7's failure:**
 - Purpose: Packet capture testing
-- Attempt: Set up Forgotten Server (open-source game server)
-- Result: 3 days spent (vcpkg bugs, protocol versions, port issues...)
-- Pivot: Built own simulator → Completed in 1.5 days
+- Attempt: Set up Forgotten Server (open-source game server) → 3 days spent
+- Pivot: Build custom simulator → 1.5 days to completion
 
-**Lesson:**
-> AI works hard on given tasks but doesn't judge if it's optimal for the purpose.
-
-### What AI Users Can Learn
-
-**Bad Example:**
-```
-"Set up Forgotten Server for me"
-```
-
-**Good Example:**
-```
-"I want to test packet capture.
-Analyze whether Forgotten Server is the best option or if there's a simpler way first"
-```
-
----
-
-## 2. "Analyze" → "Follow Checklists"
-
-### v2.0 Approach
-
-```markdown
-### Before ANY Implementation:
-
-1. Analyze Data Structures (5-10 minutes)
-2. Analyze Side Effects (5-10 minutes)
-3. Search for Similar Issues
-4. Present Options to User
-5. Get User Confirmation
-```
-
-### Added in v5.0
-
-```markdown
-### Async/Callback Pattern Implementation Checklist
-
-1. **Buffer Ownership**
-   - Who allocates and frees the buffer?
-   - Who manages buffer size/offset?
-   - Is the buffer valid when async completes?
-
-2. **Lock Reentrancy**
-   - Does the callback/handler acquire locks again?
-   - std::mutex vs std::recursive_mutex choice
-
-3. **Lifecycle**
-   - Is the object alive when callback executes?
-   - Use of shared_from_this()
-```
-
-### Why Did It Have to Change?
-
-**Mickey 8's Failures:**
-
-1. **Buffer Ownership Issue**
-   - Symptom: Character coordinate warping, input not working
-   - Cause: External ParsePacket modified buffer → Session's recvSize_ mismatch
-   - Solution: Manage buffer inside Session
-
-2. **Nested Lock Deadlock**
-   - Symptom: abort() occurred
-   - Cause: ForEach(lock) → Handler → Broadcast(lock)
-   - Solution: Use std::recursive_mutex
-
-3. **Missing Broadcast**
-   - Symptom: Player exit not reflected on other clients
-   - Cause: SC_CHAR_LEAVE packet not sent
-   - Solution: Add broadcast checklist for state changes
-
-**Lesson:**
-> AI follows specific checklists better than general guidelines ("analyze").
-
-### What AI Users Can Learn
-
-**Bad Example:**
-```
-"Be careful with async code"
-```
-
-**Good Example:**
-```
-"Before writing async code, check:
-1. Who manages buffer ownership?
-2. Does the callback acquire locks again?
-3. Is the object alive when callback executes?"
-```
-
----
-
-## 3. "Problem Solving" → "Root Cause First"
-
-### v2.0 Approach
-
-```markdown
-### When Encountering Issues
-
-"I found [issue]. Let me analyze:
-- Root cause: [analysis]
-- Proposed fix: [solution]"
-```
-
-### Added in v5.0
-
-```markdown
-### Immediately on Error
-
-1. **Check full error log** (don't guess)
-2. **Root cause question**: "Why is this error occurring?"
-3. **Scope of impact**: "Does this problem affect other areas?"
-4. **Explain cause before solution**: Explain cause to user first
-```
-
-### Why Did It Have to Change?
-
-**Mickey 7's Failure:**
-- Problem: vcpkg tar extraction error
-- First attempt: Delete cache → Failed
-- Second attempt: Update vcpkg → Failed
-- Third attempt: Analyze error log → CMake trying to extract gzip as bzip2 (bug)
-- Solution: Modify script to use WSL tar
-
-**Lesson:**
-> AI prefers quick fixes but easily misses root causes.
-
-### What AI Users Can Learn
+**Lesson**: AI works hard on given tasks but doesn't judge whether they're optimal for the purpose.
 
 ```
-AI: "Deleting the cache will fix it"
-You: "Why do you think it's a cache problem? Analyze the error log again"
+❌ "Set up Forgotten Server"
+✅ "I want to test packet capture. Analyze the simplest approach first"
 ```
 
----
+### 2. "Analyze" → "Follow Checklists"
 
-## 4. "Knowledge Management" → "Systematize Failure Experience"
+**Mickey 8's failures:**
+- Buffer ownership issue → Character coordinate warping
+- Nested lock deadlock → abort() triggered
+- Broadcast omission → Player departure not reflected
 
-### v2.0 Approach
+**Lesson**: AI follows specific checklists better than general guidelines ("analyze").
 
-```
-common_knowledge/: Store reusable knowledge
-context_rule/: Store project context
-```
+### 3. "Problem Solving" → "Root Cause First"
 
-### Added in v5.0
+**Mickey 7's failure:**
+- vcpkg tar extraction error → Cache delete (fail) → Update (fail) → Error log analysis → CMake bug found
 
-```markdown
-# context_rule/mickey-agent-improvements-m8.md
+**Lesson**: AI prefers quick fixes but easily misses root causes.
 
-### Lesson 12: Async Buffer Ownership
-- **Problem**: Sync failure when buffer modified externally
-- **Cause**: ParsePacket receives length by reference and modifies it
-- **Solution**: Manage buffer inside Session
-- **Lesson**: Buffer management in one place only
+### 4. "Knowledge Management" → "Systematized Failure Experience"
 
-### Lesson 13: Lock Caution in Callbacks
-- **Problem**: ForEach(lock) → Handler → Broadcast(lock) = deadlock
-- **Solution**: Use std::recursive_mutex
-- **Lesson**: Always consider nested lock possibility in callback patterns
-```
-
-### Why Did It Have to Change?
-
-- v2.0: Record "what was done"
-- v5.0: Record "what NOT to do"
-
-**Lesson:**
-> Systematizing failure experiences prevents repeating the same mistakes.
-
-### What AI Users Can Learn
-
-Record failure experiences at session end in this format:
+v2.0 recorded "what was done", v5.0 recorded "what NOT to do."
 
 ```markdown
 ### Lesson N: [Topic]
 - **Problem**: [What went wrong]
 - **Cause**: [Why it went wrong]
-- **Solution**: [How it was fixed]
+- **Fix**: [How it was resolved]
 - **Lesson**: [What to avoid next time]
 ```
 
----
+### 5. "Session Continuity" → "Automated Protocol"
 
-## 5. "Session Continuity" → "Automated Protocol"
+v2.0: Instruct "write session log" every time → v5.0: Say "session cleanup" and everything runs automatically.
 
-### v2.0 Approach
-
-```
-At session end:
-1. Write session log
-2. Create handoff document
-3. Update context_rule
-```
-
-### Added in v5.0
-
-```markdown
-## SESSION END PROTOCOL
-
-### When user says "세션 정리" or similar:
-
-Automatically perform these steps:
-1. Update MICKEY-N-SESSION.md with all completed work
-2. Create MICKEY-N-HANDOFF.md for next Mickey
-3. Update context_rule/ if new lessons learned
-4. Update system prompt if new patterns discovered
-
-No need for user to explain - just do it.
-```
-
-### Why Did It Have to Change?
-
-- v2.0: Every time "write session log", "create handoff" instructions
-- v5.0: Say "session cleanup" and all tasks performed automatically
-
-**Lesson:**
-> Repetitive patterns should be automated in the prompt.
-
-### What AI Users Can Learn
-
-If you have frequently repeated instructions, add to prompt:
-
-```markdown
-### When user says "[trigger phrase]":
-
-Automatically perform:
-1. [Task 1]
-2. [Task 2]
-3. [Task 3]
-```
+**Lesson**: Repeated patterns should be automated in the prompt.
 
 ---
 
-## REMEMBER Section Comparison
+## Phase 2: v5.0 → v6.3 (Specificity → Lightweight)
 
-### v2.0 (6 Principles)
+### Why It Had to Change
 
-```
-1. Session log FIRST, then work
-2. Analysis BEFORE implementation
-3. User confirmation BEFORE changes
-4. Root cause OVER quick fixes
-5. Documentation ALWAYS
-6. Context window MONITOR constantly
-```
+v5.0's problem: Prompt **bloated with domain-specific content**.
+- Godot checklists, C++ async checklists, MSVC warnings...
+- Unnecessary content occupying context in new projects
 
-### v5.0 (18 Principles)
+### v6.0: Lightweight/Optimization
 
-```
-1. Purpose first: Clarify ultimate purpose before work
-2. Simplicity first: Simple alternatives before complex solutions
-3. Session log FIRST, then work
-4. Analysis BEFORE implementation
-5. Check error log immediately (don't guess)
-6. Check build system before modification
-7. User confirmation BEFORE changes
-8. Root cause OVER quick fixes
-9. Suggest alternatives when complexity is excessive
-10. Documentation ALWAYS
-11. Context window MONITOR constantly
-12. Async buffer ownership: Buffer management in one place only
-13. Lock caution in callbacks: Check if recursive_mutex needed
-14. Multiplayer broadcast: Consider other clients on state changes
-15. Check process before Windows build: Running exe can't be overwritten
-16. No Korean comments in MSVC: UTF-8 Korean causes C4819 error
-17. JSON schema type match: Check parser expected type vs JSON value type
-18. Struct vs actual transmission: Defined struct may differ from actual data
-```
+| Change | Reason |
+|--------|--------|
+| Remove domain-specific content | Transition to universal agent |
+| REMEMBER 18 → 8 | Move domain-specific principles to context_rule/ |
+| Introduce 3-Tier Context Loading | Prompt has principles only, details in files |
+| Introduce Document Schema | Ensure document format consistency |
+
+**Insight**: Shifted from "putting everything in the prompt" to "prompt has principles only, details in files."
+
+### v6.1: INDEX Map Pattern
+
+**Problem**: As knowledge files grow, figuring out "what's in which file" itself consumes context.
+
+**Solution**: Introduce **trigger → file → summary** mapping in INDEX. Read only INDEX at session start, load specific files only when triggers match during work.
+
+### v6.2: PURPOSE-SCENARIO Independent Document
+
+**Problem**: "Purpose first" exists in REMEMBER, but gets formally checked and skipped when immersed in work.
+
+**Solution**: Separate purpose into independent document, load as T2 top priority. Alert user when purpose drift detected.
+
+### v6.3: Auto Memory Pattern
+
+**Problem**: Inefficient to instruct "record this" every time. User-written rules and AI-observed facts mixed together.
+
+**Solution**: Dual auto memory:
+- `auto_notes/`: AI-observed facts (descriptive, batch review at session end)
+- `context_rule/adaptive.md`: AI self-generated rules (adaptive, batch review at session end)
+
+---
+
+## Phase 3: v7.0 → v7.2 (Lightweight → Autonomy)
+
+### Why It Had to Change
+
+Up to v6.3, the model was "user instructs → AI executes." But requiring confirmation even for repetitive, clear tasks is inefficient.
+
+### v7.0: Autonomous Execution + Subagent + Brownfield
+
+| Change | Reason |
+|--------|--------|
+| Autonomous execution conditions | Autonomous when CC clear + rollback possible + verifiable |
+| Backpressure | No proceeding on verification failure |
+| Brownfield onboarding | Auto-analysis when existing codebase detected |
+| T1.5 layer introduced | Separate detailed guidelines to `~/.kiro/mickey/` |
+
+**Insight**: Autonomy is a means, **feedback loops are the key**. Execute autonomously but always verify.
+
+### v7.1: Adaptive Rules
+
+**Problem**: Users had to manually teach project-specific behavioral rules.
+
+**Solution**: Design `context_rule/adaptive.md` as a self-modifiable sub-prompt. When patterns are discovered during work, rules are added automatically.
+
+### v7.2: Autonomy Preference
+
+**Problem**: Different users want different autonomy levels. Some want to confirm every change, others just want results.
+
+**Solution**: 3-level autonomy (Conservative / Balanced / Autonomous) + CLI `--trust-tools` integration.
 
 ---
 
-## Meta Insights: Laws of Prompt Evolution
-
-### 1. Prompts Are Not "Write Once and Done"
+## REMEMBER Section Evolution
 
 ```
-v2.0: 6 principles
-  ↓ (Mickey 7-9 failures)
-v5.0: 18 principles + 7 checklists
+v2.0: 6 (universal principles)
+  ↓ Failure experience accumulation
+v5.0: 18 (including domain-specific)
+  ↓ Lightweight
+v6.0: 8 (domain-specific → moved to context_rule/)
+  ↓ New lessons accumulated
+v7.2: 15 (autonomy/verification/testing principles added)
 ```
 
-### 2. Failure Experience Drives Prompt Improvement
-
-| Mickey | Failure | Added Principle/Checklist |
-|--------|---------|---------------------------|
-| 7 | Lost purpose, excessive complexity | Purpose first, simplicity first, tool selection checklist |
-| 8 | Buffer ownership, deadlock, broadcast | Async checklist, multiplayer checklist |
-| 9 | MSVC Korean, JSON type | MSVC warnings, JSON schema check |
-
-### 3. Evolution of Abstraction Level
-
-```
-General Guidelines  →  Specific Checklists  →  Automated Protocols
-"Analyze"          →  "Check buffer ownership"  →  "Auto-perform on session cleanup"
-```
+Key: REMEMBER retains only **fundamental principles validated through projects**. Domain-specific lessons go to context_rule/, universal patterns to common_knowledge/.
 
 ---
+
+## Meta-Insights: Laws of Prompt Evolution
+
+### 1. Failure Drives Evolution
+
+| Session | Failure | What Was Added |
+|---------|---------|---------------|
+| Mickey 7 | Lost purpose, excessive complexity | Purpose first, simplicity first |
+| Mickey 8 | Buffer ownership, deadlock | Async checklists |
+| Mickey 9 | Domain-specific bloat | 3-Tier, lightweight |
+| Mickey 10 | Insufficient autonomy | Autonomous execution, Backpressure |
+
+### 2. Abstraction Level Evolution
+
+```
+General guidelines → Specific checklists → Automated protocols → Self-improvement
+"Analyze" → "Check buffer ownership" → "Auto-execute on session cleanup" → "adaptive.md self-modification"
+```
+
+### 3. Prompts Oscillate Between Expansion and Contraction
+
+```
+v2.0 (concise) → v5.0 (expansion) → v6.0 (contraction/lightweight) → v7.2 (structural expansion)
+```
+
+Expansion: Rules added as failure experiences accumulate
+Contraction: Separate domain-specific, keep only principles
+Structural expansion: Maintain principles but add execution mechanisms (autonomy, self-improvement)
+
+---
+
+**Core message:**
+> AI prompts aren't "written" — they're "evolved."
+> Failure experience drives prompt improvement, maturing through cycles of expansion and contraction.
 
 ## Next Steps
 
-- [Packet Capture Agent Case Study](case-study/packet-capture-agent-en.md) - Real project application
-- [System Prompt v5.0](../examples/ai-developer-mickey.json) - Full prompt
-- [Mickey 7-12 Session Logs](../sessions/packet-capture/) - Actual work records
-
----
-
-**Key Message:**
-> AI prompts should be "evolved," not just "written."
-> Failure experience is the driving force behind prompt improvement.
+- [Changelog](07-changelog-en.md) - Detailed version-by-version changes
+- [Evolution Insights](08-evolution-insight-en.md) - How "using AI well" has evolved
+- [Packet Capture Agent Case Study](case-study/packet-capture-agent.md) - v5.0 practical application
