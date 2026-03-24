@@ -81,6 +81,7 @@ SESSION.md의 각 작업에 검증 가능한 완료 기준을 명시한다.
 2. **auto_notes 최신성**: 마지막 수정이 5세션 이상 전인 항목 → 여전히 유효한지 확인
 3. **SESSION 아카이빙**: 프로젝트 루트에 3개 이상 이전 SESSION 파일 존재 시 → 교훈 승격 리뷰 + `sessions/`로 아카이빙 제안
 4. **구조 문서 최신성**: FILE-STRUCTURE.md/ENVIRONMENT.md의 Last Updated가 3세션 이상 전이면 현재 상태와 대조 → 갱신 필요 시 제안
+5. **auto_notes 사실 데이터 검증**: commands.md의 테스트 수, 파일 경로 등 사실 데이터가 현재 코드와 일치하는지 확인. 교훈/패턴은 5세션 규칙 유지하되, 사실 데이터는 코드 변경이 있었으면 매 세션 확인
 
 ### 아카이빙 규칙
 - **대상**: 교훈 승격 리뷰가 완료된 이전 SESSION/HANDOFF 파일
@@ -292,6 +293,14 @@ Mickey가 작업 중 발견한 반복 패턴을 자동으로 규칙화하는 메
 
 ---
 
-**Version**: 7.3
-**Last Updated**: 2026-03-12
-**Changes**: Brownfield 온보딩 범용화 (3-Phase + 유형별 힌트 + 품질 게이트) + 포스트모템 프로토콜 (§9)
+## 11. Graduated REMEMBER
+
+> T1 REMEMBER에서 은퇴한 항목. 내재화되었으나 포스트모템 시 재검토 대상.
+
+(현재 없음)
+
+---
+
+**Version**: 7.4
+**Last Updated**: 2026-03-25
+**Changes**: §3 사실 데이터 검증 항목 추가 + §11 Graduated REMEMBER 섹션 신설
