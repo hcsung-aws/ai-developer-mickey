@@ -159,7 +159,7 @@ if __name__ == "__main__":
 ```json
 {
   "name": "Mickey Session Initialize",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "경량 세션 초기화 — 스크립트가 생성한 brief만 읽고, memorygraph는 제목/태그만 조회 (search_memories 사용, recall_memories project_path 필터 버그 우회)",
   "when": {
     "type": "preTaskExecution"
@@ -178,7 +178,7 @@ if __name__ == "__main__":
 ```json
 {
   "name": "Mickey Session Close",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "세션 종료 시 세션 로그 정리, 교훈 추출, memorygraph 저장, HANDOFF 생성",
   "when": {
     "type": "postTaskExecution"

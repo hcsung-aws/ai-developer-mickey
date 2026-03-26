@@ -8,6 +8,11 @@ Memory Graph MCP를 사용한 장기 기억 관리입니다.
 - 복잡한 문제 해결 과정을 기록할 때
 - 프로젝트 간 지식 공유가 필요할 때
 
+## 크기 관리
+- **project-lessons.md**: 최대 10개 항목. 초과 시 오래된 항목은 Memory Graph에만 보존하고 파일에서 제거
+- **Memory Graph**: 크기 제한 없음. project-lessons.md에서 제거된 항목의 장기 보존소 역할
+- **세션 종료 시**: project-lessons.md 항목 수 확인 → 초과 임박하면 정리 제안
+
 ## 세션 시작 시 (지식 지도 패턴)
 
 Context window 절약을 위해 2단계로 조회한다:
