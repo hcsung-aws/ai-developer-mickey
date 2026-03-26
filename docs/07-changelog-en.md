@@ -21,6 +21,60 @@
 | v7 | 2026-03 | Mickey Self-Improvement | Autonomous execution + Subagent + Brownfield onboarding |
 | v7.1 | 2026-03 | Mickey Self-Improvement | Adaptive Rules (self-improving sub-prompt) |
 | v7.2 | 2026-03 | Mickey Self-Improvement | Autonomy Preference (per-user autonomy level) |
+| v7.3 | 2026-03 | Mickey Self-Improvement | REMEMBER consolidation (#12+#13 → WELC) + size management protocol |
+| v7.4 | 2026-03 | Mickey Self-Improvement | REMEMBER retirement management (15→12) + Power Mickey full sync |
+
+---
+
+## v7.4 (2026-03-26)
+
+**Project**: Mickey Self-Improvement (Mickey 11-12)
+
+### Key Change: REMEMBER Retirement Management + Power Mickey Full Sync
+
+Resolved REMEMBER exceeding the 12-item cap + synced Power Mickey steering to CLI v7.4 level.
+
+### Major Changes
+
+1. **REMEMBER Retirement (15→12)**
+   - #3 "Session log FIRST" → Internalized in SESSION PROTOCOL
+   - #8 "Suggest alternatives when complexity is excessive" → Overlaps with #2 "Simplicity first"
+   - #10 "Core message first in documentation" → Overlaps with #1 "Purpose first"
+   - Retired items moved to T1.5 Graduated REMEMBER (not deleted)
+
+2. **Power Mickey Steering Full Sync**
+   - mickey-core.md: Working principles 5→12 (based on CLI REMEMBER)
+   - problem-solving.md: Added behavioral scenario/minimal code/bug propagation/Backpressure
+   - session-protocol.md: Added Brownfield/entropy/behavioral scenario/Completion Criteria
+   - self-improvement.md: Adaptive Rules/promotion enhancement/Graduated/Architectural Guard/postmortem
+   - memory-protocol.md: Size management clarification
+
+3. **Hook Version Updates**
+   - init: 3.1.0 → 3.2.0 (PURPOSE-SCENARIO loading added)
+   - close: 1.4.0 → 1.5.0 (project-lessons cap + lesson promotion guidance)
+
+---
+
+## v7.3 (2026-03-25)
+
+**Project**: Mickey Self-Improvement (Mickey 11)
+
+### Key Change: REMEMBER Consolidation + Size Management Protocol
+
+Resolved overlap between REMEMBER items + introduced cap management system.
+
+### Major Changes
+
+1. **REMEMBER #12+#13 Consolidation**
+   - Former #12 "Test-based completion" + #13 "Verification-based completion" → Merged into one
+   - Added Test Harness (WELC) approach: wrap existing behavior in tests before modifying
+
+2. **REMEMBER Size Management Protocol**
+   - Cap: 12 items
+   - When exceeded, oldest items with lowest violation frequency become retirement candidates
+   - Retirement: Move to T1.5 "Graduated REMEMBER" section (not deleted)
+
+3. **T1.5 §11 Graduated REMEMBER Section Added**
 
 ---
 

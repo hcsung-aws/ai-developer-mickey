@@ -1,4 +1,4 @@
-# Prompt Evolution: v2.0 → v7.2
+# Prompt Evolution: v2.0 → v7.4
 
 > [한국어 버전](06-prompt-evolution.md)
 
@@ -13,7 +13,7 @@ This document explains how Mickey's prompt evolved through real projects, and **
 ## Evolution Flow
 
 ```
-v2.0 (Foundation) → v5.0 (Specificity) → v6.0 (Lightweight) → v7.2 (Autonomy)
+v2.0 (Foundation) → v5.0 (Specificity) → v6.0 (Lightweight) → v7.4 (Autonomy)
   File-based          Checklists           3-Tier separation    Self-improvement
   memory              Protocols            INDEX pattern         Autonomous execution
 ```
@@ -122,7 +122,7 @@ v5.0's problem: Prompt **bloated with domain-specific content**.
 
 ---
 
-## Phase 3: v7.0 → v7.2 (Lightweight → Autonomy)
+## Phase 3: v7.0 → v7.4 (Lightweight → Autonomy)
 
 ### Why It Had to Change
 
@@ -151,6 +151,16 @@ Up to v6.3, the model was "user instructs → AI executes." But requiring confir
 
 **Solution**: 3-level autonomy (Conservative / Balanced / Autonomous) + CLI `--trust-tools` integration.
 
+### v7.3~v7.4: REMEMBER Maturity Management + Power Sync
+
+**Problem**: REMEMBER expanded to 15 items. Overlap between items, some already internalized in protocols.
+
+**Solution**:
+- v7.3: Consolidated #12+#13 (WELC) + size management protocol (cap: 12) + Graduated REMEMBER
+- v7.4: Retirement review (15→12) + Power Mickey steering full sync
+
+**Insight**: REMEMBER also goes through expansion→contraction cycles. "Retirement" (moving to a lower tier instead of deleting) enables re-evaluation during postmortems.
+
 ---
 
 ## REMEMBER Section Evolution
@@ -163,6 +173,8 @@ v5.0: 18 (including domain-specific)
 v6.0: 8 (domain-specific → moved to context_rule/)
   ↓ New lessons accumulated
 v7.2: 15 (autonomy/verification/testing principles added)
+  ↓ Expansion→contraction (retirement management)
+v7.4: 12 (overlapping/internalized items retired to Graduated REMEMBER)
 ```
 
 Key: REMEMBER retains only **fundamental principles validated through projects**. Domain-specific lessons go to context_rule/, universal patterns to common_knowledge/.
@@ -190,7 +202,7 @@ General guidelines → Specific checklists → Automated protocols → Self-impr
 ### 3. Prompts Oscillate Between Expansion and Contraction
 
 ```
-v2.0 (concise) → v5.0 (expansion) → v6.0 (contraction/lightweight) → v7.2 (structural expansion)
+v2.0 (concise) → v5.0 (expansion) → v6.0 (contraction/lightweight) → v7.4 (structural expansion + retirement)
 ```
 
 Expansion: Rules added as failure experiences accumulate

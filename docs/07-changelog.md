@@ -19,6 +19,60 @@
 | v7 | 2026-03 | Mickey 자기 개선 | 자율 실행 + Subagent 협업 + Brownfield 온보딩 |
 | v7.1 | 2026-03 | Mickey 자기 개선 | Adaptive Rules (자가 개선 sub-prompt) |
 | v7.2 | 2026-03 | Mickey 자기 개선 | Autonomy Preference (사용자별 자율성 수준) |
+| v7.3 | 2026-03 | Mickey 자기 개선 | REMEMBER 통합 (#12+#13 → WELC) + 크기 관리 프로토콜 |
+| v7.4 | 2026-03 | Mickey 자기 개선 | REMEMBER 은퇴 관리 (15→12) + Power Mickey 전면 동기화 |
+
+---
+
+## v7.4 (2026-03-26)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 11-12)
+
+### 핵심 변화: REMEMBER 은퇴 관리 + Power Mickey 전면 동기화
+
+REMEMBER 상한(12개) 초과 문제 해결 + Power Mickey steering을 CLI v7.4 수준으로 동기화.
+
+### 주요 변경
+
+1. **REMEMBER 은퇴 (15→12개)**
+   - #3 "Session log FIRST" → SESSION PROTOCOL에 내재화
+   - #8 "복잡도 과도 시 대안 제안" → #2 "단순함 우선"과 중복
+   - #10 "문서 작성 시 핵심 메시지 먼저" → #1 "목적 우선"과 중복
+   - 은퇴 항목은 T1.5 Graduated REMEMBER로 이동 (삭제 아님)
+
+2. **Power Mickey steering 전면 동기화**
+   - mickey-core.md: 작업 원칙 5→12개 (CLI REMEMBER 기반)
+   - problem-solving.md: 동작 시나리오/최소 코드/버그 전파/Backpressure 추가
+   - session-protocol.md: Brownfield/엔트로피/동작시나리오/Completion Criteria 추가
+   - self-improvement.md: Adaptive Rules/승격강화/Graduated/Architectural Guard/포스트모템
+   - memory-protocol.md: 크기 관리 명확화
+
+3. **Hook 버전 업데이트**
+   - init: 3.1.0 → 3.2.0 (PURPOSE-SCENARIO 로딩 추가)
+   - close: 1.4.0 → 1.5.0 (project-lessons 상한 + 교훈 승격 안내)
+
+---
+
+## v7.3 (2026-03-25)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 11)
+
+### 핵심 변화: REMEMBER 통합 + 크기 관리 프로토콜
+
+REMEMBER 항목 간 중복 해소 + 상한 관리 체계 도입.
+
+### 주요 변경
+
+1. **REMEMBER #12+#13 통합**
+   - 기존 #12 "테스트 기반 완료" + #13 "검증 기반 완료" → 하나로 통합
+   - Test Harness(WELC) 접근법 추가: 변경 지점의 기존 동작을 테스트로 감싼 뒤 수정
+
+2. **REMEMBER 크기 관리 프로토콜**
+   - 상한: 12개
+   - 초과 시 가장 오래되고 위반 빈도 낮은 항목부터 은퇴 후보
+   - 은퇴: T1.5 "Graduated REMEMBER" 섹션으로 이동 (완전 삭제 아님)
+
+3. **T1.5 §11 Graduated REMEMBER 섹션 신설**
 
 ---
 
