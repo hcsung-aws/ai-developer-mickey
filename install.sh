@@ -13,8 +13,10 @@ if ! command -v kiro-cli &> /dev/null; then
 fi
 
 # 2. 글로벌 가이드 설치
-mkdir -p "$MICKEY_DIR"
+mkdir -p "$MICKEY_DIR" "$MICKEY_DIR/patterns" "$MICKEY_DIR/domain"
 cp "$SCRIPT_DIR/mickey/extended-protocols.md" "$MICKEY_DIR/"
+cp "$SCRIPT_DIR/mickey/patterns/"*.md "$MICKEY_DIR/patterns/" 2>/dev/null || true
+cp "$SCRIPT_DIR/mickey/domain/"*.md "$MICKEY_DIR/domain/" 2>/dev/null || true
 echo "✅ 글로벌 가이드 설치: $MICKEY_DIR/"
 
 # 3. Agent JSON 설치

@@ -35,7 +35,8 @@ The Mickey prompt continues to evolve through real projects:
 | **v6.3** | Mickey Self-Improvement | Mickey 4 | Auto Memory pattern (auto_notes/ + knowledge promotion) |
 | **v7** | Mickey Self-Improvement | Mickey 7-8 | Autonomous execution + Subagent + Brownfield onboarding |
 | **v7.2** | Mickey Self-Improvement | Mickey 9 | Adaptive Rules (self-improvement) + Autonomy Preference |
-| **v7.4** | Mickey Self-Improvement | Mickey 11-12 | 🆕 REMEMBER retirement management (15→12) + Power Mickey full sync |
+| **v7.4** | Mickey Self-Improvement | Mickey 11-12 | REMEMBER retirement management (15→12) + Power Mickey full sync |
+| **v8** | Mickey Self-Improvement | Mickey 12 | 🆕 Global Knowledge (patterns/ + domain/) + Session-PURPOSE connection + Postmortem auto-trigger |
 
 > 💡 **Key Insight**: AI prompts should not be "write once and done" but **continuously evolved through failure experiences**. See [Prompt Evolution Guide](docs/06-prompt-evolution-en.md) for details.
 

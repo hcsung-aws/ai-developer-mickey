@@ -10,6 +10,10 @@ REMEMBER 은퇴 리뷰 (15→12) + Power Mickey steering CLI v7.4 동기화
 ## Current Tasks
 - [x] REMEMBER 은퇴 리뷰 | CC: 15→12개, Graduated REMEMBER에 존재, install.sh 완료
 - [x] Power Mickey steering 전면 동기화 | CC: 5개 steering + POWER.md + Windows 동기화
+- [x] README 및 GitHub 문서 최신화 | CC: 한글/영문 README, changelog, evolution 문서 v7.4 반영
+- [x] 전체 프로젝트 Mickey 이력 분석 + 개선 방향 제안 | CC: 7개 프로젝트 65+세션 분석, Gap 3개 + 제안 4개 도출
+- [x] 글로벌 지식 구조 설계 검토 (patterns/ + domain/ + /knowledge 선택적) | CC: 우려 3개 해소, 이식성 확보
+- [x] IMPROVEMENT-PLAN-v8.md 작성 | CC: 4 Phase, 전체 CC 명시
 
 ## Progress
 
@@ -24,6 +28,9 @@ REMEMBER 은퇴 리뷰 (15→12) + Power Mickey steering CLI v7.4 동기화
 8. memory-protocol.md: 크기 관리 명확화
 9. POWER.md hook 버전: init 3.1→3.2, close 1.4→1.5
 10. Windows 동기화: 글로벌 Power + 프로젝트 hooks (init 3.1→3.2, close 1.3→1.5) + CRLF
+11. README.md/README-en.md: 버전 테이블 v7.4 추가
+12. docs/07-changelog + 07-changelog-en: v7.3, v7.4 항목 추가
+13. docs/06-prompt-evolution + 06-prompt-evolution-en: v7.4까지 진화 흐름 + REMEMBER 팽창→수축 사이클
 
 ## Key Decisions
 - REMEMBER 은퇴 기준: 다른 항목과 의미 중복 + 프로토콜 내재화 + 특정 상황 한정
@@ -39,6 +46,9 @@ REMEMBER 은퇴 리뷰 (15→12) + Power Mickey steering CLI v7.4 동기화
 - power-mickey/steering/self-improvement.md
 - power-mickey/steering/memory-protocol.md
 - power-mickey/POWER.md
+- README.md, README-en.md
+- docs/06-prompt-evolution.md, docs/06-prompt-evolution-en.md
+- docs/07-changelog.md, docs/07-changelog-en.md
 
 ## Lessons Learned
 (없음)

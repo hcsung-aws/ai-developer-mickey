@@ -5,9 +5,10 @@
 2. Agent가 `python .kiro/scripts/session_init.py` 실행 (이전 세션 아카이브 + 새 CURRENT.md + SESSION-BRIEF.md 생성)
 3. **PURPOSE-SCENARIO.md 최우선 로딩** — 없으면 첫 세션 절차로 전환
 4. `.kiro/sessions/SESSION-BRIEF.md`만 읽기 (HANDOFF 전문을 읽지 않음 — context 절약)
-5. Memory Graph에서 기억 제목/태그 목록만 조회 (상세 내용은 on-demand)
-6. **목적 재확인**: PURPOSE-SCENARIO.md 내용을 간략히 언급, 변경 필요 시 사용자에게 조정 여부 확인
-7. 이전 세션 요약 + 참고 가능한 기억 목록을 사용자에게 보고
+5. **글로벌 지식 로딩**: `~/.kiro/mickey/patterns/INDEX.md` + `~/.kiro/mickey/domain/INDEX.md` 존재 시 로딩
+6. Memory Graph에서 기억 제목/태그 목록만 조회 (상세 내용은 on-demand)
+7. **목적 재확인**: PURPOSE-SCENARIO.md 내용을 간략히 언급, 변경 필요 시 사용자에게 조정 여부 확인
+8. 이전 세션 요약 + 참고 가능한 기억 목록을 사용자에게 보고
 
 ### 첫 세션 (PURPOSE-SCENARIO.md 없을 때)
 - 사용자에게 질문: "이 프로젝트가 완성되면 어떻게 사용하게 되나요?"
@@ -82,8 +83,15 @@
 ```markdown
 # Session Log
 
+## Session Meta
+- Type: [Implementation/Self-Improvement/Maintenance/Planning]
+
 ## 목표
 [세션 목표]
+
+## Purpose Alignment
+- 기여 시나리오: [PURPOSE-SCENARIO의 어느 시나리오/단계]
+- 이번 세션 범위: [구체적 범위]
 
 ## 진행 상황
 - [x] 완료 작업 | CC: [완료 기준]

@@ -95,7 +95,9 @@ Mickey가 작업 중 발견한 반복 패턴을 project-lessons.md에 규칙 형
 ### 승격 경로
 1. project-lessons.md에서 3+ 세션 유효 → Global steering 후보
 2. 여러 프로젝트에서 유효 → Global steering 확정
-3. 근본 원칙 수준 → 작업 원칙(mickey-core.md) 후보
+3. 접근법 패턴 → `~/.kiro/mickey/patterns/` 후보 (도메인 무관 접근법)
+4. 도메인 지식 → `~/.kiro/mickey/domain/` 후보 (기술/도구 참조)
+5. 근본 원칙 수준 → 작업 원칙(mickey-core.md) 후보
 - 모든 승격은 사용자 확인 필수
 
 ## Architectural Guard
@@ -112,7 +114,17 @@ Mickey가 작업 중 발견한 반복 패턴을 project-lessons.md에 규칙 형
 
 ## 포스트모템
 
-사용자가 "포스트모템" 또는 "프로토콜 리뷰"를 요청하면:
+사용자가 "포스트모템" 또는 "프로토콜 리뷰"를 요청하거나, 아래 자동 트리거 조건 충족 시:
+
+### 자동 트리거 (엔트로피 체크 시 확인)
+아래 조건 중 하나 충족 시 경량 포스트모템 제안:
+- 프로젝트에서 10세션 이상 경과
+- 작업 원칙 변경 후 3개 프로젝트에서 사용
+
+경량 포스트모템 = [Protocol] 태그 수집 + 긍정/부정 분류 + 1페이지 요약.
+전체 포스트모템은 사용자 요청 시에만.
+
+### 실행 절차
 1. CURRENT.md, HANDOFF.md, Memory Graph에서 `[Protocol]` 태그 + Lessons 수집
 2. 반복되는 긍정/부정 피드백 식별
 3. 변경별 유효성 판정 (유효/무효/판단 보류) + 근거

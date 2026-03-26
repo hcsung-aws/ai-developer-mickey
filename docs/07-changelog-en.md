@@ -23,6 +23,39 @@
 | v7.2 | 2026-03 | Mickey Self-Improvement | Autonomy Preference (per-user autonomy level) |
 | v7.3 | 2026-03 | Mickey Self-Improvement | REMEMBER consolidation (#12+#13 → WELC) + size management protocol |
 | v7.4 | 2026-03 | Mickey Self-Improvement | REMEMBER retirement management (15→12) + Power Mickey full sync |
+| v8 | 2026-03 | Mickey Self-Improvement | Global Knowledge (patterns/ + domain/) + Session-PURPOSE connection + Postmortem auto-trigger |
+
+---
+
+## v8 (2026-03-26)
+
+**Project**: Mickey Self-Improvement (Mickey 12)
+
+### Key Change: Global Knowledge Structure + Protocol Maturation
+
+Resolved 3 structural gaps found from comprehensive analysis of 7 projects, 65+ sessions.
+
+### Major Changes
+
+1. **Global Knowledge Structure (`~/.kiro/mickey/patterns/` + `domain/`)**
+   - patterns/: Domain-agnostic approach patterns (7-item cap, loaded at session start)
+   - domain/: Domain knowledge (INDEX trigger-based on-demand, /knowledge as optional)
+   - Promotion criteria: patterns/ = "Valid in completely different domain?", domain/ = "Reference value for same tech?"
+   - Portability: markdown + INDEX is primary path, /knowledge is optional optimization
+
+2. **Session-PURPOSE Connection**
+   - Purpose Alignment section added to SESSION.md (contributing scenario + session scope)
+   - Maintenance sessions classified as "Infrastructure"
+
+3. **Session Metadata**
+   - Session Meta added to SESSION.md (Type: Implementation/Self-Improvement/Maintenance/Planning)
+   - Foundation for self-improvement cost visibility
+
+4. **Postmortem Auto-trigger**
+   - Lightweight postmortem suggested at 10+ sessions or after REMEMBER change used in 3+ projects
+   - Lightweight = [Protocol] tag collection + positive/negative classification + 1-page summary
+
+5. **install.sh Extended**: patterns/ + domain/ directory deployment
 
 ---
 

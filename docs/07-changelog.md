@@ -21,6 +21,39 @@
 | v7.2 | 2026-03 | Mickey 자기 개선 | Autonomy Preference (사용자별 자율성 수준) |
 | v7.3 | 2026-03 | Mickey 자기 개선 | REMEMBER 통합 (#12+#13 → WELC) + 크기 관리 프로토콜 |
 | v7.4 | 2026-03 | Mickey 자기 개선 | REMEMBER 은퇴 관리 (15→12) + Power Mickey 전면 동기화 |
+| v8 | 2026-03 | Mickey 자기 개선 | 글로벌 지식 구조 (patterns/ + domain/) + 세션-PURPOSE 연결 + 포스트모템 자동 트리거 |
+
+---
+
+## v8 (2026-03-26)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 12)
+
+### 핵심 변화: 글로벌 지식 구조 + 프로토콜 성숙화
+
+7개 프로젝트 65+ 세션 종합 분석에서 발견된 3가지 Gap 해결.
+
+### 주요 변경
+
+1. **글로벌 지식 구조 (`~/.kiro/mickey/patterns/` + `domain/`)**
+   - patterns/: 도메인 무관 접근법 패턴 (7개 상한, 세션 시작 시 로딩)
+   - domain/: 도메인 지식 (INDEX 트리거 기반 on-demand, /knowledge 선택적 보조)
+   - 승격 기준: patterns/ = "다른 도메인에서도 유효한가?", domain/ = "같은 기술 사용 시 참고 가치?"
+   - 이식성: markdown + INDEX가 주 경로, /knowledge는 선택적 최적화
+
+2. **세션-PURPOSE 연결 강화**
+   - SESSION.md에 Purpose Alignment 섹션 추가 (기여 시나리오 + 세션 범위)
+   - 유지보수 세션은 "Infrastructure"로 분류
+
+3. **세션 메타데이터**
+   - SESSION.md에 Session Meta 추가 (Type: Implementation/Self-Improvement/Maintenance/Planning)
+   - 자기 개선 비용 가시화 기반
+
+4. **포스트모템 자동 트리거**
+   - 10세션 이상 경과 또는 REMEMBER 변경 후 3개 프로젝트 사용 시 경량 포스트모템 제안
+   - 경량 = [Protocol] 태그 수집 + 긍정/부정 분류 + 1페이지 요약
+
+5. **install.sh 확장**: patterns/ + domain/ 디렉토리 배포
 
 ---
 

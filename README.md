@@ -73,7 +73,8 @@ Mickey 프롬프트는 실제 프로젝트를 거치며 계속 진화합니다:
 | **v6.3** | Auto Memory 패턴 도입 (자동 메모리 이원화) |
 | **v7** | 자율 실행 + Subagent 협업 + Brownfield 온보딩 |
 | **v7.2** | Adaptive Rules (자가 개선) + Autonomy Preference (사용자별 자율성) |
-| **v7.4** | 🆕 REMEMBER 은퇴 관리 (15→12) + Power Mickey 전면 동기화 |
+| **v7.4** | REMEMBER 은퇴 관리 (15→12) + Power Mickey 전면 동기화 |
+| **v8** | 🆕 글로벌 지식 구조 (patterns/ + domain/) + 세션-PURPOSE 연결 + 포스트모템 자동 트리거 |
 
 > 💡 자세한 변경 이력은 [변경 이력 문서](docs/07-changelog.md)를 참고하세요.
 > 📋 v6.3 개선 계획은 [IMPROVEMENT-PLAN-v6.3.md](IMPROVEMENT-PLAN-v6.3.md)를 참고하세요.

@@ -1,4 +1,4 @@
-# Prompt Evolution: v2.0 → v7.4
+# Prompt Evolution: v2.0 → v8
 
 > [한국어 버전](06-prompt-evolution.md)
 
@@ -13,9 +13,9 @@ This document explains how Mickey's prompt evolved through real projects, and **
 ## Evolution Flow
 
 ```
-v2.0 (Foundation) → v5.0 (Specificity) → v6.0 (Lightweight) → v7.4 (Autonomy)
+v2.0 (Foundation) → v5.0 (Specificity) → v6.0 (Lightweight) → v8 (Autonomy+Structure)
   File-based          Checklists           3-Tier separation    Self-improvement
-  memory              Protocols            INDEX pattern         Autonomous execution
+  memory              Protocols            INDEX pattern         Global knowledge
 ```
 
 ---
@@ -122,7 +122,7 @@ v5.0's problem: Prompt **bloated with domain-specific content**.
 
 ---
 
-## Phase 3: v7.0 → v7.4 (Lightweight → Autonomy)
+## Phase 3: v7.0 → v8 (Lightweight → Autonomy → Structure)
 
 ### Why It Had to Change
 
@@ -161,6 +161,18 @@ Up to v6.3, the model was "user instructs → AI executes." But requiring confir
 
 **Insight**: REMEMBER also goes through expansion→contraction cycles. "Retirement" (moving to a lower tier instead of deleting) enables re-evaluation during postmortems.
 
+### v8: Global Knowledge Structure + Protocol Maturation
+
+**Problem**: Analysis of 7 projects, 65+ sessions revealed 3 gaps — manual cross-project knowledge transfer, qualitative protocol validation, opaque self-improvement costs.
+
+**Solution**:
+- `~/.kiro/mickey/patterns/`: Approach patterns (capability accumulation, 7-item cap)
+- `~/.kiro/mickey/domain/`: Domain knowledge (reference, INDEX-based on-demand)
+- Session-PURPOSE connection + Session Meta for effectiveness measurement
+- Postmortem auto-trigger for systematic protocol validation
+
+**Insight**: Knowledge worth globalizing is not "what you know" (domain) but "how you approach" (capability). Capability patterns converge rather than grow linearly with projects.
+
 ---
 
 ## REMEMBER Section Evolution
@@ -175,6 +187,8 @@ v6.0: 8 (domain-specific → moved to context_rule/)
 v7.2: 15 (autonomy/verification/testing principles added)
   ↓ Expansion→contraction (retirement management)
 v7.4: 12 (overlapping/internalized items retired to Graduated REMEMBER)
+  ↓ Global knowledge structure introduced
+v8: 12 maintained + patterns/ (approaches) + domain/ (domain knowledge) separated
 ```
 
 Key: REMEMBER retains only **fundamental principles validated through projects**. Domain-specific lessons go to context_rule/, universal patterns to common_knowledge/.
@@ -202,7 +216,7 @@ General guidelines → Specific checklists → Automated protocols → Self-impr
 ### 3. Prompts Oscillate Between Expansion and Contraction
 
 ```
-v2.0 (concise) → v5.0 (expansion) → v6.0 (contraction/lightweight) → v7.4 (structural expansion + retirement)
+v2.0 (concise) → v5.0 (expansion) → v6.0 (contraction/lightweight) → v8 (structural expansion + retirement + global knowledge)
 ```
 
 Expansion: Rules added as failure experiences accumulate

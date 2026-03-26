@@ -244,7 +244,17 @@ Mickey가 작업 중 발견한 반복 패턴을 자동으로 규칙화하는 메
 
 ### 포스트모템 실행
 
-사용자가 "포스트모템" 또는 "프로토콜 리뷰"를 요청하면:
+사용자가 "포스트모템" 또는 "프로토콜 리뷰"를 요청하거나, 아래 자동 트리거 조건 충족 시:
+
+#### 자동 트리거 (엔트로피 체크 시 확인)
+아래 조건 중 하나 충족 시 경량 포스트모템 제안:
+- 프로젝트에서 10세션 이상 경과
+- REMEMBER 또는 T1.5 변경 후 3개 프로젝트에서 사용
+
+경량 포스트모템 = [Protocol] 태그 수집 + 긍정/부정 분류 + 1페이지 요약.
+전체 포스트모템은 사용자 요청 시에만.
+
+#### 실행 절차
 
 1. **데이터 수집**: 대상 프로젝트들의 SESSION.md, HANDOFF.md, DECISIONS.md에서 `[Protocol]` 태그 + Lessons Learned 수집
 2. **패턴 분석**: 반복되는 긍정/부정 피드백 식별
@@ -305,6 +315,38 @@ Mickey가 작업 중 발견한 반복 패턴을 자동으로 규칙화하는 메
 
 ---
 
-**Version**: 7.4
-**Last Updated**: 2026-03-25
-**Changes**: §3 사실 데이터 검증 항목 추가 + §11 Graduated REMEMBER 섹션 신설
+## 12. Global Knowledge
+
+### 구조
+- `~/.kiro/mickey/patterns/`: 도메인 무관 접근법 패턴 (상한 7개)
+- `~/.kiro/mickey/domain/`: 도메인 지식 (INDEX 트리거 기반 on-demand)
+
+### 로딩
+- 세션 시작 시: patterns/INDEX.md + domain/INDEX.md 로딩 (T1.5와 함께)
+- 작업 중: INDEX 트리거 매칭 시 해당 파일 로딩
+- 보조 검색 (환경별 선택적): /knowledge, grep, IDE 내장 검색 등
+
+### 승격 기준
+- patterns/ 후보: "완전히 다른 도메인의 프로젝트에서도 이 접근법이 유효한가?"
+- domain/ 후보: "다른 프로젝트에서 같은 기술/도구를 쓸 때 참고할 가치가 있는가?"
+- 프로젝트 한정 지식은 프로젝트 common_knowledge/에 유지
+
+### 크기 관리
+- patterns/: 7개 상한. 초과 시 가장 오래되고 참조 빈도 낮은 항목부터 은퇴
+- domain/: 상한 없음. 6개월 미참조 시 아카이브 제안
+
+### 승격 경로 (전체)
+```
+프로젝트 auto_notes/ → context_rule/ → common_knowledge/ (프로젝트 내)
+                                              ↓ (접근법)     ↓ (도메인 지식)
+                                        patterns/          domain/
+                                              ↓ (근본 원칙)
+                                        REMEMBER 후보
+```
+모든 글로벌 승격은 사용자 확인 필수.
+
+---
+
+**Version**: 8
+**Last Updated**: 2026-03-26
+**Changes**: §12 Global Knowledge 신설 + §9 포스트모템 자동 트리거 추가
