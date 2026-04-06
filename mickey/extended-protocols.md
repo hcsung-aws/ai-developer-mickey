@@ -362,6 +362,31 @@ Mickey가 작업 중 발견한 반복 패턴을 자동으로 규칙화하는 메
 
 ---
 
-**Version**: 9
-**Last Updated**: 2026-04-03
-**Changes**: §13 세션 로그 기록 품질 추가 (과도한 요약 금지)
+## 14. Soft Restart 프로토콜
+
+context window가 충분해도 대화 내역이 누적되면 정보 밀도가 낮아지고, 유지보수 트리거(포스트모템, INDEX 갱신 등)가 발동하지 않는 문제를 해결하기 위한 mid-session restart 절차.
+
+### 트리거 조건
+- 완료 작업 5개 이상 누적 (T1 During Session 중간 체크포인트)
+
+### 절차
+
+1. **파일 기록 완료 확인**: SESSION.md, auto_notes/, INDEX 등 최신 상태
+2. **포스트모템/INDEX 트리거 확인**: 총 세션 수 ≥ 10이면 포스트모템 제안, INDEX 7일 이상 미갱신이면 갱신 제안
+3. **사용자에게 문의**: "파일 기록 완료. context 정리를 원하시면 HANDOFF 생성 후 `/clear` → 메시지 전송으로 새 Mickey가 시작됩니다. 이대로 계속하시겠습니까?"
+4. **사용자가 원할 경우**:
+   - HANDOFF 경량 생성
+   - 안내: "`/clear` 실행 후 아무 메시지나 보내시면 새 Mickey가 파일에서 컨텍스트를 로딩합니다"
+5. **사용자가 원하지 않을 경우**: 그대로 계속 진행
+
+### 설계 근거
+- context window 압박이 자연스러운 "가비지 컬렉터" 역할을 했으나, 모델 context window 크기 증가로 이 메커니즘이 사라짐
+- `/compact`(요약 압축)보다 `/clear`(완전 초기화) + 파일 재로딩이 더 결정적(deterministic)
+- 파일이 single source of truth이므로 대화 내역 유실 위험 없음
+- Mickey 13 분석: packet-capture/skr-reverse-poc 두 프로젝트에서 포스트모템 누락, INDEX 노후화 확인
+
+---
+
+**Version**: 10
+**Last Updated**: 2026-04-06
+**Changes**: §14 Soft Restart 프로토콜 추가 (중간 체크포인트 + /clear 기반 context 정리)
