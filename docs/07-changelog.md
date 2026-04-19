@@ -22,6 +22,51 @@
 | v7.3 | 2026-03 | Mickey 자기 개선 | REMEMBER 통합 (#12+#13 → WELC) + 크기 관리 프로토콜 |
 | v7.4 | 2026-03 | Mickey 자기 개선 | REMEMBER 은퇴 관리 (15→12) + Power Mickey 전면 동기화 |
 | v8 | 2026-03 | Mickey 자기 개선 | 글로벌 지식 구조 (patterns/ + domain/) + 세션-PURPOSE 연결 + 포스트모템 자동 트리거 |
+| v8.1 | 2026-04 | Mickey 자기 개선 | Knowledge Curator subagent + domain/ 활성화 + Personal Vault → domain/ 전환 |
+
+---
+
+## v8.1 (2026-04-19)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 14-15)
+
+### 핵심 변화: Knowledge Curator + domain/ 활성화
+
+v8에서 설계만 된 domain/ 시스템을 실제로 구현하고, 전용 subagent를 통한 자동 큐레이션 체계를 구축.
+
+### 주요 변경
+
+1. **Knowledge Curator subagent (`examples/knowledge-curator.json`)**
+   - 작업 맥락을 받아 저장 여부 판단 → 큐레이션 → 관계 설정까지 수행하는 전용 에이전트
+   - 3단계 실행: 저장 판단 → 큐레이션(entry 생성 + GRAPH.md 업데이트) → PROFILE 업데이트 제안
+   - 저장 기준: 사용자의 '결정'과 '성향' 중심 (단순 사실 제외)
+
+2. **domain/ 시스템 활성화**
+   - `PROFILE.md`: 사용자 도메인 프로필 (Decision Style, Relationship Preferences 등)
+   - `GRAPH.md`: 관계 맵 (Nodes 테이블 + Edges 테이블, O(1) 접근)
+   - `entries/`: 개별 지식 항목 (결정 맥락 + 관계 링크 포함)
+   - `CURATOR-PROMPT.md`: subagent 프롬프트 원본
+
+3. **Personal Vault → domain/ 전환**
+   - Obsidian MCP 기반 Personal Vault 검색 → domain/GRAPH.md 기반 검색으로 전환
+   - 인터페이스 독립 원칙: domain/ 정규 형식이 source of truth, 외부 도구는 어댑터
+   - Session End 교훈 승격 대상에서 Personal Vault → domain/ 변경
+
+4. **T1 프로토콜 반영 (v14)**
+   - During Session: Knowledge Curator 호출 규칙 추가 (세션 로그 트리거에 편승)
+   - During Session: domain/ 지식 검색 규칙 추가 (GRAPH.md 키워드/태그 매칭)
+   - Continuing Session 1a: domain/GRAPH.md T1.5 로딩 대상 추가
+
+5. **install.sh 확장**
+   - knowledge-curator.json 배포
+   - domain/ 디렉토리 전체 동기화 (PROFILE.md, GRAPH.md, entries/)
+
+### 설계 결정
+
+- domain/ 크기 제한 없음 — O(1) 접근을 위한 구조화(GRAPH.md 100줄 기준)로 해결
+- subagent 호출: 동기(use_subagent)로 시작, 안정화 후 delegate(비동기)로 전환
+- patterns/(핵심 원칙, 상한 7개)와 domain/(실전 지식, 제한 없음) 병행 — 추상도의 차이
+- Mickey 역할 한정: 맥락 전달 + 결과 안내만. 저장 판단/큐레이션/관계 설정은 모두 subagent
 
 ---
 

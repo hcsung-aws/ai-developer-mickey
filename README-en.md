@@ -37,6 +37,7 @@ The Mickey prompt continues to evolve through real projects:
 | **v7.2** | Mickey Self-Improvement | Mickey 9 | Adaptive Rules (self-improvement) + Autonomy Preference |
 | **v7.4** | Mickey Self-Improvement | Mickey 11-12 | REMEMBER retirement management (15→12) + Power Mickey full sync |
 | **v8** | Mickey Self-Improvement | Mickey 12 | 🆕 Global Knowledge (patterns/ + domain/) + Session-PURPOSE connection + Postmortem auto-trigger |
+| **v8.1** | Mickey Self-Improvement | Mickey 14-15 | 🆕 Knowledge Curator subagent + domain/ activation (PROFILE/GRAPH/entries) + Personal Vault → domain/ transition |
 
 > 💡 **Key Insight**: AI prompts should not be "write once and done" but **continuously evolved through failure experiences**. See [Prompt Evolution Guide](docs/06-prompt-evolution-en.md) for details.
 
@@ -123,6 +124,7 @@ ai-developer-mickey/
 ├── sessions/               # Mickey session log examples
 ├── examples/               # Configuration files and examples
 │   ├── ai-developer-mickey.json  # Latest prompt
+│   ├── knowledge-curator.json    # Knowledge Curator subagent
 │   ├── common_knowledge/   # Knowledge management examples
 │   └── context_rule/       # Context rule examples
 ├── context_rule/           # This project's context rules (used by Mickey for self-improvement)

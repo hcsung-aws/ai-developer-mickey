@@ -75,10 +75,10 @@ Mickey 프롬프트는 실제 프로젝트를 거치며 계속 진화합니다:
 | **v7.2** | Adaptive Rules (자가 개선) + Autonomy Preference (사용자별 자율성) |
 | **v7.4** | REMEMBER 은퇴 관리 (15→12) + Power Mickey 전면 동기화 |
 | **v8** | 🆕 글로벌 지식 구조 (patterns/ + domain/) + 세션-PURPOSE 연결 + 포스트모템 자동 트리거 |
+| **v8.1** | 🆕 Knowledge Curator subagent + domain/ 활성화 (PROFILE/GRAPH/entries) + Personal Vault → domain/ 전환 |
 
 > 💡 자세한 변경 이력은 [변경 이력 문서](docs/07-changelog.md)를 참고하세요.
-> 📋 v6.3 개선 계획은 [IMPROVEMENT-PLAN-v6.3.md](IMPROVEMENT-PLAN-v6.3.md)를 참고하세요.
-> 📋 v7 개선 계획은 [IMPROVEMENT-PLAN-v7.md](IMPROVEMENT-PLAN-v7.md)를 참고하세요.
+> 📋 v8.1 개선 계획은 [IMPROVEMENT-PLAN-v8.1.md](IMPROVEMENT-PLAN-v8.1.md)를 참고하세요.
 > 🔍 진화 과정의 인사이트는 [진화 인사이트](docs/08-evolution-insight.md)를 참고하세요.
 
 ## 🚀 빠른 시작
@@ -131,6 +131,7 @@ ai-developer-mickey/
 ├── sessions/               # Mickey 세션 로그 예시
 ├── examples/               # 설정 파일 및 예시
 │   ├── ai-developer-mickey.json  # 최신 프롬프트
+│   ├── knowledge-curator.json    # Knowledge Curator subagent
 │   ├── common_knowledge/   # 지식 관리 예시
 │   └── context_rule/       # 컨텍스트 규칙 예시
 ├── context_rule/           # 이 프로젝트의 컨텍스트 규칙 (Mickey가 자기 개선 시 활용)
