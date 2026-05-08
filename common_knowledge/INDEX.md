@@ -9,3 +9,11 @@
 
 ## Last Updated
 2026-03-09
+
+
+## Domain Links
+
+| 키워드 | Domain Entry | 힌트 |
+|--------|-------------|------|
+| 지식 활용, 검색 vs 발견, backlink | ~/.kiro/mickey/domain/entries/passive-over-active-retrieval.md | Active 검색 실패 → Passive 발견 경로 설계 |
+| 자동 호출 실패, 실행 시점, 중단점 | ~/.kiro/mickey/domain/entries/forced-breakpoint-execution.md | 판단 병목 제거 → 자연스러운 중단점에 배치 |
