@@ -7,3 +7,5 @@
 1. **'세션 중 자동 호출' 설계는 실패한다 — 판단+다단계 실행 작업은 강제 중단점에 배치** — Mickey 16, TMI-agent + Curator 동일 실패 (2회)
 2. **덮어쓰기 방향 실행 전 소스/대상 diff 필수 — 최신본이 어디인지 확인 없이 install/deploy 금지** — Mickey 18, global→repo 방향 오판 시 최신 domain entry 손실 위험
 3. **global `~/.kiro/mickey/` 수정 시 repo `mickey/` 동기화 확인 — 누락 시 install이 오래된 내용 배포** — Mickey 18, domain entry 3개 + 6파일 불일치 발견
+4. **저장소 동기화는 파일별 방향 판정 — 일괄 스크립트(install.sh 등)는 모든 파일이 동일 방향일 때만 안전** — Mickey 19, "global이 최신" 일괄 판정으로 CURATOR-PROMPT v2 손실 위험 (3회차: #2,#3 + 이번)
+5. **세션 종료 시 HANDOFF.md가 실제로 git add/commit 되었는지 확인 — untracked로 남으면 원격 배포 누락** — Mickey 19, Mickey 18 HANDOFF가 untracked로 남아 다음 세션에서 발견

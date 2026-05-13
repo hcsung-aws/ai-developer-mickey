@@ -25,6 +25,8 @@ agent-design, knowledge-management, retrieval, passive-discovery, context-window
 ### 적용 사례
 - Domain Backlink: domain entry 저장 → 프로젝트 INDEX에 링크 (Mickey 16)
 - GRAPH.md Core 강화: 노드에 "언제 쓰는가" 힌트 추가 → 읽을 때 자연스럽게 리마인드
+- common_knowledge 교차 참조: agent-design-patterns.md 본문에 domain entry 경로를 직접 삽입 → 패턴 읽을 때 상세 지식 자연 노출 (Mickey 19)
+- machine-env.md 절차 상세화: "설치됨" 수준이 아닌 구체 실행 절차까지 기록 → 매 세션 되묻는 Active 질의 제거 (Mickey 19)
 
 ### 설계 함의
 - 지식 저장소의 가치는 저장이 아니라 발견 경로에 있음
@@ -32,3 +34,4 @@ agent-design, knowledge-management, retrieval, passive-discovery, context-window
 
 ## Source
 ai-developer-mickey, Mickey 16, 2026-05-08
+ai-developer-mickey, Mickey 19, 2026-05-14 (적용 사례 보강)

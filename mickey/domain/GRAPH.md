@@ -27,4 +27,4 @@
 | forced-breakpoint-execution | plan-before-execute | similar-to | 둘 다 실행 전 구조화이지만 시점 선택 vs 내용 구조화 |
 
 ## Last Updated
-2026-05-08 (Mickey 16)
+2026-05-14 (Mickey 19)

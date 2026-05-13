@@ -13,6 +13,8 @@
 | 벤치마킹, 외부 기술, 선별 채택, gap 분석 | entries/external-benchmarking.md | 외부 기술을 자기 맥락에서 재해석 |
 | 검증 도구, 동시 발전, coevolution, 테스트 대상 | entries/tool-and-target-coevolution.md | 대상과 도구를 함께 개선하여 검증 범위 확장 |
 | 스크립트 추출, 라이브러리화, 파이프라인, 오케스트레이터, YAML 설정 | entries/script-to-library-extraction.md | 스크립트→함수 추출 + 오케스트레이터 조합으로 설정 기반 파이프라인 |
+| 지식 활용, 검색 vs 발견, backlink, passive, context window 노출 | entries/passive-over-active-retrieval.md | Active 검색 의존 제거 → Passive 발견 경로(backlink, 교차 참조) 설계 |
+| 자동 호출 실패, 실행 시점, 중단점, 판단 제거, 자동화 | entries/forced-breakpoint-execution.md | 판단 병목 제거 → 자연스러운 중단점에 배치하여 확실히 실행 |
 
 ## 접근 경로
 1. 주 경로: GRAPH.md Tags/Title 스캔 → Core로 즉시 판단 → entries/ 상세 (1홉)
@@ -20,4 +22,4 @@
 3. 트리거 매칭: 이 INDEX의 트리거 → 해당 entry 직접 로딩
 
 ## Last Updated
-2026-05-08 (Mickey 36-37)
+2026-05-14 (Mickey 19)

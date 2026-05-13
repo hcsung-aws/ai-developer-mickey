@@ -21,9 +21,17 @@ IMPROVEMENT-PLAN을 상세하게 작성해두면 구현 시 판단 비용이 거
 - 원칙: 지식 저장소의 가치는 "저장"이 아니라 "발견 경로"에 있다. 저장 시점에 발견 경로까지 함께 설계해야 한다.
 - 교차 참조: `~/.kiro/mickey/domain/entries/passive-over-active-retrieval.md`
 
+## 교차 참조 삽입 (Passive 발견 경로 구현 기법)
+문서/코드 본문에 관련 지식의 경로를 직접 인용한다. 독자(또는 에이전트)가 본문을 읽을 때 자연스럽게 참조 지식이 context window에 들어오므로 "필요하면 찾아보라"는 판단을 우회한다.
+- 형식: 섹션 말미에 `- 교차 참조: <경로 또는 링크>` 한 줄
+- 적용 지점: 범용 패턴 문서에서 상세 근거(domain entry)로, 설정/절차 문서에서 관련 정책 문서로
+- 제약: 너무 많이 걸면 오히려 노이즈 → 해당 섹션의 "핵심 근거 1~2개"만 인용
+- 근거: Mickey 19에서 이 파일 자체에 domain entry 경로를 삽입하고, machine-env.md에 Code Defender 구체 절차를 추가하여 "매 세션 되묻는 Active 질의"를 제거함으로써 실증
+
 ## 출처
 - Mickey 1, 4, 5 (상위 3개 패턴)
 - Mickey 16, 18 (강제 중단점 실행, Passive > Active 지식 활용)
+- Mickey 19 (교차 참조 삽입)
 
 ## Last Updated
 2026-05-14 (Mickey 19)
