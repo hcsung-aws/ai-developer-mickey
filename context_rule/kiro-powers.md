@@ -17,12 +17,20 @@
 - memorygraph `store_memory`: context에 `{"project_path": "..."}` 키 사용 (`{"project": "..."}` 는 무시됨)
 - Kiro IDE `userTriggered` hook은 `askAgent`만 지원
 
-## Windows 반영 명령어
+## Windows Kiro IDE 연동
+
+### Windows native 환경
+- repo가 이미 Windows 파일 시스템에 있으므로 별도 복사/변환 불필요
+- Kiro IDE → Powers 패널 → `Add power from Local Path` → repo 내 `power-mickey/` 선택
+
+### WSL 환경에서 Windows Kiro IDE 테스트
+WSL의 repo를 Windows Kiro IDE가 인식하도록 Windows 경로로 복사 + CRLF 변환:
 ```bash
-cp power-mickey/POWER.md /mnt/c/Users/hcsung/work/q/power-mickey/
-cp power-mickey/steering/*.md /mnt/c/Users/hcsung/work/q/power-mickey/steering/
-sed -i 's/$/\r/' /mnt/c/Users/hcsung/work/q/power-mickey/POWER.md /mnt/c/Users/hcsung/work/q/power-mickey/steering/*.md
+# <win-path>는 Windows Kiro IDE가 접근 가능한 경로 (예: /mnt/c/Users/<user>/power-mickey)
+cp power-mickey/POWER.md <win-path>/
+cp power-mickey/steering/*.md <win-path>/steering/
+sed -i 's/$/\r/' <win-path>/POWER.md <win-path>/steering/*.md
 ```
 
 ## Last Updated
-2026-02-22
+2026-05-13 (Mickey 18)

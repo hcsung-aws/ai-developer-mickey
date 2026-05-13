@@ -89,10 +89,19 @@ Mickey 프롬프트는 실제 프로젝트를 거치며 계속 진화합니다:
 # Kiro CLI 설치 후 (https://github.com/aws/kiro-cli)
 git clone https://github.com/hcsung-aws/ai-developer-mickey.git
 cd ai-developer-mickey
+```
+
+**macOS / Linux / WSL:**
+```bash
 ./install.sh
 ```
 
-`install.sh`가 수행하는 것:
+**Windows (PowerShell):**
+```powershell
+.\install.ps1
+```
+
+`install.sh` / `install.ps1`이 수행하는 것:
 - Agent JSON → `~/.kiro/agents/`
 - 글로벌 가이드 → `~/.kiro/mickey/`
 

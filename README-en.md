@@ -97,10 +97,19 @@ Through this project, you will learn:
 # After installing Kiro CLI (https://github.com/aws/kiro-cli)
 git clone https://github.com/hcsung-aws/ai-developer-mickey.git
 cd ai-developer-mickey
+```
+
+**macOS / Linux / WSL:**
+```bash
 ./install.sh
 ```
 
-What `install.sh` does:
+**Windows (PowerShell):**
+```powershell
+.\install.ps1
+```
+
+What `install.sh` / `install.ps1` does:
 - Agent JSON → `~/.kiro/agents/`
 - Global guide → `~/.kiro/mickey/`
 

@@ -1,14 +1,15 @@
 # Project Context
 
 ## Environment
-- WSL2 (Linux) + Windows Kiro IDE
+- Supported: Windows native 또는 WSL2 (Linux) — 세부 사항은 ENVIRONMENT.md
+- Shell: Windows는 PowerShell / Git Bash, Linux는 bash / zsh
 - Git repo: hcsung-aws/ai-developer-mickey
 
 ## Goal
 생성형 AI 어시스턴트(Kiro)를 효과적으로 활용하기 위한 실전 가이드 및 에이전트 시스템 개발/개선
 
 ## Constraints
-- CRLF: Windows 쪽 파일은 CRLF, repo는 LF
+- Line endings: repo는 LF. Windows native는 `core.autocrlf=input` 권장, WSL↔Windows 파일 공유 시 CRLF 변환 필요
 - Context window 효율성 중시
 
 ## Key Decisions
@@ -22,4 +23,4 @@
 - INDEX는 "진실"이 아니라 "탐색의 출발점" — Verify(현실과 대조), Update(불일치 시 수정), Suggest(개선 제안) 원칙 적용 필요
 
 ## Last Updated
-2026-03-08
+2026-05-13 (Mickey 18)
