@@ -12,6 +12,7 @@
 | 계획 문서 선행 | (INDEX 내 기술) | IMPROVEMENT-PLAN 수준의 구체적 계획 → 구현 세션에서 판단 비용 제거 | ai-developer-mickey M4→M5 |
 | 외부 벤치마킹 → 선별 채택 | (INDEX 내 기술) | 외부 기술을 조사하되 자기 맥락에서 재해석하여 적용 | ai-developer-mickey M4, M7 |
 | 검증 대상과 도구 동시 발전 | (INDEX 내 기술) | 테스트 대상과 도구를 함께 개선하여 검증 범위 확장 | packet-capture |
+| LLM 결정론적 하이브리드 | (INDEX 내 기술) | LLM 파이프라인에서 결정론적 변환 가능한 단계는 코드로 전환. LLM은 의미 추론만. 프롬프트만으로 비결정성 해결 시도는 안티패턴 | packet-capture M22 |
 
 ## Last Updated
-2026-03-26
+2026-04-10

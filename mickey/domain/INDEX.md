@@ -12,6 +12,7 @@
 | 계획 문서, IMPROVEMENT-PLAN, 판단 비용, 실행 속도 | entries/plan-before-execute.md | 상세 계획 선행 → 구현 시 판단 제거 |
 | 벤치마킹, 외부 기술, 선별 채택, gap 분석 | entries/external-benchmarking.md | 외부 기술을 자기 맥락에서 재해석 |
 | 검증 도구, 동시 발전, coevolution, 테스트 대상 | entries/tool-and-target-coevolution.md | 대상과 도구를 함께 개선하여 검증 범위 확장 |
+| 스크립트 추출, 라이브러리화, 파이프라인, 오케스트레이터, YAML 설정 | entries/script-to-library-extraction.md | 스크립트→함수 추출 + 오케스트레이터 조합으로 설정 기반 파이프라인 |
 
 ## 접근 경로
 1. 주 경로: GRAPH.md Tags/Title 스캔 → Core로 즉시 판단 → entries/ 상세 (1홉)
@@ -19,4 +20,4 @@
 3. 트리거 매칭: 이 INDEX의 트리거 → 해당 entry 직접 로딩
 
 ## Last Updated
-2026-04-19 (Mickey 15)
+2026-05-08 (Mickey 36-37)

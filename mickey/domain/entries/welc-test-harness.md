@@ -19,5 +19,9 @@ testing, safety, refactoring, verification, legacy-code
 - 추측으로 "괜찮을 것"이라고 넘어가지 않음 — 테스트 통과 + 실제 환경 검증 후에만 완료 선언
 - Brownfield 프로젝트에서 특히 유효 (기존 코드의 동작을 모를 때)
 
+## Evidence
+- M9: 리팩토링 중 기존 동작 깨짐 → WELC 채택
+- M36-37: 15개 하네스 테스트로 5개 스크립트 리팩토링, 회귀 0건. 471 테스트 전체 통과.
+
 ## Source
-packet-capture-log-agent (M9), REMEMBER #9
+packet-capture-log-agent (M9, M36-37), REMEMBER #9
