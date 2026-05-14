@@ -15,6 +15,8 @@
 | 스크립트 추출, 라이브러리화, 파이프라인, 오케스트레이터, YAML 설정 | entries/script-to-library-extraction.md | 스크립트→함수 추출 + 오케스트레이터 조합으로 설정 기반 파이프라인 |
 | 지식 활용, 검색 vs 발견, backlink, passive, context window 노출 | entries/passive-over-active-retrieval.md | Active 검색 의존 제거 → Passive 발견 경로(backlink, 교차 참조) 설계 |
 | 자동 호출 실패, 실행 시점, 중단점, 판단 제거, 자동화 | entries/forced-breakpoint-execution.md | 판단 병목 제거 → 자연스러운 중단점에 배치하여 확실히 실행 |
+| 활용도 측정, grep, 포스트모템, 정량 진단, 0% 활용 | entries/quantitative-usage-measurement.md | 프로토콜 효과를 추측 아닌 실측으로 판단, 0%=설계 결함 |
+| 지식 분류, R/G/S, 활용 경로, 성격별 분기, 저장소 설계 | entries/knowledge-type-routing.md | 지식 성격(방식/사실/절차)에 따라 활용 경로를 분리 설계 |
 
 ## 접근 경로
 1. 주 경로: GRAPH.md Tags/Title 스캔 → Core로 즉시 판단 → entries/ 상세 (1홉)
@@ -22,4 +24,4 @@
 3. 트리거 매칭: 이 INDEX의 트리거 → 해당 entry 직접 로딩
 
 ## Last Updated
-2026-05-14 (Mickey 19)
+2026-05-14 (Mickey 20)

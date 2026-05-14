@@ -17,6 +17,7 @@ benchmarking, adoption, external-analysis, selective
 - 전체 채택보다 선별 채택이 기본. 필요한 부분만 가져와서 자기 체계에 맞게 변형
 - 벤치마킹 대상: 경쟁 도구, 학술 논문, 커뮤니티 트렌드, 다른 프로젝트의 접근법
 - 실패 사례: Obsidian 그래프를 그대로 도입하려다 본질(수동 wikilinks)이 기존 INDEX와 동일함을 발견 → 방향 전환
+- 후행 표준화 패턴: 자체 구현이 1~2년 후 외부 표준으로 등장하는 경우 (Mickey INDEX→AGENTS.md, Mickey Skill→Claude Skills, Mickey auto_notes→Claude Auto Memory). 이때 "통합 vs 자체 유지" 결정은 사용자의 도구 환경에 따라야 함 — 도구 환경이 다중(Kiro+Claude+AGENTS.md 동시)이면 표준 채택이 유리, 단일이면 자체 유지가 유리
 
 ## Source
-ai-developer-mickey (M4, M7, M14)
+ai-developer-mickey (M4, M7, M14, M20)

@@ -9,3 +9,5 @@
 3. **global `~/.kiro/mickey/` 수정 시 repo `mickey/` 동기화 확인 — 누락 시 install이 오래된 내용 배포** — Mickey 18, domain entry 3개 + 6파일 불일치 발견
 4. **저장소 동기화는 파일별 방향 판정 — 일괄 스크립트(install.sh 등)는 모든 파일이 동일 방향일 때만 안전** — Mickey 19, "global이 최신" 일괄 판정으로 CURATOR-PROMPT v2 손실 위험 (3회차: #2,#3 + 이번)
 5. **세션 종료 시 HANDOFF.md가 실제로 git add/commit 되었는지 확인 — untracked로 남으면 원격 배포 누락** — Mickey 19, Mickey 18 HANDOFF가 untracked로 남아 다음 세션에서 발견
+6. **프로토콜/규칙 추가 전 기존 체계의 폐지/검토를 먼저 수행 — "더 추가"는 같은 실패 반복** — Mickey 20, M14 원칙이 v8/v8.1 자기 자신에게 위반됨 (3회차: v8 추가→v8.1 추가→동일 실패)
+7. **자기 개선 진단 시 사용자의 실제 도구 환경 스캔을 첫 단계로 수행 — 환경 불일치가 설계 결함의 근본 원인일 수 있음** — Mickey 20, 다중 AI 도구 환경(Kiro+Claude+AGENTS.md) 발견이 v8.1 실패 진단의 결정적 입력
