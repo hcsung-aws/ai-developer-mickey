@@ -24,6 +24,39 @@
 | v7.3 | 2026-03 | Mickey Self-Improvement | REMEMBER consolidation (#12+#13 → WELC) + size management protocol |
 | v7.4 | 2026-03 | Mickey Self-Improvement | REMEMBER retirement management (15→12) + Power Mickey full sync |
 | v8 | 2026-03 | Mickey Self-Improvement | Global Knowledge (patterns/ + domain/) + Session-PURPOSE connection + Postmortem auto-trigger |
+| v8.1 | 2026-04 | Mickey Self-Improvement | Knowledge Curator subagent + domain/ activation + Personal Vault → domain/ transition |
+| v9 (PLAN) | 2026-05 | Mickey Self-Improvement | 3-Tier (R/G/S) + Domain-centric global knowledge + knowledge-organization Skill — POSTMORTEM-based redesign |
+
+---
+
+## v9 (PLAN, 2026-05-14)
+
+**Project**: Mickey Self-Improvement (Mickey 20)
+**Status**: PLAN written, implementation not started (Phase 1 from next session)
+
+### Key Change: 3-Tier (R/G/S) + Domain-centric + Kiro Skill Integration
+
+POSTMORTEM-2026-05-14 confirmed v8.1 failure (0% usage outside self-improvement) via 76-session quantitative measurement. After analysis of external trends (Claude Skills, AGENTS.md, Auto Memory), redesigned to be **Kiro-only + Domain-centric global knowledge**.
+
+### Major Changes (Planned)
+
+1. **3-Tier Simplification**: F (auto_notes) absorbed as G's entry. R (way of judging) / G (facts/structure) / S (procedures)
+2. **Domain Global as Body**: `~/.kiro/mickey/domain/` is the body. Project-internal kept to truly project-specific facts only
+3. **knowledge-organization Skill**: Replaces Curator subagent. Auto-invoked at 5/5 checkpoint
+4. **Progressive stub lifecycle**: On promotion, body moves to new location, original becomes a stub with trigger info
+5. **External standards integration excluded**: Mickey is Kiro CLI/IDE only. No CLAUDE.md/AGENTS.md integration
+6. **Migration priority**: patterns/ retire → CURATOR-PROMPT conversion → common_knowledge stub → adaptive R/G/S split
+
+### Diagnostic Data (POSTMORTEM)
+
+- 76-session sample: ai-mickey 19s + skr-poc 40s + gamejob 18s
+- Usage: auto_notes 80~100% / domain·Curator 0% (outside self-improvement) / adaptive.md gamejob 0%
+- External trends: Claude Skills (2025-10), AGENTS.md cross-platform, Auto Memory, GraphRAG·MAGMA, Agent Stability Index
+
+### Supersedes
+
+- IMPROVEMENT-PLAN-v8.md, IMPROVEMENT-PLAN-v8.1.md (intent absorbed as diagnostic input)
+- M16's 2026-06-08 Curator validation (terminated due to trigger structure flaw)
 
 ---
 

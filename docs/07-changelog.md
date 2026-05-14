@@ -23,6 +23,38 @@
 | v7.4 | 2026-03 | Mickey 자기 개선 | REMEMBER 은퇴 관리 (15→12) + Power Mickey 전면 동기화 |
 | v8 | 2026-03 | Mickey 자기 개선 | 글로벌 지식 구조 (patterns/ + domain/) + 세션-PURPOSE 연결 + 포스트모템 자동 트리거 |
 | v8.1 | 2026-04 | Mickey 자기 개선 | Knowledge Curator subagent + domain/ 활성화 + Personal Vault → domain/ 전환 |
+| v9 (PLAN) | 2026-05 | Mickey 자기 개선 | 3-Tier (R/G/S) + 글로벌 도메인 중심 + knowledge-organization Skill — POSTMORTEM 기반 재설계 |
+
+---
+
+## v9 (PLAN, 2026-05-14)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 20)
+**상태**: PLAN 작성 완료, 구현 미시작 (Phase 1부터 다음 세션에서 시작)
+
+### 핵심 변화: 3-Tier(R/G/S) + 도메인 중심 + Kiro Skill 통합
+
+POSTMORTEM-2026-05-14에서 76세션 정량 측정으로 v8.1 실패(자기 개선 외 활용 0%)를 확인. 외부 트렌드(Claude Skills, AGENTS.md, Auto Memory, GraphRAG) 분석 후 **Kiro 한정 + 도메인 글로벌 중심**으로 전면 재설계.
+
+### 주요 변경 (예정)
+
+1. **3-Tier 단순화**: F(auto_notes) → G의 입구로 흡수. R(판단 방식) / G(사실/구조) / S(동작 절차)
+2. **도메인 글로벌 중심**: `~/.kiro/mickey/domain/`이 본체. 프로젝트 내부는 완전 특화 사실만
+3. **knowledge-organization Skill**: Curator subagent 대체. 5/5 체크포인트 도달 시 자동 호출
+4. **점진적 stub 라이프사이클**: 승격 시 본문 → 새 위치, 원본 → 트리거 정보만 남기는 stub
+5. **외부 표준 통합 배제**: Mickey는 Kiro CLI/IDE 한정. CLAUDE.md/AGENTS.md 통합 안 함
+6. **마이그레이션 우선순위**: patterns/ 폐지 → CURATOR-PROMPT 변환 → common_knowledge stub → adaptive R/G/S 분기
+
+### 진단 데이터 (POSTMORTEM)
+
+- 76세션 표본: ai-developer-mickey 19s + skr-reverse-poc 40s + gamejob_crawler 18s
+- 활용도: auto_notes 80~100% / domain·Curator 0% (자기 개선 외) / adaptive.md gamejob 0%
+- 외부 트렌드: Claude Skills(2025-10), AGENTS.md cross-platform, Auto Memory, GraphRAG·MAGMA, Agent Stability Index
+
+### Supersedes
+
+- IMPROVEMENT-PLAN-v8.md, IMPROVEMENT-PLAN-v8.1.md (의도는 진단 입력으로 흡수)
+- M16의 2026-06-08 Curator 검증 (트리거 구조 결함으로 종료)
 
 ---
 
