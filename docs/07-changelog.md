@@ -24,6 +24,74 @@
 | v8 | 2026-03 | Mickey 자기 개선 | 글로벌 지식 구조 (patterns/ + domain/) + 세션-PURPOSE 연결 + 포스트모템 자동 트리거 |
 | v8.1 | 2026-04 | Mickey 자기 개선 | Knowledge Curator subagent + domain/ 활성화 + Personal Vault → domain/ 전환 |
 | v9 (PLAN) | 2026-05 | Mickey 자기 개선 | 3-Tier (R/G/S) + 글로벌 도메인 중심 + knowledge-organization Skill — POSTMORTEM 기반 재설계 |
+| v9.1 | 2026-06 | Mickey 자기 개선 | v9 PLAN 보정+정착: Curator 권한 보정 + Pre-staged Apply + T1.5 §17/§18 + ADDENDUM 우선 |
+
+---
+
+## v9.1 (2026-06-19~20)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 21-22)
+**상태**: v9 PLAN 보정 + Phase 1 정착 완료
+
+### 핵심 변화: Curator 권한 보정 + Pre-staged Apply 패턴
+
+v9 PLAN(Mickey 20)이 "v8.1 활용도 0%"로 진단했으나, 5주간 31개 신규 세션 실측에서 글로벌 domain 76회 / Curator 82회 사용 확인. M20 진단의 표본 편향(자기 자신 위주 + 1.5개월 시점)을 보정하여 PLAN의 "Curator 폐지" 결정을 무효화하고, Curator는 진화 + 마찰 해소 방향으로 정착.
+
+### 주요 변경
+
+1. **knowledge-curator.json 권한 보정** (D-7-FIX)
+   - `tools` 4개 제한: fs_read, fs_write, grep, glob
+   - `allowedTools` 자동 승인 (이전: `[]` 빈 배열로 매번 사용자 승인 요구)
+   - `fs_write.allowedPaths` 3개 한정: `~/.kiro/mickey/domain/**`, `**/context_rule/adaptive.md`, `**/_curator-staging/**`
+   - `fs_write.deniedPaths` 7개: `.git`, `node_modules`, `.venv`, `credentials*`, `.env*`, `*.key`, `*.pem`
+
+2. **Pre-staged Apply 패턴 도입**
+   - Curator가 제안 영역(common_knowledge/, context_rule/, patterns/, REMEMBER) 변경 후보를 staging 디렉토리에 정식 형식으로 초안 작성
+   - 사용자는 단일 응답으로 일괄 결정: "전체" / 번호 ("1,3" 등) / "없음" / "보류"
+   - 마찰 1 (제안 영역 매번 승인) 해결. 추가 도구/플러그인 없이 Kiro CLI 기능 범위에서 구현
+
+3. **T1.5 §17 Knowledge Lifecycle 신설**
+   - 라이프사이클 다이어그램: auto_notes → Curator → 직접 수정 영역 + Pre-staged Apply 영역
+   - Curator 권한 + Pre-staged 5단계 + staging 위치 자동 감지 + 5회 검증 기간 명시
+
+4. **T1.5 §18 Activity Metrics 신설**
+   - Baseline (5주 31세션 실측): domain 2.45회/세션, Curator 2.65회, auto_notes 5.55회, [Protocol] 2.03개
+   - 임계값 위반 시 행동: 1회 → 재측정, 2회 연속 → 포스트모템 트리거
+   - 측정 스크립트: `scripts/m21_measure_usage.py`
+   - 자동 호출 메커니즘은 Phase 3에서 구현 예정
+
+5. **T1.5 §8 Adaptive Rules 흡수 stub**
+   - 본문은 §17 + CURATOR-PROMPT.md 로 흡수. stub만 잔존
+
+6. **T1 시스템 프롬프트 변경 (v15 → v16)**
+   - Continuing Session 1b: 엔트로피 체크에 `_curator-staging/` dangling 항목 추가
+   - Session End 단계 2: Curator delegate (보정된 권한) + 첫 5회 git diff 자동 보고
+   - Session End 단계 3: Pre-staged 항목 일괄 제시 + 사용자 단일 응답
+   - 교훈 승격 절차를 Curator 자동 분류로 단순화
+
+7. **PURPOSE-SCENARIO 갱신**
+   - 3-Tier 진화 루프 (R/G/S) + Curator + Pre-staged Apply 명문화
+   - Acceptance Criteria → 활용도 메트릭 측정 (T1.5 §18 참조)
+
+### M20 → M21 진단 비교
+
+| M20 결론 (76세션) | M21 실측 (5주 31세션) | 판정 |
+|------------------|---------------------|------|
+| 글로벌 domain 0% | 76회 / 평균 2.45/세션 | M20 무효 |
+| Curator 호출 0회 | 82회 / 평균 2.65/세션 | M20 무효 |
+| common_knowledge 5~10% | 58회 / 1.87/세션 | 일관 |
+| auto_notes 80~100% | 172회 / 5.55/세션 | 일관 |
+
+### 메타 교훈 (REMEMBER 후보)
+
+- 포스트모템 결론은 충분한 잠복 기간(3개월+) 후 재검증
+- 자기 자신 위주 표본은 메타 작업 비중이 높아 도메인 entry 트리거 부족 → 자기 진단은 다른 프로젝트 표본 우선 비교
+- "추가 전 폐지/검토" 원칙의 진짜 가치는 폐지 후보가 자체 부적격일 때 발견됨 (M14 함정의 자기 적용)
+
+### Supersedes (부분)
+
+- IMPROVEMENT-PLAN-v9.md §6 Phase 1 (Curator → Skill 전환), §7 마이그레이션 우선순위 #2, §9 결정 D-3/D-7/D-9
+- ADDENDUM이 SoT (`IMPROVEMENT-PLAN-v9-ADDENDUM.md`)
 
 ---
 

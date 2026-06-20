@@ -77,9 +77,11 @@ Mickey 프롬프트는 실제 프로젝트를 거치며 계속 진화합니다:
 | **v8** | 🆕 글로벌 지식 구조 (patterns/ + domain/) + 세션-PURPOSE 연결 + 포스트모템 자동 트리거 |
 | **v8.1** | 🆕 Knowledge Curator subagent + domain/ 활성화 (PROFILE/GRAPH/entries) + Personal Vault → domain/ 전환 |
 | **v9 (PLAN)** | 🆕 3-Tier(R/G/S) + 글로벌 도메인 중심 + knowledge-organization Skill — POSTMORTEM 기반 재설계 (Phase 1~5, 구현은 다음 세션부터) |
+| **v9.1** | 🆕 v9 PLAN 보정+정착: Curator 권한 보정 + Pre-staged Apply 패턴 + T1.5 §17 Knowledge Lifecycle + §18 Activity Metrics — 5주 31세션 실측이 v9 PLAN의 "Curator 폐지" 결정 무효화 |
 
 > 💡 자세한 변경 이력은 [변경 이력 문서](docs/07-changelog.md)를 참고하세요.
-> 📋 **최신 개선 계획 (v9)**: [IMPROVEMENT-PLAN-v9.md](IMPROVEMENT-PLAN-v9.md) — 76세션 정량 측정 기반 재설계
+> 📋 **v9.1 정착 (Mickey 21~22)**: [IMPROVEMENT-PLAN-v9-ADDENDUM.md](IMPROVEMENT-PLAN-v9-ADDENDUM.md) — Curator 권한 보정 + Pre-staged Apply (ADDENDUM 우선)
+> 📋 **v9 PLAN 원본 (Mickey 20)**: [IMPROVEMENT-PLAN-v9.md](IMPROVEMENT-PLAN-v9.md) — 76세션 정량 측정 기반 재설계
 > 📊 **포스트모템 (M20)**: [POSTMORTEM-2026-05-14.md](POSTMORTEM-2026-05-14.md) — v8.1 활용도 진단 + 외부 트렌드 비교
 > 📋 v8.1 개선 계획: [IMPROVEMENT-PLAN-v8.1.md](IMPROVEMENT-PLAN-v8.1.md)
 > 🔍 진화 과정의 인사이트는 [진화 인사이트](docs/08-evolution-insight.md)를 참고하세요.

@@ -26,6 +26,74 @@
 | v8 | 2026-03 | Mickey Self-Improvement | Global Knowledge (patterns/ + domain/) + Session-PURPOSE connection + Postmortem auto-trigger |
 | v8.1 | 2026-04 | Mickey Self-Improvement | Knowledge Curator subagent + domain/ activation + Personal Vault → domain/ transition |
 | v9 (PLAN) | 2026-05 | Mickey Self-Improvement | 3-Tier (R/G/S) + Domain-centric global knowledge + knowledge-organization Skill — POSTMORTEM-based redesign |
+| v9.1 | 2026-06 | Mickey Self-Improvement | v9 PLAN correction+landing: Curator permission fix + Pre-staged Apply + T1.5 §17/§18 + ADDENDUM-first |
+
+---
+
+## v9.1 (2026-06-19~20)
+
+**Project**: Mickey Self-Improvement (Mickey 21-22)
+**Status**: v9 PLAN correction + Phase 1 landing complete
+
+### Key Change: Curator Permission Fix + Pre-staged Apply Pattern
+
+v9 PLAN (Mickey 20) diagnosed "v8.1 usage 0%", but 5-week measurement of 31 new sessions showed global domain 76 references / Curator 82 invocations. Correcting M20's sample bias (self-focused + 1.5-month timing), we invalidated PLAN's "retire Curator" decision and landed Curator in evolution + friction-resolution direction.
+
+### Major Changes
+
+1. **knowledge-curator.json permission fix** (D-7-FIX)
+   - `tools` limited to 4: fs_read, fs_write, grep, glob
+   - `allowedTools` auto-approve (previously: `[]` empty array required user approval each time)
+   - `fs_write.allowedPaths` limited to 3: `~/.kiro/mickey/domain/**`, `**/context_rule/adaptive.md`, `**/_curator-staging/**`
+   - `fs_write.deniedPaths` 7 items: `.git`, `node_modules`, `.venv`, `credentials*`, `.env*`, `*.key`, `*.pem`
+
+2. **Pre-staged Apply pattern introduced**
+   - Curator drafts proposal-area (common_knowledge/, context_rule/, patterns/, REMEMBER) changes in staging directory in final format
+   - User decides in single response: "all" / numbers ("1,3") / "none" / "hold"
+   - Resolves friction 1 (per-item approval in proposal area). Implemented within Kiro CLI feature range without additional tools/plugins
+
+3. **T1.5 §17 Knowledge Lifecycle introduced**
+   - Lifecycle diagram: auto_notes → Curator → direct-modify area + Pre-staged Apply area
+   - Curator permissions + Pre-staged 5 steps + staging location auto-detection + 5-call validation period
+
+4. **T1.5 §18 Activity Metrics introduced**
+   - Baseline (5-week 31-session measurement): domain 2.45/session, Curator 2.65, auto_notes 5.55, [Protocol] 2.03
+   - On threshold violation: 1st → re-measure, 2nd consecutive → postmortem trigger
+   - Measurement script: `scripts/m21_measure_usage.py`
+   - Auto-invocation mechanism deferred to Phase 3
+
+5. **T1.5 §8 Adaptive Rules absorbed (stub only)**
+   - Body absorbed into §17 + CURATOR-PROMPT.md. Stub remains
+
+6. **T1 system prompt change (v15 → v16)**
+   - Continuing Session 1b: entropy check adds `_curator-staging/` dangling items
+   - Session End step 2: Curator delegate (corrected permissions) + first 5 calls auto git diff report
+   - Session End step 3: Pre-staged items batch presentation + user single response
+   - Lesson promotion procedure simplified to Curator auto-classification
+
+7. **PURPOSE-SCENARIO updated**
+   - 3-Tier evolution loop (R/G/S) + Curator + Pre-staged Apply made explicit
+   - Acceptance Criteria → activity metrics measurement (refer T1.5 §18)
+
+### M20 → M21 Diagnosis Comparison
+
+| M20 conclusion (76 sessions) | M21 measurement (5-week 31 sessions) | Verdict |
+|------------------------------|--------------------------------------|---------|
+| Global domain 0% | 76 references / avg 2.45/session | M20 invalidated |
+| Curator invocations 0 | 82 / avg 2.65/session | M20 invalidated |
+| common_knowledge 5~10% | 58 / 1.87/session | consistent |
+| auto_notes 80~100% | 172 / 5.55/session | consistent |
+
+### Meta Lessons (REMEMBER candidates)
+
+- Postmortem conclusions require sufficient incubation (3+ months) before re-validation
+- Self-focused samples have high meta-work ratio → low domain entry triggers; self-diagnosis must prioritize comparison with other projects
+- "Retire/review before adding" principle's true value emerges when retire candidate is self-disqualifying (M14 trap self-application)
+
+### Supersedes (partial)
+
+- IMPROVEMENT-PLAN-v9.md §6 Phase 1 (Curator → Skill transition), §7 migration priority #2, §9 decisions D-3/D-7/D-9
+- ADDENDUM is SoT (`IMPROVEMENT-PLAN-v9-ADDENDUM.md`)
 
 ---
 
