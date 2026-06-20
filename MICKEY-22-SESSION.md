@@ -154,6 +154,7 @@ Mickey 21이 완료한 v9 PLAN Phase 1 단계 1+2 (Curator 권한 보정 + Pre-s
 - 5건 일괄 search/replace 시 각 패턴 1건 매칭 검증 — `m22_apply_t1_changes.py` 에서 `count != 1` 시 RuntimeError 발생시켜 부분 적용 방지. 안전한 일괄 변경 패턴. (Mickey 22)
 - [Protocol] **변경 영역 묶기는 SoT 정합성으로 결정** — Step 5 변경 5건 (A~E) 중 D (교훈 승격 단순화), C (자동 메모리 표 행) 는 ADDENDUM §4 보정 3 에 명시되지 않았으나 §17 신설과 자연 연동. 명세 그대로가 아니라 "변경의 일관성"을 보장하는 추가 변경을 함께 묶음. (Mickey 22)
 - [Protocol] **§ 번호 유지 원칙** — §8 Adaptive Rules 폐지 시 §9~§16 번호를 -1 하지 않고 §8 stub 만 남김. 다른 문서·Power Mickey·외부 참조의 깨짐 방지. T1.5 §11 (Graduated REMEMBER) 패턴과 일관. (Mickey 22)
+- [Protocol] **Curator 첫 호출 EmptyResponse — 권한 보정 후 환경 이슈 발견** — 본 세션 Session End 단계 2 에서 knowledge-curator delegate 가 2회 연속 `AgentLoopError(EmptyResponse)` 로 실패. 권한 보정 후 첫 호출이라 검증 기간 1/5 회차에 발생. 원인 후보: (a) Curator agent JSON 의 권한 보정이 Kiro CLI subagent 호출 시 정상 인식 안 됨, (b) 호출 query 가 길어 timeout, (c) subagent 환경 일시 이슈. 본좌 본체에서 Curator 역할 대행은 SoT 분리 원칙 위반이라 다음 세션에 재호출 인계. (Mickey 22)
 
 ## Context Window Status
 ~60% (본 세션 끝부분)

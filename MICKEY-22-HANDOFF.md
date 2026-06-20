@@ -1,11 +1,22 @@
 # Mickey 22 Handoff
 
 ## Current Status
-v9 PLAN Phase 1 단계 3~7 정착 완료. PURPOSE-SCENARIO/T1.5/T1/README/changelog/evolution-insight 모두 v9.1 반영. 글로벌+repo 양쪽 hash 일치 검증 통과 (extended-protocols `cea8d881...` / agent JSON `86e6a50f...`). M18~M20 6파일 sessions/ 아카이빙. git 커밋 4건 분할.
+v9 PLAN Phase 1 단계 3~7 정착 완료. PURPOSE-SCENARIO/T1.5/T1/README/changelog/evolution-insight 모두 v9.1 반영. 글로벌+repo 양쪽 hash 일치 검증 통과. M18~M20 6파일 sessions/ 아카이빙. git 커밋 5건 분할 (Step 3+4 / Step 5 / Step 6 / T7 / T7+). **단, Session End 단계 2 Curator delegate 가 2회 연속 EmptyResponse 로 실패** — 다음 세션 첫 작업으로 인계.
 
 ## Next Steps (Mickey 23)
 
-ADDENDUM §5 Phase 분담 표를 따라 다음 단계 진입:
+### 0순위 (추가됨) — Curator EmptyResponse 원인 진단 + 재호출
+
+**최우선**. 본 세션 Session End 단계 2 에서 knowledge-curator delegate 가 `AgentLoopError(EmptyResponse)` 로 2회 연속 실패. 원인 진단 후 재호출 또는 fallback 결정 필요.
+
+진단 절차 (권고):
+1. `~/.kiro/agents/knowledge-curator.json` 확인 (권한 보정 v2 의 형식이 Kiro CLI 가 정확히 인식하는지)
+2. CURATOR-PROMPT.md v3 본문 길이 + 형식 점검 (10520 bytes — subagent 의 prompt 필드 한도 초과 가능성)
+3. `use_subagent ListAgents` → knowledge-curator description 확인
+4. 짧은 query (예: "test") 로 호출 시도 → 응답 형태 확인
+5. 위 모두 정상이면 Mickey 22 의 정확한 호출 query 를 재현하여 재시도
+
+fallback: 진단 실패 시 본좌 본체에서 Curator 역할 임시 대행 (단 SoT 분리 원칙 위반이라 1회만, 그리고 patterns/REMEMBER staging 은 절대 직접 처리 X — 사용자 명시 승인 필요)
 
 ### 1순위 — Phase 3 (5/5 카운터 → 메트릭 자동 호출 통합)
 - 작업: m21_measure_usage.py 를 Mickey가 5/5 체크포인트 도달 시 자동 실행하도록 통합
