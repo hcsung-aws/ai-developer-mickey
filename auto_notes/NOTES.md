@@ -10,4 +10,4 @@
 | v8 분석 | analysis-other-projects.md | 기타 5개 프로젝트 분석 (프로젝트 간 공통 패턴) |
 
 ## Last Updated
-2026-03-26
+2026-06-20 (Mickey 21 — 인덱스 검증, 사실 데이터 깊은 검증은 Mickey 22 Phase 1과 함께 처리)
