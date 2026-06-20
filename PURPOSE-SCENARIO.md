@@ -2,22 +2,34 @@
 
 ## Ultimate Purpose
 
-Mickey와 함께 탐색·분석·해결·개선하는 과정을 세션 연속성을 유지하며 반복 경험함으로써, **AI를 잘 사용하는 법을 자연스럽게 익히는 실전 가이드**를 만드는 것.
+Mickey와 함께 탐색·분석·해결·개선하는 과정에서 누적되는 사용자의 결정/판단/도메인 경험을, **3-Tier(R/G/S) 진화 루프**로 점진적으로 구조화하여 다음 세션·다음 프로젝트에서 자동 적용되도록 한다. 이 과정 자체가 "AI를 잘 사용하는 법"의 실전 가이드가 된다.
 
-핵심: 특정 분야에 한정되지 않고, Kiro CLI를 활용할 수 있는 모든 분야에서 "점진적 개선 + 세션 연속성"을 통해 AI 개발을 효율적으로 진행하는 방법을 제공한다.
+핵심: Kiro CLI/IDE 생태계 안에서, **세션 연속성 + 점진적 개선 + 도메인 지식 자기 강화**의 세 축으로 AI 개발을 효율화한다. 사용자가 같은 판단을 반복하지 않도록, 최종 활용 단계(REMEMBER, Skill, 글로벌 domain)에서는 자동으로 적용된다.
+
+### 3-Tier 진화 루프
+- **R (Rule)** — 판단/추론 방식. T1 REMEMBER + T1.5 핵심
+- **G (Knowledge)** — 작업 중 알게 된 사실/구조/패턴. `auto_notes/` (입구) → 글로벌 `~/.kiro/mickey/domain/` (본체) + `GRAPH.md` backlink
+- **S (Skill)** — R+G를 활용한 동작 절차. `~/.kiro/skills/` 또는 프로젝트 `.kiro/skills/`
+
+### 진화 메커니즘 (Knowledge Curator + Pre-staged Apply)
+세션 종료 시 또는 5/5 체크포인트 도달 시 Knowledge Curator subagent가 자동 호출되어:
+1. 직접 수정 영역 (글로벌 `domain/`, `adaptive.md`) 은 Curator가 즉시 적용 (보정된 권한)
+2. 제안 영역 (common_knowledge/, context_rule/, REMEMBER 후보) 은 staging 디렉토리에 초안 작성 → 사용자 단일 응답("전체"/번호/"없음"/"보류")으로 일괄 결정
 
 ## Usage Scenarios
 
-1. **소프트웨어 개발**: 개발자가 자기 프로젝트에 Mickey를 적용 → 프로젝트 분석, 신규 코드 작성, 세션간 연속성 있는 점진적 개선
-2. **인프라 운영**: AWS 인프라 관리 중 발생하는 문제를 Mickey와 대응 → 세션간 문제 기억, 점진적으로 더 정확하고 효율적인 대응
-3. **Mickey 자체 개선**: AI 기술 발전(예: Claude Code Auto Memory)에서 배운 점을 Mickey에 반영 → 에이전트 시스템 자체의 지속적 진화
+1. **소프트웨어 개발 / 인프라 운영 / 일반 작업**: 세션 진행 중 결정·학습이 `auto_notes/`에 누적 → Curator가 R/G/S로 분기 판단 → 일반화 가능 지식은 글로벌 `domain/`으로 승격 → 다른 프로젝트에서 backlink로 자연 발견 + 직접 확장
+2. **Mickey 자체 개선**: AI 기술 발전 + 외부 트렌드 + 다른 프로젝트의 활용 패턴 → 본 진화 루프 자체에 반영 (포스트모템 + ADDENDUM 형태 의사결정 이력 추적)
 
 ## Acceptance Criteria
 
-"충분하다"는 없음. AI 기술은 계속 발전하며, 개선할 부분이 계속 발견된다. 사용자가 "어떻게 AI를 점진적으로 개선하면서 원하는 목적을 달성할 수 있을지"를 더 잘 깨닫게 하는 것이 목적이므로, 프로젝트는 지속적으로 진화한다.
+"충분"은 없음. 진화 루프의 **건강 지표**를 정량 측정한다.
+- 측정 대상: 글로벌 domain 참조 / Curator 호출 / auto_notes 참조 / [Protocol] 태그 (세션당 평균)
+- baseline + 임계값 + 측정 방법: T1.5 §18 (Activity Metrics) 참조
+- 임계값 위반 시: 포스트모템 트리거 + 진단 보정 (M20→M21 패턴 참조)
 
 ## Last Confirmed
-2026-03-01 (Mickey 5)
+2026-06-20 (Mickey 22)
 
 ## Last Updated
-2026-03-01
+2026-06-20
