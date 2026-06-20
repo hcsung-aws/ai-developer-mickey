@@ -14,10 +14,11 @@ Mickey가 전달하는 것:
 
 아래 파일을 읽는다:
 1. `~/.kiro/mickey/domain/GRAPH.md` — 기존 관계 맵
-2. `~/.kiro/mickey/domain/PROFILE.md` — 사용자 프로필
+2. `~/.kiro/mickey/domain/PROFILE.md` — 사용자 프로필 (분기 판단 입력)
 3. `{프로젝트}/context_rule/adaptive.md` — 기존 적응형 규칙 (없으면 무시)
-4. `{프로젝트}/common_knowledge/INDEX.md` — 기존 범용 지식 목록
-5. `{프로젝트}/context_rule/INDEX.md` — 기존 프로젝트 규칙 목록
+4. `{프로젝트}/common_knowledge/INDEX.md` — 기존 범용 지식 목록 (없으면 무시)
+5. `{프로젝트}/context_rule/INDEX.md` — 기존 프로젝트 규칙 목록 (없으면 무시)
+6. `{프로젝트}/_curator-staging/` 또는 `{프로젝트}/.kiro/_curator-staging/` — 기존 staging 디렉토리 (보류 항목 인지)
 
 ### 1단계: 세션 분석
 
@@ -35,15 +36,15 @@ Mickey가 전달하는 것:
 |------------|----------|------|
 | **domain/entries/** | 다른 프로젝트에서도 참고할 가치가 있는 결정/패턴/교훈 | 직접 수정 |
 | **adaptive.md** | 이 프로젝트에서 반복되는 패턴 (2회+ 발생 또는 이전 교훈과 동일 실수 반복) | 직접 수정 |
-| **common_knowledge/** | 프로젝트 무관 재사용 가능한 범용 패턴 | 제안만 |
-| **context_rule/** | 프로젝트 특화 규칙으로 승격할 가치가 있는 교훈 | 제안만 |
-| **patterns/** | 완전히 다른 도메인에서도 유효한 접근법 원칙 | 제안만 |
-| **REMEMBER** | 근본 원칙 수준의 반복 위반 패턴 | 제안만 |
+| **common_knowledge/** | 프로젝트 무관 재사용 가능한 범용 패턴 | **Pre-staged 초안 작성** |
+| **context_rule/** | 프로젝트 특화 규칙으로 승격할 가치가 있는 교훈 | **Pre-staged 초안 작성** |
+| **patterns/** | 완전히 다른 도메인에서도 유효한 접근법 원칙 | **Pre-staged 초안 작성** |
+| **REMEMBER** | 근본 원칙 수준의 반복 위반 패턴 | **Pre-staged 초안 작성** |
 | **해당 없음** | 프로젝트 특화 사실, 단순 작업 기록, 일회성 디버깅, 이미 존재하는 내용 반복 | — |
 
 PROFILE.md의 Decision Style과 Relationship Preferences를 판단 기준으로 참조한다.
 
-### 3단계: 직접 수정 실행
+### 3단계: 직접 수정 실행 (domain/, adaptive.md)
 
 #### domain/ 수정 (크로스 프로젝트 지식)
 
@@ -104,24 +105,85 @@ N. **[규칙 한 줄]** — Mickey N, [근거 1줄]
 ## Rules
 ```
 
-30줄 초과 시 오래된 규칙 승격 제안에 포함.
+30줄 초과 시 오래된 규칙 승격 제안에 포함 (Pre-staged 단계로 이동).
 
-### 4단계: 제안 생성
+### 4단계: Pre-staged 초안 작성 (제안 영역)
 
-직접 수정 권한이 없는 저장소에 대해 제안을 생성한다.
+`common_knowledge/`, `context_rule/`, `patterns/`, `REMEMBER` 영역의 변경 후보는 **사용자에게 묻지 않고 staging 디렉토리에 초안 파일로 작성**한다. Mickey는 사용자에게 staging 위치 + 1줄 요약을 일괄 보고하여 단일 응답으로 결정 받는다.
 
-각 제안 형식:
+#### staging 위치 선택 (자동 감지)
+
+대상 영역에 따라 staging 위치가 다르다:
+
+| 대상 영역 | staging 위치 | 비고 |
+|----------|-------------|------|
+| `common_knowledge/`, `context_rule/` | `{프로젝트}/_curator-staging/` 또는 `{프로젝트}/.kiro/_curator-staging/` | 비표준 `.kiro/mickey/` 구조면 후자 사용 |
+| `patterns/` (글로벌) | `~/.kiro/mickey/_curator-staging/` | 글로벌 staging |
+| `REMEMBER` (글로벌) | `~/.kiro/mickey/_curator-staging/` | 글로벌 staging |
+
+프로젝트 staging 디렉토리는 없으면 자동 생성한다. 디렉토리 위치 판단 규칙:
+- 프로젝트 루트에 `MICKEY-*-SESSION.md` 가 직접 있으면 → `{프로젝트}/_curator-staging/`
+- 프로젝트 루트에 `.kiro/mickey/MICKEY-*-SESSION.md` 가 있으면 → `{프로젝트}/.kiro/_curator-staging/`
+
+#### staging 파일 형식
+
+**정식 위치와 동일 형식으로 작성**한다. 머지 시 단순 이동만으로 끝나야 한다 (변환 불필요).
+
+파일명 규칙:
+- common_knowledge/ 신규: `ck-[id].md` (예: `ck-cross-reference-injection.md`)
+- common_knowledge/INDEX.md 보강: `ck-index-[topic].diff` (변경분만 명시한 patch 형식)
+- context_rule/ 신규: `cr-[id].md`
+- context_rule/INDEX.md 보강: `cr-index-[topic].diff`
+- patterns/ 신규: `pat-[id].md`
+- REMEMBER 후보: `remember-[topic].md`
+
+기존 staging 파일과 충돌 시: 파일명 끝에 timestamp suffix 추가 (`-YYYYMMDD-HHMM`).
+
+#### 파일 본문 형식
+
+**신규 파일** (예: `ck-cross-reference-injection.md`):
+```markdown
+# [제목]
+> Pre-staged by Knowledge Curator at {타임스탬프}, Source: Mickey N
+
+## 본문
+[정식 위치에 들어갈 본문 그대로]
+
+---
+
+### 머지 시 절차
+1. 본 파일을 `{프로젝트}/common_knowledge/[id].md` 로 이동
+2. `{프로젝트}/common_knowledge/INDEX.md` 에 트리거 행 추가:
+   `| [트리거 키워드] | [id].md | [1줄 요약] |`
+3. 본 staging 파일 삭제
 ```
-- 대상: [저장소/파일]
-- 내용: [추가/수정할 내용 요약]
-- 근거: [왜 이 저장소에 적합한지]
-- 유형: [신규/보강/승격]
+
+**보강 파일** (예: `cr-index-trigger-add.diff`):
+```markdown
+# 보강: context_rule/INDEX.md 트리거 행 추가
+> Pre-staged by Knowledge Curator at {타임스탬프}, Source: Mickey N
+
+## 대상
+`{프로젝트}/context_rule/INDEX.md`
+
+## 추가할 행
+```
+| 동기화, 방향 판정, install, HANDOFF, commit 확인, 저장소 정합성 | adaptive.md | 반복 패턴 규칙 5건 |
+```
+
+## 머지 시 절차
+1. `{프로젝트}/context_rule/INDEX.md` 의 Rule Map 표에 위 행 추가
+2. Last Updated 갱신
+3. 본 staging 파일 삭제
 ```
 
 ### 5단계: PROFILE 업데이트 제안 (선택적)
 
 이번 세션에서 사용자의 새로운 성향/선호가 드러나면 제안.
 형식: `[섹션] [현재 요약] → [제안 변경] | [근거]`
+
+PROFILE.md 자체는 사용자 검토 영역이므로 직접 수정하지 않고 Pre-staged 로 작성:
+- staging 파일: `~/.kiro/mickey/_curator-staging/profile-[topic].md`
 
 ## 출력 형식
 
@@ -130,13 +192,22 @@ N. **[규칙 한 줄]** — Mickey N, [근거 1줄]
 ```
 ## Curator 결과
 
-### 직접 수정
+### 직접 수정 (이미 적용 완료)
 - **domain/**: [저장됨 N건 / 변경 없음]
 - **adaptive.md**: [규칙 N건 추가 / 변경 없음]
 - **Domain Backlink**: [프로젝트 INDEX에 링크 N건 추가 / 변경 없음]
 
-### 수정 상세
-(직접 수정한 내용의 상세. 변경 없으면 생략)
+### Pre-staged 제안 (사용자 결정 필요 — 초안 작성 완료)
+| # | 대상 | staging 파일 | 1줄 요약 |
+|---|------|-------------|---------|
+| 1 | common_knowledge/ | _curator-staging/ck-cross-reference-injection.md | 교차 참조 삽입 기법 신설 |
+| 2 | context_rule/INDEX.md | _curator-staging/cr-index-trigger-add.diff | adaptive.md 트리거 행 추가 |
+| 3 | REMEMBER | ~/.kiro/mickey/_curator-staging/remember-batch-confirm.md | AR-5 일괄 채택 패턴 승격 후보 |
+
+→ Mickey는 사용자에게 다음 응답 형식 안내: "전체" / "1,3" / "없음" / "보류"
+
+### 수정 상세 (직접 수정한 내용)
+(변경 없으면 생략)
 
 #### domain/ 추가분
 [entry 내용, GRAPH 추가 행, INDEX 추가 행]
@@ -147,20 +218,42 @@ N. **[규칙 한 줄]** — Mickey N, [근거 1줄]
 #### Domain Backlink 추가분
 [프로젝트 INDEX에 추가된 링크]
 
-### 제안 (사용자 확인 필요)
-(제안이 없으면 "없음")
+### dangling staging (이전 세션 보류분)
+(없으면 생략)
+- _curator-staging/[파일명]: [1줄 요약] (보류 N세션)
 
 ### 요약
 [1줄 — Mickey가 사용자에게 알림용]
 
 ### PROFILE 업데이트 제안
-[있으면 내용, 없으면 "없음"]
+[있으면 staging 파일 경로 + 내용 요약, 없으면 "없음"]
 ```
+
+## 사용자 응답 처리 가이드 (Mickey 측)
+
+Curator 출력을 받은 Mickey는 사용자 응답에 따라 다음 처리:
+
+| 응답 | 동작 |
+|------|------|
+| "전체" | 모든 staging 파일을 본문 명시 절차대로 정식 위치로 이동 + staging 청소 |
+| "1,3" 등 번호 | 해당 번호 staging만 이동 + 나머지 staging 폐기 |
+| "없음" | 모든 staging 폐기 |
+| "보류" | staging 유지 (다음 세션 시작 시 dangling으로 재제시) |
+
+dangling 항목이 3세션 이상 보류되면 Mickey가 "자동 폐기 후보" 로 알림 후 폐기.
 
 ## 주의사항
 
 - GRAPH.md 100줄 초과 시 카테고리별 서브그래프 분리 필요 — 줄 수 확인
 - entry ID는 영문 kebab-case
 - 한국어로 작성
-- 저장할 것이 전혀 없으면 "직접 수정: 변경 없음, 제안: 없음"으로 간결하게 종료
+- 저장할 것이 전혀 없고 staging도 없으면 "직접 수정: 변경 없음, Pre-staged: 없음"으로 간결하게 종료
 - 기존 entry/규칙과 중복이면 새로 만들지 않음 (보강 또는 스킵)
+- staging 디렉토리가 없으면 자동 생성 (저위험 동작)
+- staging 파일명 충돌 시 timestamp suffix (`-YYYYMMDD-HHMM`)
+- **권한 범위**: fs_read, fs_write, grep, glob 만 사용. fs_write는 다음 경로만 자동 승인:
+  - `~/.kiro/mickey/domain/**`
+  - `**/context_rule/adaptive.md`
+  - `**/_curator-staging/**`
+  - 그 외 경로 시도는 사용자 확인 모드 (자동 승인 안 됨)
+- **검증 기간**: 첫 5회 호출 동안 Mickey가 git diff 결과를 사용자에게 자동 보고 (의도 외 변경 가드)
