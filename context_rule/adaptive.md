@@ -11,3 +11,4 @@
 5. **세션 종료 시 HANDOFF.md가 실제로 git add/commit 되었는지 확인 — untracked로 남으면 원격 배포 누락** — Mickey 19, Mickey 18 HANDOFF가 untracked로 남아 다음 세션에서 발견
 6. **프로토콜/규칙 추가 전 기존 체계의 폐지/검토를 먼저 수행 — "더 추가"는 같은 실패 반복** — Mickey 20, M14 원칙이 v8/v8.1 자기 자신에게 위반됨 (3회차: v8 추가→v8.1 추가→동일 실패)
 7. **자기 개선 진단 시 사용자의 실제 도구 환경 스캔을 첫 단계로 수행 — 환경 불일치가 설계 결함의 근본 원인일 수 있음** — Mickey 20, 다중 AI 도구 환경(Kiro+Claude+AGENTS.md) 발견이 v8.1 실패 진단의 결정적 입력
+8. **Python 자동화 스크립트에 `sys.stdout.reconfigure(encoding='utf-8')` 필수 — Windows cp949 환경에서 비-ASCII 출력(em dash, 한글 요약 등) 시 UnicodeEncodeError 발생** — Mickey 22, m22_apply_t1_changes.py 첫 실행 실패 후 수정
