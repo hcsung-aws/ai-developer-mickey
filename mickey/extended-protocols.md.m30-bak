@@ -94,7 +94,6 @@ SESSION.md의 각 작업에 검증 가능한 완료 기준을 명시한다.
 - 문제 발견 시 구체적 행동(아카이빙/삭제/승격/무시)과 대상을 명시하여 제안 (자동 삭제 금지). 사용자가 보류 시 auto_notes에 기록하고 다음 세션에서 반복 제안하지 않음
 - INDEX 불일치 → 즉시 수정 (저위험, 확인 불필요)
 - 오래된 auto_notes → "이 내용이 여전히 유효한지" 사용자에게 확인
-- staging dangling 점검 시 ownership 필터링 적용 (§17 참조). 외부 source 항목은 skip + 카운트만 보고
 
 ## 4. 자율성 모드
 
@@ -453,37 +452,6 @@ Knowledge Curator (subagent, delegate 호출)
 3. Mickey가 사용자에게 단일 응답 요청: "전체" / 번호 / "없음" / "보류"
 4. 응답에 따라 staging → 정식 위치 이동 또는 폐기
 5. dangling 항목은 다음 세션 시작 엔트로피 체크에서 재제시. 3세션 이상 보류 시 자동 폐기 후보
-
-### Source 프로젝트 ownership
-
-각 staging 파일은 **Source 프로젝트**가 명시되며, 머지/폐기 결정 권한은 Source 프로젝트의 Mickey 만 보유한다. 다른 프로젝트의 Mickey 가 외부 source 의 staging 을 결정·변경하지 못하도록 보장하는 ownership 가드.
-
-#### Source 태그 형식
-
-staging 파일의 메타데이터 줄은 다음 형식을 사용한다:
-
-```
-> Pre-staged by Knowledge Curator at <ISO8601>, Source: <project-name> Mickey N
-```
-
-- `<project-name>`: Source 프로젝트 루트 디렉토리명 (예: `gamejob_crawler`, `vision-math-helper`)
-- `<N>`: Source 프로젝트의 해당 시점 Mickey 번호
-
-글로벌 `~/.kiro/mickey/_curator-staging/` 의 모든 항목은 본 형식이 **필수**. 프로젝트 `_curator-staging/` 도 권장.
-
-#### ownership 규칙
-
-| 상황 | 행동 |
-|------|------|
-| 본 프로젝트가 Source 인 staging | 머지/폐기 결정 가능. 사용자 단일 응답 요청 |
-| 외부 프로젝트가 Source 인 staging | **skip** — 내용 결정 금지. 메타데이터 보강(Source 식별 가능하게)은 가능 |
-| Source 미명시 staging | 본문 분석으로 Source 추정 → 메타데이터 보강만 수행. 결정은 추정된 Source 프로젝트에 위임 |
-
-#### 엔트로피 체크와의 연동
-
-세션 시작 시 §3 엔트로피 체크에서 staging dangling 점검 시 ownership 필터링 적용:
-- 본 프로젝트 source 항목만 사용자 결정 요청
-- 외부 source 항목은 카운트만 보고 (3세션 이상 dangling 시에도 자동 폐기 금지 — Source 프로젝트만 폐기 가능)
 
 ### staging 디렉토리 위치 (자동 감지)
 
