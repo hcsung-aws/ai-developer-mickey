@@ -44,6 +44,6 @@
   ],
   "hooks": {},
   "mcpServers": {},
-  "useLegacyMcpJson": false,
-  "model": null
+  "model": null,
+  "includeMcpJson": false
 }

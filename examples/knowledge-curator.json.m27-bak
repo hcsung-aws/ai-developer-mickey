@@ -23,25 +23,9 @@
         "**/*.key",
         "**/*.pem"
       ]
-    },
-    "execute_bash": {
-      "allowedCommands": [
-        "ls MICKEY-.*",
-        "ls PROJECT-OVERVIEW\\.md.*",
-        "cat MICKEY-.*-SESSION\\.md",
-        "cat MICKEY-.*-HANDOFF\\.md",
-        "cat PROJECT-OVERVIEW\\.md"
-      ]
-    },
-    "subagent": {
-      "availableAgents": [],
-      "trustedAgents": []
     }
   },
-  "resources": [
-    "file://AGENTS.md",
-    "file://README.md"
-  ],
+  "resources": [],
   "hooks": {},
   "mcpServers": {},
   "useLegacyMcpJson": false,
