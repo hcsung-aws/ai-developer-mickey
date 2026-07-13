@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Mickey Knowledge Graph — __PAGE_TITLE__</title>
+<style>
+  body { margin: 0; font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+  header { padding: 10px 14px; background: #1e293b; color: #f1f5f9; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  header input[type=text], header input:not([type]) { flex: 1; min-width: 200px; padding: 6px 10px; border: 1px solid #475569; border-radius: 4px; background: #0f172a; color: #f1f5f9; }
+  .view-switch { display: inline-flex; gap: 4px; background: #0f172a; padding: 2px; border-radius: 4px; }
+  .view-switch label { padding: 4px 10px; cursor: pointer; border-radius: 3px; font-size: 12px; color: #94a3b8; }
+  .view-switch label:has(input:checked) { background: #3b82f6; color: #ffffff; }
+  .view-switch input { display: none; }
+  main { flex: 1; display: flex; overflow: hidden; }
+  #graph { flex: 1; background: #fafbfc; }
+  #detail { width: 340px; padding: 14px; background: #f8fafc; overflow: auto; border-left: 1px solid #cbd5e1; }
+  #detail h2 { margin: 0 0 8px; font-size: 16px; word-break: break-all; }
+  #detail .tag { display: inline-block; padding: 2px 6px; margin: 2px; background: #e2e8f0; border-radius: 3px; font-size: 11px; }
+  #detail .meta { font-size: 12px; color: #64748b; margin-top: 10px; word-break: break-all; }
+  #detail .field { margin-top: 6px; font-size: 13px; }
+  #detail .field strong { color: #334155; }
+  #detail .degree { display: inline-block; padding: 2px 8px; margin-right: 4px; background: #dbeafe; border-radius: 3px; font-size: 12px; font-weight: bold; }
+  #detail .degree.out { background: #fef3c7; }
+  #detail .badge { display: inline-block; padding: 2px 6px; margin-left: 4px; background: #fce7f3; color: #831843; border-radius: 3px; font-size: 11px; font-weight: bold; }
+  .legend { font-size: 12px; color: #cbd5e1; }
+  .legend .item { display: inline-block; margin-right: 10px; }
+  .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; margin-right: 3px; }
+  .legend .tri { display: inline-block; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid #10b981; vertical-align: middle; margin-right: 3px; }
+  .legend .sq { display: inline-block; width: 10px; height: 10px; background: #10b981; vertical-align: middle; margin-right: 3px; }
+  .placeholder { color: #94a3b8; font-style: italic; }
+  .hint { font-size: 11px; color: #94a3b8; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1; }
+  #stats { font-size: 11px; color: #94a3b8; margin-left: 4px; }
+  /* --- Phase 3 필터 바 (chip 목록 + 체크박스) --- */
+  #filter-bar { padding: 8px 14px; background: #f1f5f9; border-bottom: 1px solid #cbd5e1; display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; font-size: 12px; }
+  #filter-bar .filter-group { display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap; max-width: 100%; }
+  #filter-bar .filter-label { font-weight: bold; color: #334155; margin-right: 4px; white-space: nowrap; padding-top: 4px; }
+  #filter-bar .filter-actions { display: flex; gap: 4px; margin-left: 4px; }
+  #filter-bar .filter-actions button { padding: 2px 6px; font-size: 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 3px; cursor: pointer; color: #475569; }
+  #filter-bar .filter-actions button:hover { background: #e2e8f0; }
+  #filter-bar .filter-actions button.toggle-active { background: #dbeafe; border-color: #3b82f6; color: #1e40af; }
+  /* B 개선: 태그 chip 컨테이너 스크롤 (다태그 데이터셋 대응)
+     display: block + inline-block chip 조합 — flex 컨텍스트에서 max-height 무효화 이슈 회피 */
+  .chip-container { display: block; max-height: 110px; overflow-y: auto; padding: 4px 6px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 4px; min-width: 400px; max-width: 900px; line-height: 24px; }
+  /* 태그 chip */
+  .chip { display: inline-block; padding: 3px 8px; margin: 1px 2px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 11px; cursor: pointer; user-select: none; color: #64748b; transition: background 0.1s, border-color 0.1s; }
+  .chip.active { background: #3b82f6; border-color: #2563eb; color: #ffffff; }
+  .chip:hover { border-color: #94a3b8; }
+  .chip .count { margin-left: 4px; font-size: 10px; opacity: 0.7; }
+  /* kind/edge 체크박스 */
+  .type-check { display: inline-flex; align-items: center; gap: 3px; padding: 2px 6px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 3px; cursor: pointer; user-select: none; font-size: 11px; color: #475569; }
+  .type-check input { margin: 0; cursor: pointer; }
+  .type-check .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 3px; }
+  .type-check.edge .swatch { width: 12px; height: 3px; border-radius: 1px; }
+</style>
+</head>
+<body>
+<header>
+  <strong>Mickey Graph</strong>
+  <span>[__PAGE_TITLE__]</span>
+  <span class="view-switch" id="view-switch">
+    <label><input type="radio" name="view" value="project" checked>Project</label>
+    <label><input type="radio" name="view" value="global">Global</label>
+    <label><input type="radio" name="view" value="combined">Combined</label>
+  </span>
+  <input type="text" id="search" placeholder="노드 검색 (id/title/tag)">
+  <span class="legend">
+    <span class="item"><span class="dot" style="background:#3b82f6"></span>entry</span>
+    <span class="item"><span class="dot" style="background:#f97316"></span>pattern</span>
+    <span class="item"><span class="dot" style="background:#94a3b8"></span>graduated</span>
+    <span class="item"><span class="dot" style="background:#10b981"></span>project-K</span>
+    <span class="item"><span class="tri"></span>project-R</span>
+    <span class="item"><span class="sq"></span>project-N</span>
+    <span class="item"><span class="dot" style="background:#dc2626"></span>unknown</span>
+  </span>
+  <span id="stats"></span>
+</header>
+<!-- Phase 3 필터 바: 태그(chip), 노드 kind, 엣지 type. 기본 모두 활성. -->
+<section id="filter-bar">
+  <div class="filter-group">
+    <span class="filter-label">Tags</span>
+    <span id="tag-filter" class="chip-container"></span>
+    <span class="filter-actions">
+      <button id="tag-all">All</button>
+      <button id="tag-none">None</button>
+      <button id="tag-show-all" title="빈도 1 태그(대부분)를 감춰서 목록을 짧게 유지">Show all</button>
+    </span>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Kinds</span>
+    <span id="kind-filter" class="check-container"></span>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Edges</span>
+    <span id="edge-type-filter" class="check-container"></span>
+  </div>
+</section>
+<main>
+  <div id="graph"></div>
+  <aside id="detail">
+    <p class="placeholder">노드를 클릭하면 상세정보가 표시됩니다.</p>
+    <div class="hint">
+      • <strong>뷰 전환</strong>: 상단 [Project/Global/Combined] 라디오<br>
+      • <strong>노드 크기</strong> = 총 연결 수 (in + out)<br>
+      • <strong>굵은 테두리</strong> = 나가는 링크 많음 (탐색 허브)<br>
+      • <strong>핑크 테두리</strong> = 프로젝트가 backlink 로 참조한 글로벌 entry<br>
+      • <strong>Shape</strong>: dot=K, triangle=Rule, square=Note<br>
+      • <strong>라벨</strong>: 총 연결 3+ 노드만 항상 표시. 나머지는 hover
+    </div>
+  </aside>
+</main>
+
+<!-- vis-network 라이브러리 (인라인, 오프라인 완전 자립) -->
+<script>
+__VIS_NETWORK_JS__
+</script>
+
+<!-- 그래프 데이터 (인라인 JSON) -->
+<script id="graph-data">
+const MICKEY_GRAPH = __GRAPH_DATA_JSON__;
+</script>
+
+<!-- 렌더링 로직 -->
+<script>
+// --- 색상/shape 매핑 ---
+const kindColor = {
+  entry: '#3b82f6',
+  pattern: '#f97316',
+  graduated: '#94a3b8',
+  project_knowledge: '#10b981',
+  unknown: '#dc2626'
+};
+
+const kindBorder = {
+  entry: '#1d4ed8',
+  pattern: '#c2410c',
+  graduated: '#64748b',
+  project_knowledge: '#059669',
+  unknown: '#991b1b'
+};
+
+// project subkind → vis-network shape
+const subkindShape = {
+  knowledge: 'dot',
+  rule: 'triangle',
+  note: 'square',
+  '': 'dot'
+};
+
+const edgeColor = {
+  'applies-to': '#3b82f6',
+  'extends': '#8b5cf6',
+  'similar-to': '#22c55e',
+  'prerequisite': '#eab308',
+  'cross-scope': '#ec4899',
+  'unknown': '#94a3b8'
+};
+
+const BACKLINK_HIGHLIGHT_BORDER = '#ec4899';  // 핑크: backlink 대상 강조
+
+// --- 라벨 표시 임계 ---
+const LABEL_ALWAYS_SHOW_THRESHOLD = 3;
+
+// --- 스케일 함수 ---
+function computeNodeSize(totalDegree) {
+  return Math.min(10 + totalDegree * 2.5, 40);
+}
+function computeBorderWidth(outDegree, isBacklinked) {
+  const base = Math.min(1 + outDegree * 0.5, 6);
+  return isBacklinked ? Math.max(base, 3) : base;
+}
+function computeFontSize(totalDegree) {
+  return Math.min(11 + totalDegree * 0.5, 18);
+}
+
+// --- vis 노드 배열 구성 ---
+const visNodes = MICKEY_GRAPH.nodes.map(function(n) {
+  const inDeg = n.in_degree || 0;
+  const outDeg = n.out_degree || 0;
+  const total = inDeg + outDeg;
+  const displayLabel = total >= LABEL_ALWAYS_SHOW_THRESHOLD;
+  const shape = n.kind === 'project_knowledge' ? (subkindShape[n.subkind] || 'dot') : 'dot';
+
+  return {
+    id: n.id,
+    label: displayLabel ? (n.title || n.id) : '',
+    title: (n.title || n.id) + '\n' +
+           (n.core || '') +
+           (n.tags && n.tags.length ? '\n[' + n.tags.join(', ') + ']' : '') +
+           '\nin: ' + inDeg + ', out: ' + outDeg +
+           (n.is_backlinked ? '\n[backlinked from project]' : ''),
+    color: {
+      background: kindColor[n.kind] || '#94a3b8',
+      border: n.is_backlinked ? BACKLINK_HIGHLIGHT_BORDER : (kindBorder[n.kind] || '#475569'),
+      highlight: {
+        background: kindColor[n.kind] || '#94a3b8',
+        border: '#0ea5e9'
+      }
+    },
+    shape: shape,
+    size: computeNodeSize(total),
+    borderWidth: computeBorderWidth(outDeg, n.is_backlinked),
+    borderWidthSelected: 4,
+    font: {
+      size: computeFontSize(total),
+      strokeWidth: 3,
+      strokeColor: '#ffffff',
+      color: '#0f172a'
+    },
+    data: n
+  };
+});
+
+// --- vis 엣지 배열 구성 ---
+const visEdges = MICKEY_GRAPH.edges.map(function(e, i) {
+  return {
+    id: 'e' + i,
+    from: e.from_id,
+    to: e.to_id,
+    arrows: 'to',
+    color: { color: edgeColor[e.type] || '#94a3b8', opacity: 0.5 },
+    title: e.type + (e.reason ? ': ' + e.reason : ''),
+    dashes: e.type === 'cross-scope' || e.type === 'extends',
+    width: e.type === 'cross-scope' ? 2 : 1
+  };
+});
+
+// --- 그래프 인스턴스 ---
+const container = document.getElementById('graph');
+const data = {
+  nodes: new vis.DataSet(visNodes),
+  edges: new vis.DataSet(visEdges)
+};
+
+const options = {
+  nodes: { shape: 'dot' },
+  edges: { smooth: { type: 'continuous' } },
+  physics: {
+    solver: 'barnesHut',
+    barnesHut: {
+      gravitationalConstant: -8000,
+      centralGravity: 0.15,
+      springLength: 220,
+      springConstant: 0.04,
+      damping: 0.4,
+      avoidOverlap: 0.5
+    },
+    stabilization: {
+      enabled: true,
+      iterations: 500,
+      updateInterval: 50,
+      fit: true
+    }
+  },
+  interaction: {
+    hover: true,
+    tooltipDelay: 200
+  }
+};
+
+const network = new vis.Network(container, data, options);
+
+// --- Phase 3: 필터 상태 + 유니크 집합 ---
+// 필터는 white-list 방식 (선택된 것만 표시). 초기값: 모두 활성.
+const filterState = {
+  activeTags: new Set(),
+  activeKinds: new Set(),
+  activeEdgeTypes: new Set(),
+  showAllTags: false  // B 개선: 기본은 count>=2 태그만 chip 표시 (다태그 UX 대응)
+};
+
+// B 개선: 태그 chip 표시 임계값. 이 값 미만인 태그는 기본 접힘 ("Show all" 로 확장 가능)
+const TAG_MIN_COUNT = 2;
+
+// 유니크 태그/kind/edge type 집합 (레이블별 노드/엣지 수 포함)
+const tagCounts = new Map();
+const kindCounts = new Map();
+const edgeTypeCounts = new Map();
+MICKEY_GRAPH.nodes.forEach(function(n) {
+  kindCounts.set(n.kind, (kindCounts.get(n.kind) || 0) + 1);
+  (n.tags || []).forEach(function(t) {
+    tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+  });
+});
+MICKEY_GRAPH.edges.forEach(function(e) {
+  edgeTypeCounts.set(e.type, (edgeTypeCounts.get(e.type) || 0) + 1);
+});
+// 초기값: 모든 값 활성
+tagCounts.forEach(function(_, t) { filterState.activeTags.add(t); });
+kindCounts.forEach(function(_, k) { filterState.activeKinds.add(k); });
+edgeTypeCounts.forEach(function(_, et) { filterState.activeEdgeTypes.add(et); });
+
+// --- 필터 통과 판정 (순수 함수) ---
+function passesTagFilter(node) {
+  // 태그 없는 노드는 태그 필터 우회 (kind 필터만 적용)
+  if (!node.tags || node.tags.length === 0) return true;
+  // 노드의 태그 중 하나라도 활성이면 통과 (OR)
+  return node.tags.some(function(t) { return filterState.activeTags.has(t); });
+}
+function passesKindFilter(node) {
+  return filterState.activeKinds.has(node.kind);
+}
+function passesEdgeTypeFilter(edge) {
+  return filterState.activeEdgeTypes.has(edge.type);
+}
+
+network.once('stabilizationIterationsDone', function() {
+  network.fit({ animation: { duration: 500 } });
+  network.setOptions({ physics: { enabled: false } });
+  applyView(currentView());   // 초기 뷰 적용
+});
+
+// --- 뷰 스위치 로직 ---
+function currentView() {
+  const el = document.querySelector('input[name="view"]:checked');
+  return el ? el.value : 'project';
+}
+
+/**
+ * 뷰별 노드 표시 정책:
+ *   project:  프로젝트 노드 + backlink 대상 글로벌 entry
+ *   global:   프로젝트 노드 hide + backlink 대상 글로벌만 (프로젝트가 참조한 것)
+ *             그리고 backlink 노드 간의 엣지도 함께 표시
+ *   combined: 모두 표시
+ */
+function isNodeVisibleInView(node, view) {
+  if (view === 'combined') return true;
+  if (view === 'project') return node.is_project || node.is_backlinked;
+  if (view === 'global') {
+    // Global 뷰 = 전체 글로벌 (프로젝트 노드만 제외).
+    // Backlink 대상은 border 강조로 유지.
+    return !node.is_project;
+  }
+  return true;
+}
+
+function applyView(view) {
+  // 노드 hidden 필드 업데이트 (view + 태그 + kind 3중 필터)
+  const visibleIds = new Set();
+  const nodeUpdates = MICKEY_GRAPH.nodes.map(function(n) {
+    const visible = isNodeVisibleInView(n, view)
+                 && passesTagFilter(n)
+                 && passesKindFilter(n);
+    if (visible) visibleIds.add(n.id);
+    return { id: n.id, hidden: !visible };
+  });
+  data.nodes.update(nodeUpdates);
+
+  // 엣지 hidden: 양끝 노드가 모두 visible + edge type 필터 통과
+  const edgeUpdates = MICKEY_GRAPH.edges.map(function(e, i) {
+    const visible = visibleIds.has(e.from_id)
+                 && visibleIds.has(e.to_id)
+                 && passesEdgeTypeFilter(e);
+    return { id: 'e' + i, hidden: !visible };
+  });
+  data.edges.update(edgeUpdates);
+
+  // 통계 표시
+  const shownNodes = visibleIds.size;
+  const shownEdges = edgeUpdates.filter(function(u) { return !u.hidden; }).length;
+  document.getElementById('stats').textContent =
+    '(showing ' + shownNodes + ' nodes, ' + shownEdges + ' edges)';
+
+  // 뷰/필터 변경 시 이웃 강조 해제 (표시된 노드 집합 변경으로 무효화 가능)
+  clearNeighborHighlight();
+
+  // 잠시 후 fit
+  setTimeout(function() { network.fit({ animation: { duration: 500 } }); }, 100);
+}
+
+// --- Phase 3: 필터 UI 렌더 (chip + 체크박스) ---
+const EDGE_ORIG_OPACITY = 0.5;      // template 원본과 동일
+const NODE_DIM_OPACITY = 0.15;
+const EDGE_DIM_OPACITY = 0.05;
+const EDGE_HIGHLIGHT_OPACITY = 1.0;
+
+function renderTagChips() {
+  const container = document.getElementById('tag-filter');
+  container.innerHTML = '';
+  // 태그를 사용 빈도 내림차순 정렬 (동일 빈도는 알파벳 순)
+  const sorted = Array.from(tagCounts.entries()).sort(function(a, b) {
+    if (b[1] !== a[1]) return b[1] - a[1];
+    return a[0].localeCompare(b[0]);
+  });
+  // B 개선: showAllTags=false 시 count >= TAG_MIN_COUNT 만 표시 (singletons 접기)
+  const visible = filterState.showAllTags
+    ? sorted
+    : sorted.filter(function(entry) { return entry[1] >= TAG_MIN_COUNT; });
+  visible.forEach(function(entry) {
+    const tag = entry[0];
+    const count = entry[1];
+    const chip = document.createElement('span');
+    chip.className = 'chip' + (filterState.activeTags.has(tag) ? ' active' : '');
+    chip.dataset.tag = tag;
+    chip.innerHTML = tag + '<span class="count">' + count + '</span>';
+    chip.addEventListener('click', function() {
+      if (filterState.activeTags.has(tag)) {
+        filterState.activeTags.delete(tag);
+        chip.classList.remove('active');
+      } else {
+        filterState.activeTags.add(tag);
+        chip.classList.add('active');
+      }
+      applyView(currentView());
+    });
+    container.appendChild(chip);
+  });
+  // B 개선: "Show all" 버튼 상태 반영
+  const btn = document.getElementById('tag-show-all');
+  const hiddenCount = sorted.length - visible.length;
+  if (filterState.showAllTags) {
+    btn.textContent = 'Hide singletons';
+    btn.classList.add('toggle-active');
+    btn.style.display = '';
+  } else if (hiddenCount > 0) {
+    btn.textContent = 'Show all (+' + hiddenCount + ')';
+    btn.classList.remove('toggle-active');
+    btn.style.display = '';
+  } else {
+    // 숨길 singleton 이 없으면 버튼 자체를 감춤
+    btn.style.display = 'none';
+  }
+}
+
+function renderKindChecks() {
+  const container = document.getElementById('kind-filter');
+  container.innerHTML = '';
+  const orderedKinds = ['entry', 'pattern', 'graduated', 'project_knowledge', 'unknown'];
+  orderedKinds.forEach(function(kind) {
+    if (!kindCounts.has(kind)) return;
+    const count = kindCounts.get(kind);
+    const wrap = document.createElement('label');
+    wrap.className = 'type-check';
+    const swatchColor = kindColor[kind] || '#94a3b8';
+    wrap.innerHTML =
+      '<input type="checkbox" checked>' +
+      '<span class="swatch" style="background:' + swatchColor + '"></span>' +
+      kind + ' (' + count + ')';
+    wrap.querySelector('input').addEventListener('change', function(ev) {
+      if (ev.target.checked) filterState.activeKinds.add(kind);
+      else filterState.activeKinds.delete(kind);
+      applyView(currentView());
+    });
+    container.appendChild(wrap);
+  });
+}
+
+function renderEdgeTypeChecks() {
+  const container = document.getElementById('edge-type-filter');
+  container.innerHTML = '';
+  const orderedTypes = ['applies-to', 'extends', 'similar-to', 'prerequisite', 'cross-scope', 'unknown'];
+  orderedTypes.forEach(function(et) {
+    if (!edgeTypeCounts.has(et)) return;
+    const count = edgeTypeCounts.get(et);
+    const wrap = document.createElement('label');
+    wrap.className = 'type-check edge';
+    const swatchColor = edgeColor[et] || '#94a3b8';
+    wrap.innerHTML =
+      '<input type="checkbox" checked>' +
+      '<span class="swatch" style="background:' + swatchColor + '"></span>' +
+      et + ' (' + count + ')';
+    wrap.querySelector('input').addEventListener('change', function(ev) {
+      if (ev.target.checked) filterState.activeEdgeTypes.add(et);
+      else filterState.activeEdgeTypes.delete(et);
+      applyView(currentView());
+    });
+    container.appendChild(wrap);
+  });
+}
+
+// 태그 All/None 버튼
+document.getElementById('tag-all').addEventListener('click', function() {
+  tagCounts.forEach(function(_, t) { filterState.activeTags.add(t); });
+  renderTagChips();
+  applyView(currentView());
+});
+document.getElementById('tag-none').addEventListener('click', function() {
+  filterState.activeTags.clear();
+  renderTagChips();
+  applyView(currentView());
+});
+// B 개선: Show all / Hide singletons 토글
+document.getElementById('tag-show-all').addEventListener('click', function() {
+  filterState.showAllTags = !filterState.showAllTags;
+  renderTagChips();
+  // 필터 로직 자체는 불변 (활성 태그 집합 그대로) → applyView 재호출 불필요
+});
+
+// 초기 렌더
+renderTagChips();
+renderKindChecks();
+renderEdgeTypeChecks();
+
+// --- Phase 3: 이웃 1-hop 강조 ---
+// 노드 클릭 시 자신 + 1-hop 이웃만 강조, 나머지 dim.
+// 배경 클릭 시 원상복구.
+function computeNeighborSet(nodeId) {
+  const neighbors = new Set([nodeId]);
+  const relatedEdgeIds = new Set();
+  MICKEY_GRAPH.edges.forEach(function(e, i) {
+    if (e.from_id === nodeId) {
+      neighbors.add(e.to_id);
+      relatedEdgeIds.add('e' + i);
+    } else if (e.to_id === nodeId) {
+      neighbors.add(e.from_id);
+      relatedEdgeIds.add('e' + i);
+    }
+  });
+  return { neighbors: neighbors, edgeIds: relatedEdgeIds };
+}
+
+function highlightNeighbors(nodeId) {
+  const info = computeNeighborSet(nodeId);
+  const nodeUpdates = MICKEY_GRAPH.nodes.map(function(n) {
+    return { id: n.id, opacity: info.neighbors.has(n.id) ? 1.0 : NODE_DIM_OPACITY };
+  });
+  data.nodes.update(nodeUpdates);
+  const edgeUpdates = MICKEY_GRAPH.edges.map(function(e, i) {
+    const edgeId = 'e' + i;
+    const highlighted = info.edgeIds.has(edgeId);
+    return {
+      id: edgeId,
+      color: {
+        color: edgeColor[e.type] || '#94a3b8',
+        opacity: highlighted ? EDGE_HIGHLIGHT_OPACITY : EDGE_DIM_OPACITY
+      }
+    };
+  });
+  data.edges.update(edgeUpdates);
+}
+
+function clearNeighborHighlight() {
+  const nodeUpdates = MICKEY_GRAPH.nodes.map(function(n) {
+    return { id: n.id, opacity: 1.0 };
+  });
+  data.nodes.update(nodeUpdates);
+  const edgeUpdates = MICKEY_GRAPH.edges.map(function(e, i) {
+    return {
+      id: 'e' + i,
+      color: {
+        color: edgeColor[e.type] || '#94a3b8',
+        opacity: EDGE_ORIG_OPACITY
+      }
+    };
+  });
+  data.edges.update(edgeUpdates);
+}
+
+document.querySelectorAll('input[name="view"]').forEach(function(radio) {
+  radio.addEventListener('change', function() { applyView(this.value); });
+});
+
+// --- 노드 클릭 → 상세 패널 + 이웃 강조 (Phase 3) ---
+const detail = document.getElementById('detail');
+// 초기 상세 패널 상태 (placeholder + hint). 배경 클릭 시 이 상태로 복원.
+const DETAIL_PLACEHOLDER =
+  '<p class="placeholder">노드를 클릭하면 상세정보가 표시됩니다.</p>' +
+  '<div class="hint">' +
+    '• <strong>뷰 전환</strong>: 상단 [Project/Global/Combined] 라디오<br>' +
+    '• <strong>필터 바</strong>: Tags/Kinds/Edges 로 표시 대상 좁히기<br>' +
+    '• <strong>노드 클릭</strong>: 1-hop 이웃 강조 + 상세 표시<br>' +
+    '• <strong>배경 클릭</strong>: 강조 해제 + 상세 초기화<br>' +
+    '• <strong>노드 크기</strong> = 총 연결 수 (in + out)<br>' +
+    '• <strong>굵은 테두리</strong> = 나가는 링크 많음 (탐색 허브)<br>' +
+    '• <strong>핑크 테두리</strong> = 프로젝트가 backlink 로 참조한 글로벌 entry<br>' +
+    '• <strong>Shape</strong>: dot=K, triangle=Rule, square=Note<br>' +
+    '• <strong>라벨</strong>: 총 연결 3+ 노드만 항상 표시. 나머지는 hover' +
+  '</div>';
+network.on('click', function(params) {
+  if (params.nodes.length === 0) {
+    // 배경 클릭 → 이웃 강조 해제 + 상세 패널 초기화
+    clearNeighborHighlight();
+    detail.innerHTML = DETAIL_PLACEHOLDER;
+    return;
+  }
+  const nodeId = params.nodes[0];
+  const nodeData = data.nodes.get(nodeId).data;
+  const inDeg = nodeData.in_degree || 0;
+  const outDeg = nodeData.out_degree || 0;
+  const tagsHtml = (nodeData.tags || []).map(function(t) {
+    return '<span class="tag">' + t + '</span>';
+  }).join('');
+  const backlinkedBadge = nodeData.is_backlinked ? '<span class="badge">backlinked</span>' : '';
+  const projectBadge = nodeData.is_project ? '<span class="badge" style="background:#dcfce7;color:#166534;">project</span>' : '';
+  const subkindLine = nodeData.subkind ? '<div class="field"><strong>Subkind:</strong> ' + nodeData.subkind + '</div>' : '';
+
+  detail.innerHTML =
+    '<h2>' + (nodeData.title || nodeData.id) + backlinkedBadge + projectBadge + '</h2>' +
+    '<div class="field">' +
+      '<span class="degree">in ' + inDeg + '</span>' +
+      '<span class="degree out">out ' + outDeg + '</span>' +
+    '</div>' +
+    '<div class="field"><strong>ID:</strong> ' + nodeData.id + '</div>' +
+    '<div class="field"><strong>Kind:</strong> ' + nodeData.kind + '</div>' +
+    subkindLine +
+    '<div class="field"><strong>Core:</strong> ' + (nodeData.core || '-') + '</div>' +
+    (tagsHtml ? '<div class="field">' + tagsHtml + '</div>' : '') +
+    (nodeData.source ? '<div class="meta">source: ' + nodeData.source + '</div>' : '');
+
+  // 1-hop 이웃 강조 (Phase 3)
+  highlightNeighbors(nodeId);
+});
+
+// --- 검색 ---
+const searchInput = document.getElementById('search');
+searchInput.addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  if (!q) {
+    network.unselectAll();
+    return;
+  }
+  const matches = MICKEY_GRAPH.nodes.filter(function(n) {
+    return n.id.toLowerCase().indexOf(q) !== -1 ||
+      (n.title || '').toLowerCase().indexOf(q) !== -1 ||
+      (n.tags || []).some(function(t) { return t.toLowerCase().indexOf(q) !== -1; });
+  }).map(function(n) { return n.id; });
+  network.selectNodes(matches);
+  if (matches.length === 1) {
+    network.focus(matches[0], { scale: 1.4, animation: true });
+  }
+});
+
+// --- 콘솔 진단 ---
+(function() {
+  const kinds = {};
+  const subkinds = {};
+  let maxTotal = 0;
+  MICKEY_GRAPH.nodes.forEach(function(n) {
+    kinds[n.kind] = (kinds[n.kind] || 0) + 1;
+    if (n.subkind) subkinds[n.subkind] = (subkinds[n.subkind] || 0) + 1;
+    maxTotal = Math.max(maxTotal, (n.in_degree || 0) + (n.out_degree || 0));
+  });
+  console.log('[Mickey Graph] nodes:', MICKEY_GRAPH.nodes.length,
+              'edges:', MICKEY_GRAPH.edges.length, 'kinds:', kinds, 'subkinds:', subkinds);
+  console.log('[Mickey Graph] max total degree:', maxTotal);
+})();
+</script>
+</body>
+</html>
