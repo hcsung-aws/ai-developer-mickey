@@ -1,0 +1,3 @@
+# User PATH backup at 20260702-001352
+# registry type: 2 (2=REG_EXPAND_SZ, 1=REG_SZ)
+C:\Users\hcsung\AppData\Local\Microsoft\WindowsApps;C:\Users\hcsung\AppData\Local\Programs\Kiro\bin;C:\Users\hcsung\AppData\Roaming\npm;c:\users\hcsung\.local\bin;C:\Users\hcsung\.dotnet\tools;C:\Users\hcsung\AppData\Local\Toolbox\bin;C:\Users\hcsung\AppData\Local\Kiro-Cli\;C:\Users\hcsung\AppData\Local\Microsoft\WinGet\Packages\Helm.Helm_Microsoft.Winget.Source_8wekyb3d8bbwe\windows-amd64;C:\Users\hcsung\AppData\Local\Microsoft\WinGet\Packages\Hashicorp.Terraform_Microsoft.Winget.Source_8wekyb3d8bbwe;%USERPROFILE%\.dotnet\tools
