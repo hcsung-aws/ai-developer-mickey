@@ -1,0 +1,18 @@
+# Mickey graph viz tool artifacts (M34)
+scripts/mickey_graph/vendor/
+scripts/output/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# v10 migration backups (Phase 0)
+*.pre-v10-bak.zip
+*.pre-v10-bak/
+
+# Kiro CLI workspace state
+.kiro/
+
+# Serena LSP memories (per-machine, per-project)
+.serena/
