@@ -13,3 +13,4 @@
 7. **자기 개선 진단 시 사용자의 실제 도구 환경 스캔을 첫 단계로 수행 — 환경 불일치가 설계 결함의 근본 원인일 수 있음** — Mickey 20, 다중 AI 도구 환경(Kiro+Claude+AGENTS.md) 발견이 v8.1 실패 진단의 결정적 입력
 8. **Python 자동화 스크립트에 `sys.stdout.reconfigure(encoding='utf-8')` 필수 — Windows cp949 환경에서 비-ASCII 출력(em dash, 한글 요약 등) 시 UnicodeEncodeError 발생** — Mickey 22, m22_apply_t1_changes.py 첫 실행 실패 후 수정
 9. **SESSION 문서 냉동 상태와 디스크 실측을 분리 취급 — SESSION.md가 최종 갱신되지 않은 채 세션이 종료될 수 있으므로, 진입 시 파일 존재/테스트 통과/산출물 크기 등 디스크 실측을 SESSION 내용보다 우선** — Mickey 35, M34 SESSION 냉동(Phase 2 미기록) vs 실제 디스크 Phase 2 완료(pytest 89 passed) 불일치 발견
+10. **git 미추적 글로벌 파일(~/.kiro/mickey/) 편집 전 동일 디렉토리에 백업 파일 생성 필수 — 되돌리기 안전장치 없으면 수술 실패 시 복원 불가** — Mickey 36, GRAPH.md 병합+orphan 수술 전 .m36-bak 생성으로 안전 확보 (M35 domain entry 편집 시도와 동일 패턴 2회차)

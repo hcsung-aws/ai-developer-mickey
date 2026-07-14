@@ -26,3 +26,4 @@
 | 지식 분류, R/G/S, 활용 경로, 저장소 설계 | ~/.kiro/mickey/domain/entries/knowledge-type-routing.md | 지식 성격(방식/사실/절차)별 활용 경로 분리 |
 | SoT 중복 회피, 참조, 본문 중복, § 번호 유지 | ~/.kiro/mickey/domain/entries/sot-deduplication-by-reference.md | 동일 지식 1곳만 본문, 나머지 참조. 번호 재배정 금지 |
 | data-view 분리, renderer 불변, JSON pre-seeding, UI 확장 비용 | ~/.kiro/mickey/domain/entries/data-view-preseeding-immutability.md | 데이터 직렬화에 UI 필드 사전 포함 → UI 확장 시 데이터 계층 무변경 |
+| 검증 도구, health scan, 부수적 진단, 엔트로피 발견 | ~/.kiro/mickey/domain/entries/verification-tool-as-health-scanner.md | 완료 검증 목적 도구 실행이 시스템 상태 이상을 부수적으로 표면화 |
