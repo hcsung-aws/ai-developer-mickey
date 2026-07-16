@@ -40,6 +40,42 @@ class TestBuildGlobalGraph:
         graph, stats = build_global_graph(fake_mickey_root)
         assert stats.node_count == 7
 
+    def test_sub_category_graph_merged(self, fake_mickey_root: Path):
+        """§20 Step 3 하위 카테고리 GRAPH 병합: entries/{cat}/GRAPH.md 노드/엣지가 합류하고
+        cross-category 엣지(상위 노드 → 하위 노드)가 dangling 승격되지 않아야 한다."""
+        sub_dir = fake_mickey_root / "domain" / "entries" / "cloudx"
+        sub_dir.mkdir(parents=True)
+        (sub_dir / "GRAPH.md").write_text(
+            "# Sub Graph\n\n"
+            "## Nodes\n"
+            "| ID | Title | Tags | Core | Path |\n"
+            "|----|-------|------|------|------|\n"
+            "| sub-one | Sub One | tag-x | core X | entries/cloudx/sub-one.md |\n"
+            "| sub-two | Sub Two | tag-y | core Y | entries/cloudx/sub-two.md |\n\n"
+            "## Edges\n"
+            "| From | To | Type | Reason |\n"
+            "|------|----|------|--------|\n"
+            "| sub-one | sub-two | extends | internal edge |\n",
+            encoding="utf-8",
+        )
+        # 상위 GRAPH에 cross-category 엣지 추가 (alpha → sub-one)
+        top = fake_mickey_root / "domain" / "GRAPH.md"
+        text = top.read_text(encoding="utf-8")
+        text = text.replace(
+            "| alpha | ghost | similar-to | dangling target for test |",
+            "| alpha | ghost | similar-to | dangling target for test |\n"
+            "| alpha | sub-one | applies-to | cross-category edge |",
+        )
+        top.write_text(text, encoding="utf-8")
+
+        graph, stats = build_global_graph(fake_mickey_root)
+        node_ids = {n.id for n in graph.nodes}
+        assert {"sub-one", "sub-two"} <= node_ids, "하위 GRAPH 노드 병합"
+        assert any(e.from_id == "sub-one" and e.to_id == "sub-two" for e in graph.edges), "하위 내부 엣지 병합"
+        # sub-one 은 실노드로 로딩되므로 UNKNOWN 승격 대상은 기존 ghost 1건만
+        unknown = [n for n in graph.nodes if n.kind == NodeKind.UNKNOWN]
+        assert [n.id for n in unknown] == ["ghost"], "cross-category 엣지 dangling 승격 없음"
+
     def test_returns_expected_edge_count(self, fake_mickey_root: Path):
         """3 edges (graph). Graduated 'Old Pattern' → foo 는 self-loop 이므로 흡수 엣지 미생성."""
         graph, stats = build_global_graph(fake_mickey_root)

@@ -96,6 +96,14 @@ def build_global_graph(mickey_root: Path) -> tuple[GraphData, GraphBuildStats]:
     else:
         logger.warning("graph file not found: %s", graph_file)
 
+    # 하위 카테고리 GRAPH (extended-protocols §20 Step 3):
+    # domain/entries/{category}/GRAPH.md 를 재귀 스캔하여 상위 그래프에 병합.
+    # 상위에는 anchor 행만 남으므로, 하위 노드를 로딩해야 cross-category 엣지가 dangling 되지 않는다.
+    for sub_graph_file in sorted((mickey_root / "domain" / "entries").rglob("GRAPH.md")):
+        text = load_graph_file(sub_graph_file)
+        nodes.extend(parse_nodes_from_graph(text, source=str(sub_graph_file)))
+        edges.extend(parse_edges_from_graph(text))
+
     if patterns_file.exists():
         text = load_graph_file(patterns_file)
         active, graduated = parse_patterns_index(text, source=str(patterns_file))

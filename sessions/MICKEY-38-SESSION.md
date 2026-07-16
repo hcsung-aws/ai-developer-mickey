@@ -1,6 +1,6 @@
 # Mickey 38 Session Log
 
-## Checkpoint [0/5]
+## Checkpoint [2/5]
 
 ## Session Meta
 - Type: Maintenance (v10 Power 트랙 — 실사용 테스트 + 트랙 분리 계획)
@@ -51,10 +51,17 @@
 - 커밋 B: CLI 트랙 산출물 (install seed 시맨틱, m37 스크립트, 세션 로그)
 
 ### InProgress
-- mickey-power 브랜치 생성 + push + 별도 디렉토리 clone
+- (없음)
 
 ### Blocked
 - (없음)
+
+### 트랙 분리 실행 결과 (커밋 B 이후 추가 진행분 — 다음 커밋에 포함 예정)
+- push: master `78f87ab` → origin. `mickey-power` 브랜치 생성 + push (tracking 설정)
+- clone: `c:\Users\hcsung\work\kiro\mickey-power` (mickey-power 브랜치 checkout)
+- `.kiro/hooks`+`.kiro/scripts` 는 `.gitignore`(`.kiro/` 전체) 때문에 clone 누락 → `scripts/m38_copy_kiro_workspace.py` 로 수동 이식 (즉시 우회). **정식 해결(.gitignore 부분 해제 여부 검토)은 mickey-power 브랜치 과제로 인계** (solution-bypass-vs-formal-resolution-separation 패턴)
+- clone 검증: verify_power_structure 7/7 + verify_hooks 6/6 + verify_serving_sync IN-SYNC — 전부 PASS
+- **이후 power 작업(M10)은 mickey-power 디렉토리/브랜치에서만 진행. 이 디렉토리는 v2 CLI agent 트랙 전용.**
 
 ## Key Decisions
 - **D-38-1 (트랙-브랜치 분리)**: power 작업(M10)은 `mickey-power` 브랜치 + 별도 clone 디렉토리로 이동. 이 디렉토리/master 는 v2 CLI agent 트랙 전용. bak 파일 gitignore 는 보류(추후). 이 디렉토리에 별도 트랙 규칙 명시는 불필요 (사용자 지시)
@@ -62,15 +69,19 @@
 ## Files Modified
 - sessions/MICKEY-38-SESSION.md (본 로그)
 - scripts/m38_check_m37_artifacts.py (M37 산출물 디스크 실측)
+- scripts/m38_copy_kiro_workspace.py (.kiro hooks/scripts → clone 이식)
 
 ## Lessons Learned
 - **[Protocol] 세션 진입 시 첫 read 도 stale 일 수 있음** — M38 초입 MICKEY-37-SESSION.md 첫 read 가 "빈 세션" 냉동본을 반환했으나, 사용자 지적 후 재독 결과 실작업 기록 존재 + 디스크 실측(m38_check_m37_artifacts.py)으로 산출물 실존 확인. adaptive #9(SESSION 냉동 vs 디스크 실측 분리)가 "이전 세션 파일" 뿐 아니라 "현 세션의 첫 read 결과" 에도 적용됨. 인계 판단 전 산출물 디스크 실측을 기본 절차로.
+- **2트랙 동거 디렉토리의 인계 혼선** — 한 디렉토리에 CLI 트랙(MICKEY-N)과 v10 Power 트랙(session_history/)이 동거하면 Continuing Session 이 어느 트랙의 인계를 따를지 모호해짐. M38 초입에 CLI 트랙 인계를 기본값으로 오판 → 사용자 정정. 브랜치+디렉토리 분리(D-38-1)로 구조적 해소.
 
 ## Context Window Status
-~25% (추정)
+~45% (추정)
 
 ## Next Steps
-- (세션 진행 후 기재)
+- (이 디렉토리/master): CLI 트랙 잔여 — Curator 프롬프트 보정 3항목(M37 0순위-②), 트랙 A Phase 2, 엔트로피 정리
+- (mickey-power 디렉토리/브랜치): power 다듬기 — IDE 묶음 실측, registry stale path, 영문 changelog v9.2 백필, `mickey/domain/entries` 잔재, `.kiro/` gitignore 부분 해제 검토
+- bak 파일 gitignore 등록 (보류 중, 사용자 시점 결정)
 
 ## Last Updated
-2026-07-16 (Mickey 38 초입)
+2026-07-16 (Mickey 38 — 트랙 분리 완료)

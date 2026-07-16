@@ -12,7 +12,7 @@
 | 그래프 시각화, 지식 지도 시각화, 진단 도구, vis-network, 태그 chip 필터, 이웃 1-hop 강조, self-contained HTML, 클러스터 발견 | mickey-graph-visualization.md | Mickey 지식 그래프 시각화 도구 (`scripts/mickey_graph/`). 글로벌/프로젝트 스코프 self-contained HTML 렌더. Phase 3 필터 UI(태그 chip + kind/edge 체크박스 + 이웃 강조). WELC 101 tests |
 
 ## Last Updated
-2026-07-13 (Mickey 35 — mickey-graph-visualization.md 추가 + Domain Backlink data-view-preseeding-immutability 추가)
+2026-07-16 (Mickey 37 — Domain Links out-of-sync 6건 정합: windows-user-path-extension/kiro-cli-lsp-init-settings-location/project-context body 참조 반영)
 
 
 ## Domain Links
@@ -27,3 +27,9 @@
 | SoT 중복 회피, 참조, 본문 중복, § 번호 유지 | ~/.kiro/mickey/domain/entries/sot-deduplication-by-reference.md | 동일 지식 1곳만 본문, 나머지 참조. 번호 재배정 금지 |
 | data-view 분리, renderer 불변, JSON pre-seeding, UI 확장 비용 | ~/.kiro/mickey/domain/entries/data-view-preseeding-immutability.md | 데이터 직렬화에 UI 필드 사전 포함 → UI 확장 시 데이터 계층 무변경 |
 | 검증 도구, health scan, 부수적 진단, 엔트로피 발견 | ~/.kiro/mickey/domain/entries/verification-tool-as-health-scanner.md | 완료 검증 목적 도구 실행이 시스템 상태 이상을 부수적으로 표면화 |
+| PowerShell curl escape, 인용부호, JSON body | ~/.kiro/mickey/domain/entries/powershell-curl-escape.md | PowerShell 인용부호 지옥 → body 파일/스크립트 분리 회피 |
+| CLI --help 불신, 문서 drift | ~/.kiro/mickey/domain/entries/cli-help-output-distrust.md | --help 출력을 실행 검증 전 신뢰 금지 |
+| 배포 출력 불신, 외부 신호 교차 검증 | ~/.kiro/mickey/domain/entries/deploy-output-distrust.md | 도구 "성공" 출력을 외부 신호로 교차 검증 |
+| 빈 스캔 불신, 경로 후보 재확인 | ~/.kiro/mickey/domain/entries/empty-scan-distrust.md | 첫 스캔 빈 결과 → 명령어/경로 오류 우선 의심 |
+| 경로 정규화, 다중 후보 전략 | ~/.kiro/mickey/domain/entries/llm-path-normalization.md | 산출물 경로 다중 후보 전략 |
+| 측정 정밀도 반복 심화, 진단 도구 한계 | ~/.kiro/mickey/domain/entries/iterative-measurement-deepening.md | 측정 도구 정밀도는 반복 깊이 확장으로 정정 |

@@ -23,16 +23,24 @@ Documentation + Agent Configuration (Markdown, JSON, Python)
 
 ## Version Control
 - Remote: https://github.com/hcsung-aws/ai-developer-mickey.git
-- Branch: master
+- Branch: master (v2 CLI agent 트랙 전용) / `mickey-power` (v10 Power 트랙, 별도 clone `c:\Users\hcsung\work\kiro\mickey-power`) — D-38-1
+
+## Code Analysis Tools (§19 감지, M37 실측)
+- Tier 1: Serena — `.serena/` 존재 (감지됨)
+- Tier 1: Graphify — `graphify-out/` 없음 (미사용)
+- Tier 3: Kiro CLI 내장 `code` — `.kiro/settings/lsp.json` 존재 (LSP 활성)
+
+## Autonomy Preference
+Level 2 (Balanced) + batch-confirm-autonomous-proceed 패턴 유효
 
 ## Key Paths (repo-relative)
 - CLI 에이전트: `examples/ai-developer-mickey.json`
-- Knowledge Curator: `examples/knowledge-curator.json`
-- 글로벌 가이드 원본: `mickey/extended-protocols.md` (install.sh → `~/.kiro/mickey/`)
-- Power Mickey: `power-mickey/`
+- Knowledge Curator: `examples/knowledge-curator.json` (prompt SoT = `~/.kiro/mickey/domain/CURATOR-PROMPT.md`, 동기화는 `scripts/m37_sync_curator_prompt.py`)
+- 글로벌 가이드 seed: `mickey/` (install이 seed 시맨틱으로 배포 — 세대 관리 파일만 항상 갱신, D-37-1)
+- Power Mickey: `power-mickey/` (작업은 mickey-power 브랜치에서만)
 - 문서: `docs/`
 - 세션 예시: `sessions/`
-- 설치 스크립트: `install.sh` (bash — Windows는 Git Bash로 실행)
+- 설치 스크립트: `install.ps1` (Windows) / `install.sh` (bash)
 
 ## Dependencies
 - Kiro CLI (https://github.com/aws/kiro-cli)
@@ -42,4 +50,4 @@ Documentation + Agent Configuration (Markdown, JSON, Python)
 - **과거 운영 기록**: docs/07-changelog.md §22 (WSL2 SIMD 제약), sessions/self/ (WSL↔Windows 동기화 패턴)
 
 ## Last Updated
-2026-05-13 (Mickey 18)
+2026-07-16 (Mickey 37 — 브랜치 전략(D-38-1), Code Analysis Tools §19 감지 결과, Autonomy Preference, seed 시맨틱 반영)
