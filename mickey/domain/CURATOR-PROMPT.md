@@ -8,6 +8,13 @@ Mickey가 전달하는 것:
 1. **세션 맥락**: SESSION.md 내용 (결정, 교훈, 진행 상황)
 2. **프로젝트 경로**: 현재 프로젝트의 루트 경로
 
+## 세션 경계 (Session Boundary) — 위반 금지
+
+- 라우팅(승격) 대상은 **입력으로 전달된 세션 맥락(SESSION.md)에 기록된 항목만**이다.
+- 0단계에서 로딩하는 파일(GRAPH/PROFILE/INDEX/staging)은 **기존 상태 파악 용도**다. 거기서 발견한 내용을 새 지식으로 승격하지 않는다.
+- 전달된 프로젝트 경로 **밖의 다른 프로젝트 파일**(SESSION/HANDOFF/DECISIONS 등)은 읽지도, 그 내용을 승격하지도 않는다 (예외: `~/.kiro/mickey/` 글로벌 영역).
+- staging 디렉토리에서 발견한 외부 Source 항목은 건드리지 않는다 (ownership — extended-protocols §17). 세션 맥락에 없는 항목이 승격 가치가 있어 보여도 직접 처리하지 말고 출력의 "요약"에 1줄 제안으로만 언급한다.
+
 ## 실행 절차
 
 ### 0단계: 컨텍스트 로딩
@@ -48,9 +55,9 @@ PROFILE.md의 Decision Style과 Relationship Preferences를 판단 기준으로 
 
 #### domain/ 수정 (크로스 프로젝트 지식)
 
-저장 대상이 있을 때:
+저장 대상이 있을 때 (extended-protocols §20 Step 1 준수):
 1. entry 파일 생성 또는 기존 entry 보강 (`~/.kiro/mickey/domain/entries/[id].md`)
-2. GRAPH.md에 노드/엣지 추가
+2. GRAPH.md에 노드/엣지 추가 — **Path 컬럼 필수** (`entries/[id].md`). 기존 카테고리(`entries/{category}/`)에 속하는 태그면 그 안으로, 미매칭이면 flat
 3. INDEX.md에 트리거→파일→요약 추가
 
 Entry 형식:
@@ -65,6 +72,9 @@ Entry 형식:
 
 ## Tags
 [도메인 태그, 쉼표 구분]
+
+## Category (선택)
+[카테고리 소속 entry만 기입, 예: cloud/cdk. flat entry는 생략]
 
 ## Links
 - [대상 entry ID] | [관계 유형] | [연결 근거 1줄]
@@ -206,6 +216,13 @@ PROFILE.md 자체는 사용자 검토 영역이므로 직접 수정하지 않고
 
 → Mickey는 사용자에게 다음 응답 형식 안내: "전체" / "1,3" / "없음" / "보류"
 
+### 전체 변경 목록 (누락 금지)
+| 파일 경로 | 변경 유형 | 요약 |
+|----------|----------|------|
+| (이번 호출에서 생성/수정/삭제한 모든 파일 — staging 포함) | 생성/수정/삭제 | 1줄 |
+
+GRAPH.md 변경 시 노드/엣지 증감 수 명시 (예: 노드 +1, 엣지 +3)
+
 ### 수정 상세 (직접 수정한 내용)
 (변경 없으면 생략)
 
@@ -244,7 +261,10 @@ dangling 항목이 3세션 이상 보류되면 Mickey가 "자동 폐기 후보" 
 
 ## 주의사항
 
-- GRAPH.md 100줄 초과 시 카테고리별 서브그래프 분리 필요 — 줄 수 확인
+- **세션 경계 엄수** (위 "세션 경계" 섹션): 전달된 세션 맥락 밖의 지식 승격 금지. 위반 = 검증 기간 실패 사유
+- **전체 변경 보고 의무**: 이번 호출의 모든 파일 변경(생성/수정/삭제, staging 포함)을 출력의 "전체 변경 목록"에 빠짐없이 나열한다. Mickey가 git diff 및 실측(타임스탬프/노드 수)으로 교차검증하며, **미보고 변경 발견 = 검증 기간 실패 사유**
+- **Last Updated 명의 = 호출 세션**: GRAPH.md/INDEX.md 등의 Last Updated는 항상 **이번 호출을 만든 세션**(전달받은 프로젝트 + Mickey N) 명의로 기록한다 (예: `2026-07-15 (ai-developer-mickey Mickey 37 Curator)`). 다른 프로젝트/세션 명의로 기록하거나, 처리 중 알게 된 과거 세션 명의로 덮어쓰는 것을 금지한다
+- 계층화(파일 분할·카테고리화)는 extended-protocols §20 Progressive Domain Hierarchy 를 따른다: entry 400줄 초과 → Step 2 분할 제안, 태그 클러스터 7개+ → Step 3 카테고리화 제안 (둘 다 사용자 확인 필수, aspect/domain 판단은 확인 시점에)
 - entry ID는 영문 kebab-case
 - 한국어로 작성
 - 저장할 것이 전혀 없고 staging도 없으면 "직접 수정: 변경 없음, Pre-staged: 없음"으로 간결하게 종료
