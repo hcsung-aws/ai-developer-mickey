@@ -49,6 +49,7 @@
 | [프롬프트 진화](docs/06-prompt-evolution.md) | v2.0 → v5.0 진화 과정 |
 | [변경 이력](docs/07-changelog.md) | 버전별 변경사항 |
 | [진화 인사이트](docs/08-evolution-insight.md) | 🆕 "AI를 잘 쓰는 법"이 어떻게 진화해 왔는가 |
+| [v3 Power 마이그레이션](docs/09-v3-power-migration.md) | 🆕 CLI v2 agent → Kiro v3 Power 이전의 서사와 설계 결정 |
 
 ### 실전 사례
 
@@ -78,6 +79,7 @@ Mickey 프롬프트는 실제 프로젝트를 거치며 계속 진화합니다:
 | **v8.1** | 🆕 Knowledge Curator subagent + domain/ 활성화 (PROFILE/GRAPH/entries) + Personal Vault → domain/ 전환 |
 | **v9 (PLAN)** | 🆕 3-Tier(R/G/S) + 글로벌 도메인 중심 + knowledge-organization Skill — POSTMORTEM 기반 재설계 (Phase 1~5, 구현은 다음 세션부터) |
 | **v9.1** | 🆕 v9 PLAN 보정+정착: Curator 권한 보정 + Pre-staged Apply 패턴 + T1.5 §17 Knowledge Lifecycle + §18 Activity Metrics — 5주 31세션 실측이 v9 PLAN의 "Curator 폐지" 결정 무효화 |
+| **v10 (Power Migration)** | 🆕 CLI v2 agent → Kiro v3 Power 마이그레이션: steering 7개(상시 6 + on-demand 1) + 세션 hook/스크립트 + memorygraph 제거(파일 기반 지식 그래프) + install 스크립트 v3 배포 파이프라인 |
 
 > 💡 자세한 변경 이력은 [변경 이력 문서](docs/07-changelog.md)를 참고하세요.
 > 📋 **v9.1 정착 (Mickey 21~22)**: [IMPROVEMENT-PLAN-v9-ADDENDUM.md](IMPROVEMENT-PLAN-v9-ADDENDUM.md) — Curator 권한 보정 + Pre-staged Apply (ADDENDUM 우선)
@@ -107,14 +109,25 @@ cd ai-developer-mickey
 ```
 
 `install.sh` / `install.ps1`이 수행하는 것:
-- Agent JSON → `~/.kiro/agents/`
+- Agent JSON → `~/.kiro/agents/` (CLI v2)
 - 글로벌 가이드 → `~/.kiro/mickey/`
+- v3 Power → `~/.kiro/powers/installed/power-mickey/` (kiro-cli 2.10 이상일 때. 미만이면 자동으로 건너뜀)
+
+> v3 배포는 `scripts/deploy_power.py`가 담당하며, 기존 설치본을 백업한 뒤 교체합니다. 변경 없이 계획만 보려면 `python scripts/deploy_power.py --dry-run`을 실행하세요.
 
 ### 2. 프로젝트에서 Mickey 실행
 
+세 가지 사용 방식이 있습니다.
+
+| 시나리오 | 실행 방법 | 설명 |
+|----------|----------|------|
+| **CLI v2** | `kiro-cli chat --agent ai-developer-mickey` | v17 프롬프트(agent JSON) 직접 사용. 검증된 안정 경로 |
+| **CLI v3** | `kiro-cli chat` | power-mickey가 자동 인식됨. steering 상시 6 + on-demand 1 로딩 (kiro-cli 2.10+) |
+| **Kiro IDE** | Powers 패널에서 power-mickey 활성 | 동일한 steering을 IDE에서 사용 |
+
 ```bash
 cd <프로젝트 디렉토리>
-kiro-cli chat --agent ai-developer-mickey
+kiro-cli chat --agent ai-developer-mickey   # CLI v2
 ```
 
 ### 3. Mickey가 자동으로 수행하는 것
@@ -150,19 +163,19 @@ ai-developer-mickey/
 │   └── context_rule/       # 컨텍스트 규칙 예시
 ├── context_rule/           # 이 프로젝트의 컨텍스트 규칙 (Mickey가 자기 개선 시 활용)
 ├── common_knowledge/       # 이 프로젝트의 범용 지식
-├── power-mickey/           # [실험적] Kiro IDE Power
+├── power-mickey/           # Kiro v3 Power (v10 — CLI v3 + IDE)
 └── godot-pong/            # Godot 리플레이 시스템 코드
 ```
 
-## 🧪 실험적 기능: Kiro IDE Power
+## ⚡ Kiro v3 Power (v10)
 
-> ⚠️ **주의**: 이 기능은 아직 테스트 중입니다. 안정적인 사용을 원하시면 위의 Kiro CLI 방식을 사용하세요.
-
-Mickey의 핵심 원칙을 Kiro IDE Power 형태로도 제공합니다. Power는 Kiro IDE 0.7+에서 사용할 수 있는 패키징 형식으로, 온보딩 시 세션 관리 구조와 Memory Graph MCP를 자동으로 설정합니다.
+Mickey를 Kiro v3 Power 형식으로도 제공합니다 (v10 마이그레이션). steering을 진입점으로 삼고 상세 지식은 필요할 때만 pull하는 progressive disclosure 구조로, **CLI v3와 Kiro IDE 양쪽에서 동일하게 동작**합니다. 자세한 서사와 설계 결정은 [v3 Power 마이그레이션](docs/09-v3-power-migration.md)을 참고하세요.
 
 ### 설치 방법
 
-**로컬 설치:**
+위의 `install.sh` / `install.ps1`이 kiro-cli 2.10 이상이면 자동으로 배포합니다 (`~/.kiro/powers/installed/power-mickey/`).
+
+**Kiro IDE 로컬 설치:**
 ```bash
 git clone https://github.com/hcsung-aws/ai-developer-mickey.git
 # Kiro IDE → Powers 패널 → Add power from Local Path → power-mickey 폴더 선택
@@ -172,24 +185,26 @@ git clone https://github.com/hcsung-aws/ai-developer-mickey.git
 
 ```
 power-mickey/
-├── POWER.md              # 온보딩 지침 + 키워드 설정
-├── mcp.json              # Memory Graph MCP 설정
-└── steering/             # Mickey 핵심 원칙
-    ├── mickey-core.md
-    ├── session-protocol.md
-    ├── problem-solving.md
-    ├── memory-protocol.md
-    └── self-improvement.md
+├── POWER.md              # 온보딩 지침 + steering 매핑 + 활성화 트리거
+├── mcp.json              # aws-knowledge-mcp-server (memorygraph는 v10에서 제거)
+└── steering/             # 상시 6 + on-demand 1
+    ├── mickey-core.md          # Core Identity + REMEMBER 12
+    ├── session-protocol.md     # 세션 4단계 프로토콜
+    ├── knowledge-graph.md      # 지식 그래프 접근 규약
+    ├── problem-solving.md      # 문제 해결 10단계
+    ├── document-schema.md      # 문서 스키마
+    ├── context-window.md       # context window 관리
+    └── knowledge-curator.md    # (manual) 세션 종료 시에만 pull
 ```
 
-### CLI vs Power 비교
+### CLI v2 vs v3 Power 비교
 
-| 항목 | Kiro CLI (기존) | Kiro IDE Power (실험적) |
-|------|----------------|------------------------|
-| 안정성 | ✅ 검증됨 | ⚠️ 테스트 중 |
-| 설정 방식 | JSON 에이전트 파일 | Power 온보딩 |
-| 세션 관리 | 수동 | Hook으로 자동화 |
-| Memory Graph | 별도 설정 | 온보딩에서 설치 |
+| 항목 | Kiro CLI v2 (agent JSON) | Kiro v3 Power |
+|------|--------------------------|---------------|
+| 프롬프트 로딩 | v17 전체 상주 | steering 상시 6 + on-demand 1 + 그래프 노드 pull |
+| 지식 그래프 | 파일 기반 (`~/.kiro/mickey/`) | 동일 (memorygraph MCP 제거) |
+| 세션 관리 | 수동 | CLI v3 hook(`SessionStart`/`Stop`) + 스크립트 |
+| 사용 환경 | CLI | CLI v3 + Kiro IDE |
 
 ## 🔗 관련 링크
 

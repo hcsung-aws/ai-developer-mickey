@@ -1,8 +1,10 @@
 {
+  "$comment": "v10에서 memorygraph 제거. 지식 그래프는 파일 기반(~/.kiro/mickey/)으로 관리. Serena/Graphify는 사용자 홈 전역 mcp.json에 등록된 것을 재활용하므로 여기 미포함.",
   "mcpServers": {
-    "memorygraph": {
-      "command": "memorygraph",
-      "args": ["--profile", "extended"]
+    "aws-knowledge-mcp-server": {
+      "url": "https://knowledge-mcp.global.api.aws",
+      "type": "http",
+      "disabled": false
     }
   }
 }

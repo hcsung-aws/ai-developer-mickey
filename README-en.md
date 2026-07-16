@@ -40,6 +40,7 @@ The Mickey prompt continues to evolve through real projects:
 | **v8.1** | Mickey Self-Improvement | Mickey 14-15 | 🆕 Knowledge Curator subagent + domain/ activation (PROFILE/GRAPH/entries) + Personal Vault → domain/ transition |
 | **v9 (PLAN)** | Mickey Self-Improvement | Mickey 20 | 🆕 3-Tier (R/G/S) + Domain-centric global knowledge + knowledge-organization Skill — POSTMORTEM-based redesign (Phase 1~5, implementation from next session) |
 | **v9.1** | Mickey Self-Improvement | Mickey 21-22 | 🆕 v9 PLAN correction+landing: Curator permission fix + Pre-staged Apply + T1.5 §17 Knowledge Lifecycle + §18 Activity Metrics — 5-week 31-session measurement invalidated v9 PLAN's "retire Curator" decision |
+| **v10 (Power Migration)** | Mickey Self-Improvement | v10 track | 🆕 CLI v2 agent → Kiro v3 Power migration: 7 steering (6 always + 1 on-demand) + session hooks/scripts + memorygraph removed (file-based knowledge graph) + install-script v3 deploy pipeline |
 
 > 💡 **Key Insight**: AI prompts should not be "write once and done" but **continuously evolved through failure experiences**. See [Prompt Evolution Guide](docs/06-prompt-evolution-en.md) for details.
 
@@ -73,6 +74,11 @@ Through this project, you will learn:
 
 6. **[Prompt Evolution: v2.0 → v5.0](docs/06-prompt-evolution-en.md)** - Lessons from the second project ⭐
    - [한글](docs/06-prompt-evolution.md)
+
+### v3 Power Migration (v10) 🆕
+
+- **[v10: From CLI Agent to Kiro v3 Power](docs/09-v3-power-migration-en.md)** - Migration narrative and design decisions
+  - [한글](docs/09-v3-power-migration.md)
 
 ### AI Perspective
 
@@ -112,13 +118,25 @@ cd ai-developer-mickey
 ```
 
 What `install.sh` / `install.ps1` does:
-- Agent JSON → `~/.kiro/agents/`
+- Agent JSON → `~/.kiro/agents/` (CLI v2)
 - Global guide → `~/.kiro/mickey/`
+- v3 Power → `~/.kiro/powers/installed/power-mickey/` (when kiro-cli is 2.10+; skipped automatically below that)
+
+> The v3 deploy is handled by `scripts/deploy_power.py`, which backs up the existing install before replacing it. Run `python scripts/deploy_power.py --dry-run` to preview without changes.
 
 ### 2. Running Mickey in a Project
 
+There are three ways to use Mickey:
+
+| Scenario | How to run | Notes |
+|----------|-----------|-------|
+| **CLI v2** | `kiro-cli chat --agent ai-developer-mickey` | Uses the v17 prompt (agent JSON) directly. The verified, stable path |
+| **CLI v3** | `kiro-cli chat` | power-mickey is auto-detected. Loads 6 always + 1 on-demand steering (kiro-cli 2.10+) |
+| **Kiro IDE** | Activate power-mickey in the Powers panel | Same steering, in the IDE |
+
 ```bash
-kiro chat --agent ai-developer-mickey
+cd <project directory>
+kiro-cli chat --agent ai-developer-mickey   # CLI v2
 ```
 
 ### What Mickey Automatically Does
@@ -140,19 +158,19 @@ ai-developer-mickey/
 │   └── context_rule/       # Context rule examples
 ├── context_rule/           # This project's context rules (used by Mickey for self-improvement)
 ├── common_knowledge/       # This project's common knowledge
-├── power-mickey/           # [Experimental] Kiro IDE Power
+├── power-mickey/           # Kiro v3 Power (v10 — CLI v3 + IDE)
 └── godot-pong/            # Godot replay system code
 ```
 
-## 🧪 Experimental: Kiro IDE Power
+## ⚡ Kiro v3 Power (v10)
 
-> ⚠️ **Warning**: This feature is still under testing. For stable usage, please use the Kiro CLI method above.
-
-Mickey's core principles are also available as a Kiro IDE Power format. Power is a packaging format available in Kiro IDE 0.7+, which automatically sets up session management structure and Memory Graph MCP during onboarding.
+Mickey is also available as a Kiro v3 Power (the v10 migration). Steering files act as entry points and detailed knowledge is pulled only when needed (progressive disclosure), so it **works identically on CLI v3 and Kiro IDE**. See [v3 Power Migration](docs/09-v3-power-migration-en.md) for the full narrative and design decisions.
 
 ### Installation
 
-**Local installation:**
+The `install.sh` / `install.ps1` above deploys it automatically when kiro-cli is 2.10+ (`~/.kiro/powers/installed/power-mickey/`).
+
+**Kiro IDE local installation:**
 ```bash
 git clone https://github.com/hcsung-aws/ai-developer-mickey.git
 # Kiro IDE → Powers panel → Add power from Local Path → Select power-mickey folder
@@ -162,24 +180,26 @@ git clone https://github.com/hcsung-aws/ai-developer-mickey.git
 
 ```
 power-mickey/
-├── POWER.md              # Onboarding instructions + keyword settings
-├── mcp.json              # Memory Graph MCP configuration
-└── steering/             # Mickey core principles
-    ├── mickey-core.md
-    ├── session-protocol.md
-    ├── problem-solving.md
-    ├── memory-protocol.md
-    └── self-improvement.md
+├── POWER.md              # Onboarding instructions + steering mapping + activation triggers
+├── mcp.json              # aws-knowledge-mcp-server (memorygraph removed in v10)
+└── steering/             # 6 always + 1 on-demand
+    ├── mickey-core.md          # Core Identity + REMEMBER 12
+    ├── session-protocol.md     # 4-stage session protocol
+    ├── knowledge-graph.md      # Knowledge-graph access contract
+    ├── problem-solving.md      # 10-step problem solving
+    ├── document-schema.md      # Document schemas
+    ├── context-window.md       # Context window management
+    └── knowledge-curator.md    # (manual) pulled only at session close
 ```
 
-### CLI vs Power Comparison
+### CLI v2 vs v3 Power Comparison
 
-| Item | Kiro CLI (Existing) | Kiro IDE Power (Experimental) |
-|------|---------------------|-------------------------------|
-| Stability | ✅ Verified | ⚠️ Under testing |
-| Configuration | JSON agent file | Power onboarding |
-| Session Management | Manual | Automated via Hook |
-| Memory Graph | Separate setup | Installed during onboarding |
+| Item | Kiro CLI v2 (agent JSON) | Kiro v3 Power |
+|------|--------------------------|---------------|
+| Prompt loading | Full v17 resident | 6 always + 1 on-demand steering + graph-node pull |
+| Knowledge graph | File-based (`~/.kiro/mickey/`) | Same (memorygraph MCP removed) |
+| Session management | Manual | CLI v3 hooks (`SessionStart`/`Stop`) + scripts |
+| Environment | CLI | CLI v3 + Kiro IDE |
 
 ## 💡 Key Insights
 

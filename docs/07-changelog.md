@@ -26,6 +26,54 @@
 | v9 (PLAN) | 2026-05 | Mickey 자기 개선 | 3-Tier (R/G/S) + 글로벌 도메인 중심 + knowledge-organization Skill — POSTMORTEM 기반 재설계 |
 | v9.1 | 2026-06 | Mickey 자기 개선 | v9 PLAN 보정+정착: Curator 권한 보정 + Pre-staged Apply + T1.5 §17/§18 + ADDENDUM 우선 |
 | v9.2 | 2026-07 | Mickey 자기 개선 | 외부 코드 분석 도구 통합 (Serena/Graphify Tier 1 default + Kiro CLI 내장 code Tier 3 baseline + `/code init` 유도) + FILE-STRUCTURE 스키마 축소 (Mickey는 first-step 지도만, 상세 분석은 도구 위임) |
+| v10 (Power Migration) | 2026-07 | Mickey 자기 개선 | CLI v2 agent(v17) → Kiro v3 Power 마이그레이션. steering 7개(상시 6 + on-demand 1) + 세션 hook/스크립트 + 파일 기반 지식 그래프(memorygraph 제거) + install 스크립트 v3 배포 파이프라인(버전 게이트 2.10) |
+
+---
+
+## v10 (Power Migration, 2026-07-04~13)
+
+**프로젝트**: Mickey 자기 개선 (v10 Power Migration 트랙)
+**상태**: Phase 0~5 진행. 골격 재건 · 세션 hook/스크립트 · Curator steering 흡수 · install 스크립트 개편 완료. 문서 갱신 진행 중.
+
+### 핵심 변화: CLI v2 agent(v17) → Kiro v3 Power 마이그레이션
+
+v17 프롬프트(CLI agent JSON)를 Kiro v3 Power 형식(steering + POWER.md)으로 이식한다. 상시 로드 부담을 줄이기 위해 **T1(v17 골격)만 steering 6개로 분할**하고, **T1.5 심층 프로토콜 · 지식 그래프 노드 · Curator 정본은 원본 유지 후 on-demand pull**(progressive disclosure). CLI v2 경로는 그대로 유지하여 v2/v3 병행 사용 가능.
+
+### 주요 변경
+
+1. **steering 구조 (상시 6 + on-demand 1)**
+   - 상시(`inclusion: always`): `mickey-core.md`, `session-protocol.md`, `knowledge-graph.md`, `problem-solving.md`, `document-schema.md`, `context-window.md`
+   - on-demand(`inclusion: manual`): `knowledge-curator.md` — 세션 종료 시에만 `readSteering` 로 pull
+   - 각 steering 은 200줄 이하 진입점. 심층 내용은 `~/.kiro/mickey/` 그래프 노드에서 pull
+
+2. **memorygraph MCP 제거**
+   - 지식 그래프를 파일 기반(`~/.kiro/mickey/` INDEX/GRAPH/PROFILE/entries)으로 관리
+   - `mcp.json` 은 `aws-knowledge-mcp-server` 만 명시. Serena/Graphify 는 사용자 홈 전역 설정 재활용
+
+3. **세션 hook/스크립트 (Phase 3)**
+   - CLI v3 hook 2건(`SessionStart`/`Stop`) + 세션 스크립트 2건(`mickey_session_boot.py`/`mickey_session_close.py`). hook 은 얇게, 로직은 스크립트로 격리
+   - IDE `.kiro.hook` 2건은 skeleton + `_note` 로 규격 실측 이월
+
+4. **Knowledge Curator steering 흡수 (Phase 4-A)**
+   - v2 Curator agent 로직을 `knowledge-curator.md`(manual) 진입점으로 이식. 정본 절차(`CURATOR-PROMPT.md`)는 원본 유지 pull. 호출 규약 3중 중복을 `knowledge-curator.md` 로 단일화
+
+5. **install 스크립트 v3 배포 파이프라인 (Phase 5)**
+   - `scripts/deploy_power.py` 신규: kiro-cli 버전 게이트(2.10) · 기존 설치본 타임스탬프 백업 · full-dir clean-replace(구 steering orphan 차단) · `installed.json` 항목 보장 · `--dry-run`
+   - `install.ps1`/`install.sh` 는 v2 배포(agents JSON + `~/.kiro/mickey`) 유지 + `deploy_power.py` 호출 추가. v2 는 항상, v3 는 버전 조건부
+   - 소비 모델 실증: kiro-cli 는 `~/.kiro/powers/installed/power-mickey/` 물리본을 서빙
+
+### 검증
+
+- `verify_power_structure.py` 7/7 (steering · front matter · T1 추적성 · P3 · inclusion 모드)
+- `verify_hooks.py` 6/6 (세션 hook/스크립트)
+- `verify_deploy_power.py` 25/25 (버전 게이트 · 백업 · orphan 제거 · idempotent)
+
+### 참고
+
+- 계획서: `IMPROVEMENT-PLAN-v10-power-migration.md`
+- 이식 매트릭스(100% 추적성): `docs/v2-to-v3-mapping.md`
+- 상세 서사: `docs/09-v3-power-migration.md`
+- 세션 로그: `session_history/2026-07-04~13-mickey-v10-migration-*.md`
 
 ---
 

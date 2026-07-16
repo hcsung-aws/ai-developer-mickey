@@ -15,7 +15,7 @@ ai-developer-mickey/
 ├── auto_notes/                    # AI 자동 관찰 기록 (T3a)
 ├── mickey/                        # 글로벌 가이드 원본 (install.sh → ~/.kiro/mickey/)
 ├── power-mickey/                  # v10 Power 재건 (POWER.md + mcp.json + steering/ 7개: 상시 6 + manual 1). 구 실험본은 .pre-v10-bak.zip
-├── .kiro/hooks/                   # v10 Phase 3: CLI v3 hook 2(SessionStart/Stop) + IDE skeleton 2 + README
+├── .kiro/hooks/                   # v10 Phase 3: CLI v3 hook 1(SessionStart, 발화 실측 확인) + IDE skeleton 2 + README. Stop hook 은 F5 로 폐기(per-response 실측)
 ├── .kiro/scripts/                 # v10 Phase 3: mickey_session_boot.py / mickey_session_close.py (hook 얇게, 로직은 여기)
 ├── scripts/                       # 진단/적용 스크립트 + mickey_graph/ 시각화 도구
 │   ├── mickey_graph/              # 지식 그래프 시각화 (models/parser/builder/renderer + templates/ + vendor/)
@@ -85,6 +85,8 @@ ai-developer-mickey/
 | `power-mickey/steering/knowledge-curator.md` | Curator 호출 계약 (inclusion: manual, 세션 종료 시 readSteering) |
 | `scripts/verify_power_structure.py` | v10 power 구조 검증기 (steering 7 · front matter · T1 추적성 · P3 · inclusion 모드, 7/7) |
 | `scripts/verify_hooks.py` | v10 세션 hook/스크립트 검증기 (6/6) |
+| `scripts/deploy_power.py` | v10 Phase 5: v3 power 배포 단일 구현 (버전 게이트 2.10 · 백업 · clean-replace · installed.json · --dry-run) |
+| `scripts/verify_deploy_power.py` | v10 Phase 5: deploy_power 테스트 하니스 (임시 홈, 25/25) |
 | `context_rule/adaptive.md` | Curator 직접 수정 영역 (반복 패턴 8건) |
 | `common_knowledge/safe-batch-replace.md` | 10세대 재사용 검증 (M22→M32) |
 | `common_knowledge/mickey-graph-visualization.md` | 그래프 시각화 도구 사용법 + 시각적 매핑 + Phase 4 계획 (M35) |

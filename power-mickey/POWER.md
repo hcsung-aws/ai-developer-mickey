@@ -1,7 +1,7 @@
 ---
 name: "mickey"
-displayName: "Mickey AI Developer Agent"
-description: "세션 연속성, 자기 개선, 구조화된 문제 해결을 지원하는 AI 개발자 에이전트"
+displayName: "Mickey AI Developer Agent (v10)"
+description: "세션 연속성, 자기 개선, 구조화된 문제 해결을 지원하는 AI 개발자 에이전트. 파일 기반 지식 그래프(~/.kiro/mickey/)와 Serena/Graphify를 활용해 상황별 지식만 pull하며 작업한다."
 keywords: [
   "develop", "code", "implement", "fix", "debug", "build", "create",
   "session", "memory", "remember", "continue", "previous",
@@ -9,261 +9,140 @@ keywords: [
   "decision", "architecture", "design", "pattern",
   "lesson", "improve", "learn", "refactor", "test"
 ]
+version: "10.0.0-alpha"
 ---
 
-# Mickey AI Developer Agent
+# Mickey AI Developer Agent (v10)
 
-세션 연속성과 자기 개선을 지원하는 AI 개발자 에이전트입니다.
+세션 간 맥락 유지, 구조화된 문제 해결, 프로젝트별 교훈 축적을 담당한다. Postfix 번호는 세션마다 +1 증가한다 (Mickey 1, Mickey 2, ...).
 
-## 핵심 기능
-- 세션 간 맥락 유지 (세션 로그, 핸드오프)
-- 구조화된 문제 해결 프로토콜
-- 프로젝트별 교훈 축적 및 자기 개선
-- Memory Graph를 통한 장기 기억
+## 활성화 직후 반드시 pull 할 것 (Steering 상시 6종)
 
----
+**CLI v3 실측 (2026-07-14): steering 은 activate 시 자동으로 컨텍스트에 편입되지 않는다.** `inclusion: always` 표기는 Kiro IDE 호환용이며, CLI v3 런타임은 always/manual 구분 없이 모든 steering 을 `readSteering` on-demand 로만 서빙한다.
 
-# Onboarding
+따라서 에이전트는 다음 분기를 따른다 (P3 양쪽 분기):
+- **activate 완료 직후** → 아래 6종을 즉시 `readSteering` 로 pull 한다. pull 없이 작업을 시작하면 REMEMBER·세션 프로토콜 없이 동작하게 되므로 금지.
+- **activate 이전** → steering pull 을 시도하지 말고 activate 먼저 수행.
 
-## Step 1: 프로젝트 구조 생성
+각 파일은 200줄 이하, 진입점 역할만 담당하며 심층 프로토콜은 그래프 노드(§ 지식 그래프)에서 필요할 때 pull한다.
 
-Mickey가 사용할 디렉토리를 생성합니다:
+| Steering | 역할 | 언제 참조 |
+|----------|------|----------|
+| `mickey-core.md` | Core Identity + Communication + REMEMBER 12 + Anti-Patterns | 항상 (모든 판단의 뼈대) |
+| `session-protocol.md` | First/Continuing/During/End Session 4단계 + 그래프 트리거 | 세션 시작·진행·종료 시 |
+| `knowledge-graph.md` | 지식 그래프 접근 규약 + Curator 진입 리다이렉트 + 3-Tier 로딩 | 세션 시작 시 인덱스 로딩, 작업 중 트리거 매칭 시 |
+| `problem-solving.md` | 10단계 골격 + 심층 프로토콜 트리거 | 새 기능 구현, 버그 수정, 리팩토링 시 |
+| `document-schema.md` | 10종 문서 필수 스키마 | 문서 생성·수정 시 |
+| `context-window.md` | 50/70/90 관리 실행 규칙 | 세션 진행 내내 |
 
-```bash
-mkdir -p .kiro/sessions/archive
-mkdir -p .kiro/scripts
-mkdir -p .kiro/steering
-mkdir -p .kiro/settings
-```
+## 활성화 시 로드하지 않는 steering (세션 종료 시에만 pull)
 
-## Step 2: 세션 초기화 스크립트 생성
+세션 종료 시에만 필요한 규약은 상시 6종과 함께 pull 하지 않는다 (progressive disclosure). CLI v3 에서는 상시 6종도 readSteering 로 pull 하므로, 이 파일의 차이는 "pull 시점"이다 — 상시 6종은 activate 직후, 아래는 세션 종료 시.
 
-`.kiro/scripts/session_init.py` 파일을 생성합니다 (크로스 플랫폼 호환):
+| Steering | inclusion | 역할 | 언제 pull |
+|----------|-----------|------|----------|
+| `knowledge-curator.md` | `manual` | Curator 호출 계약(입력·R/G/S 분기·자동승인·5회 검증·응답 프로토콜) 요약 + CURATOR-PROMPT.md pull 지시 | 세션 종료("세션 정리") 시 `session-protocol.md` End Step 2. **세션 종료가 아니면 pull 안 함** |
 
-```python
-"""세션 초기화 스크립트.
+## 활성화 시 로드되지 않는 것 (그래프 노드, on-demand)
 
-이전 세션을 아카이브하고 새 세션 로그를 생성한다.
-HANDOFF.md에서 핵심만 추출한 SESSION-BRIEF.md를 생성하여
-에이전트의 context window 소모를 최소화한다.
-"""
+Steering이 상시 담기에는 무거우므로, 상황별로 pull해서 참조한다. **필요할 때만** 아래 노드를 읽는다.
 
-import shutil
-from datetime import datetime
-from pathlib import Path
+### 지식 그래프 진입 인덱스 (T3a — 세션 시작 시 로딩)
 
+- `~/.kiro/mickey/patterns/INDEX.md` — 도메인 무관 패턴 (상한 7개)
+- `~/.kiro/mickey/domain/INDEX.md` — 도메인 지식 트리거 매핑
+- `~/.kiro/mickey/domain/GRAPH.md` — 노드+엣지 관계 맵
+- `~/.kiro/mickey/domain/PROFILE.md` — 사용자 성향·판단 기준
 
-SESSION_DIR = Path(".kiro/sessions")
-CURRENT = SESSION_DIR / "CURRENT.md"
-ARCHIVE_DIR = SESSION_DIR / "archive"
-BRIEF = SESSION_DIR / "SESSION-BRIEF.md"
+### T1.5 세부 프로토콜 (`~/.kiro/mickey/extended-protocols.md` §1~§19)
 
-TEMPLATE = """# Session Log
+steering이 참조 트리거를 명시. 매칭 시 해당 §만 pull:
 
-## 목표
-(세션 시작 시 설정)
+| § | 제목 | 트리거 |
+|---|------|--------|
+| §1 | Brownfield 온보딩 | 기존 코드/문서/설정 자산 발견 시 |
+| §2 | Completion Criteria | 옵션 제시 시 |
+| §3 | 엔트로피 관리 | Continuing Session 초기 |
+| §4 | 자율성 모드 (HITL/OHOTL/AHOTL) | 자율 실행 조건 판단 시 |
+| §5 | Subagent Delegation | 병렬 작업 2개↑ 감지 시 |
+| §6 | Backpressure | 검증 실패 시 |
+| §7 | Architectural Guard | 동일 아키텍처 위반 2회 감지 시 |
+| §9 | 포스트모템 프로토콜 | 10세션 경과 또는 3개월 잠복 후 |
+| §10 | Behavioral Scenario Check | 새 기능/수정 구현 전 (REMEMBER #12) |
+| §11 | Graduated REMEMBER | 포스트모템 시 재검토 |
+| §12 | Global Knowledge | 승격 판단 시 |
+| §13 | 세션 로그 기록 품질 | 설계 논의 기록 시 |
+| §14 | 실행 중 이상 감지 | 도구 실행 중 warning 감지 시 |
+| §15 | Test Harness (WELC) | 기존 코드 수정 시 (REMEMBER #9) |
+| §16 | Machine Constraints Checkpoint | git push/deploy 전 |
+| §17 | Knowledge Lifecycle (Curator) | Session End |
+| §18 | Activity Metrics | 5/5 체크포인트 또는 포스트모템 시 |
+| §19 | External Code Analysis Integration | First Session Step 4a / 엔트로피 체크 |
 
-## 진행 상황
+### 도메인 노드 (`~/.kiro/mickey/domain/entries/*.md`)
 
-## 주요 결정
+INDEX.md 트리거 매칭 시에만 pull. 접근 경로:
+1. GRAPH.md Tags/Title 스캔 → Core 컬럼 즉시 판단 → entries/ 상세 (1홉)
+2. entry의 Links → 연결 entry (2홉)
+3. INDEX 트리거 키워드 매칭 시 직접 로딩
 
-## 수정 파일
+## MCP 서버
 
-## 다음 단계
-"""
+`mcp.json`에는 `aws-knowledge-mcp-server`만 명시 포함한다.
 
-SECTIONS_TO_EXTRACT = ["현재 상태", "즉시 다음 단계", "중요 컨텍스트"]
-MAX_LINES_PER_SECTION = 3
+**소비 경로 (CLI v3 실측, 2026-07-14)**: power 의 mcp.json 에 명시된 서버 도구는 에이전트 도구 목록에 `mcp_<서버명>_<도구명>` 형태로 **직접 마운트**된다. 사용 시 분기:
+- **직접 마운트 도구가 도구 목록에 보이면** → 그 도구를 직접 호출한다 (정상 경로).
+- **`kiro_powers use` proxy 경로는 사용하지 않는다** — CLI v3 에서 proxy 서버 인스턴스가 별도로 뜨지 않아 "not connected" 로 실패함이 실측됨. activate 응답의 toolsByServer 가 비어 있어도 직접 마운트 도구가 있으면 정상이다.
 
+**Serena/Graphify**: 사용자 홈 전역 `~/.kiro/settings/mcp.json`에 이미 등록되어 있으면 자동 활성. 없어도 프로젝트에서 `.serena/` 또는 `graphify-out/` 감지되면 T1.5 §19 절차로 대응.
 
-def archive_current_session():
-    if not CURRENT.exists():
-        return
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
-    dest = ARCHIVE_DIR / f"session_{timestamp}.md"
-    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
-    shutil.move(str(CURRENT), str(dest))
-    print(f"=== 이전 세션 아카이브: {dest.name} ===")
+**Kiro CLI 내장 `code` 도구**: 항상 사용 가능. `/code init` 은 사용자만 실행 가능(에이전트 대행 불가).
 
+**memorygraph MCP는 v10에서 제거됨**: 지식 그래프는 파일 기반(`~/.kiro/mickey/`)으로 관리하며, Curator가 GRAPH.md·INDEX.md·entries/를 직접 편집한다.
 
-def create_new_session():
-    SESSION_DIR.mkdir(parents=True, exist_ok=True)
-    CURRENT.write_text(TEMPLATE, encoding="utf-8")
-    print(f"=== 새 세션 시작: {datetime.now():%Y-%m-%d_%H%M} ===")
+## 사용법
 
+### 신규 프로젝트 (Mickey 1)
+1. 이 Power를 활성화한 상태로 세션 시작
+2. Mickey가 `session-protocol.md` First Session 절차 수행 (환경 스캔 → T1.5 로딩 → Brownfield 감지 → 목적 확인 → 자율성 확인 → 코드 분석 도구 감지 → 초기 문서 생성)
+3. 완료되면 사용자 확인 후 작업 시작
 
-def _extract_section(lines, section_name, max_lines):
-    """HANDOFF에서 특정 섹션의 첫 N줄만 추출."""
-    result = []
-    in_section = False
-    for line in lines:
-        if section_name in line:
-            in_section = True
-            continue
-        if in_section:
-            if line.startswith("## "):
-                break
-            stripped = line.strip()
-            if stripped:
-                result.append(stripped)
-                if len(result) >= max_lines:
-                    break
-    return result
+### 기존 프로젝트 (Mickey N+1)
+1. Power 활성 상태 유지
+2. Mickey가 `session-protocol.md` Continuing Session 절차 수행 (PURPOSE-SCENARIO → 최근 HANDOFF/SESSION → 지식 그래프 인덱스 → 엔트로피 체크 → 포스트모템 트리거)
+3. 이전 세션 요약 + 작업 질문
 
+### 세션 정리
+사용자가 "세션 정리" 요청 시:
+1. Mickey가 SESSION.md 최종 확인
+2. `knowledge-curator.md` 를 `readSteering` 로 pull → Curator 호출 (`~/.kiro/mickey/domain/CURATOR-PROMPT.md` 정본 절차 pull)
+3. 직접 수정분 보고 + Pre-staged 항목 사용자 확인
+4. HANDOFF 경량 생성
+5. `/clear` 안내 (사용자만 실행 가능)
 
-def create_brief():
-    """HANDOFF.md에서 핵심만 추출하여 SESSION-BRIEF.md 생성."""
-    handoff = SESSION_DIR / "HANDOFF.md"
-    parts = ["# Session Brief\n"]
+## 조건부 지시 규약 (P3, 양쪽 분기 병기)
 
-    if handoff.exists():
-        lines = handoff.read_text(encoding="utf-8").splitlines()
-        for section in SECTIONS_TO_EXTRACT:
-            extracted = _extract_section(lines, section, MAX_LINES_PER_SECTION)
-            if extracted:
-                parts.append(f"## {section}")
-                parts.extend(extracted)
-                parts.append("")
-    else:
-        parts.append("첫 세션입니다. 이전 핸드오프 없음.\n")
+각 steering 파일 내부의 조건부 지시는 다음 원칙을 지킨다.
+- 긍정 조건("X이면 하라")과 부정 조건("X가 아니면 하지 마라")를 병기한다
+- 예: PURPOSE-SCENARIO.md **존재 시** 최우선 로드 / **미존재 시** 사용자에게 질문 후 생성. 두 경로 모두 명시.
 
-    BRIEF.write_text("\n".join(parts), encoding="utf-8")
-    print("=== SESSION-BRIEF.md 생성 완료 ===")
+## 백업 및 롤백
 
+- 기존 v3 Power(IDE 시절): `power-mickey.pre-v10-bak.zip` (프로젝트 루트 + `~/.kiro/powers/installed/`)
+- 롤백 절차: zip 압축 해제 → 원본 자리 복원 → `installed.json` 무변경(이름 재사용)
 
-def main():
-    archive_current_session()
-    create_new_session()
-    create_brief()
+## 참고 자산
 
-
-if __name__ == "__main__":
-    main()
-```
-
-## Step 3: 세션 훅 생성
-
-두 개의 훅을 생성합니다. Spec task 실행 전후에 자동으로 트리거됩니다.
-
-- `preTaskExecution`: spec task가 in_progress로 전환되기 직전에 세션 초기화
-- `postTaskExecution`: spec task가 completed로 전환된 직후에 세션 종료
-
-> **⚠️ 알려진 버그 (memorygraph + Windows)**: memorygraph MCP의 `get_recent_activity` 도구를 `project` 파라미터 없이 호출하면, 내부의 `detect_project_context()` 함수가 MCP 서버 프로세스 컨텍스트에서 hang한다. 반드시 `project` 파라미터에 현재 workspace의 절대 경로를 전달해야 한다. 아래 hook 템플릿에는 이 지시가 포함되어 있다.
-
-> **📌 Onboarding 시 주의**: 아래 hook을 생성할 때, 현재 workspace의 절대 경로를 확인하여 hook prompt 내 안내에 반영하라. hook prompt 자체에는 경로를 하드코딩하지 않고, 에이전트가 실행 시점에 workspace 경로를 감지하여 memorygraph 도구 호출에 전달하도록 지시한다.
-
-### 세션 초기화 훅
-
-`.kiro/hooks/mickey-session-init.kiro.hook`:
-
-```json
-{
-  "name": "Mickey Session Initialize",
-  "version": "3.2.0",
-  "description": "경량 세션 초기화 — 스크립트가 생성한 brief만 읽고, memorygraph는 제목/태그만 조회 (search_memories 사용, recall_memories project_path 필터 버그 우회)",
-  "when": {
-    "type": "preTaskExecution"
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "다음 세션 초기화 절차를 순서대로 수행하라:\n\n1. `python .kiro/scripts/session_init.py` 실행 (이전 세션 아카이브 + 새 CURRENT.md + SESSION-BRIEF.md 생성)\n2. **PURPOSE-SCENARIO.md 최우선 로딩**: 프로젝트 루트의 PURPOSE-SCENARIO.md를 읽어라. 없으면 사용자에게 '이 프로젝트가 완성되면 어떻게 사용하게 되나요?'를 질문하고, 답변 기반으로 PURPOSE-SCENARIO.md를 생성하라 (필수 섹션: Ultimate Purpose, Usage Scenarios, Acceptance Criteria, Last Confirmed).\n3. `.kiro/sessions/SESSION-BRIEF.md`만 읽고 이전 세션 요약을 파악하라. HANDOFF.md를 직접 읽지 마라.\n4. memorygraph의 search_memories로 현재 프로젝트 관련 기억의 제목과 태그만 조회하라 (상세 내용은 조회하지 마라). project_path에 현재 workspace 절대 경로를 전달하라.\\n   ⚠️ recall_memories는 project_path 필터링 버그가 있어 항상 0건을 반환한다. 반드시 search_memories를 사용하라.\n5. **목적 재확인**: PURPOSE-SCENARIO.md 내용을 간략히 언급하고, 변경 필요 시 사용자에게 조정 여부를 확인하라.\n6. 위 결과를 종합하여 '목적 확인', '이전 세션 요약', '참고 가능한 기억 목록'을 사용자에게 간결히 보고하라.\n\n⚠️ context window 절약이 핵심이다. 파일을 추가로 읽거나 memorygraph 상세 내용을 조회하지 마라. 필요 시 작업 중 on-demand로 조회한다.\n⚠️ memorygraph 호출 시 project 파라미터에 현재 workspace 절대 경로를 반드시 전달하라 (Windows hang 버그 방지)."
-  }
-}
-```
-
-### 세션 종료 훅
-
-`.kiro/hooks/mickey-session-close.kiro.hook`:
-
-```json
-{
-  "name": "Mickey Session Close",
-  "version": "1.5.0",
-  "description": "세션 종료 시 세션 로그 정리, 교훈 추출, memorygraph 저장, HANDOFF 생성",
-  "when": {
-    "type": "postTaskExecution"
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "다음 세션 종료 절차를 순서대로 수행하라:\n\n1. Mickey Power의 self-improvement.md steering을 readSteering으로 읽고 절차를 숙지하라.\n2. `.kiro/sessions/CURRENT.md`를 이번 세션에서 수행한 작업 내용으로 업데이트하라 (목표, 진행 상황, 주요 결정, 수정 파일, 다음 단계).\n3. `.kiro/sessions/HANDOFF.md`를 생성/업데이트하라 (현재 상태, 즉시 다음 단계, 중요 컨텍스트, 유용한 명령어).\n4. 세션 중 발견한 교훈을 분석하라.\n\n⚠️ 교훈 판별 기준 (엄격히 적용):\n- 교훈이란: 다른 프로젝트에서도 참고할 수 있는 새로운 발견, 예상과 다른 결과, 같은 실수의 반복, 또는 효과적인 해결책의 발견이다.\n- 교훈이 아닌 것: '이번 세션에서 한 일'의 기록, 기존에 알려진 패턴(Adapter, Strategy 등)의 단순 적용, 세션 활동 요약.\n- 세션 활동 기록은 CURRENT.md와 HANDOFF.md의 역할이다. memorygraph는 교훈 전용 저장소이다.\n\n교훈이 있는 경우:\n  a. `.kiro/steering/project-lessons.md`에 추가하라. 형식: ## [YYYY-MM-DD] - [주제] / 문제 / 원인 / 해결 / 교훈.\n  b. memorygraph의 store_memory로 저장하라. type은 'solution' 또는 'fix'를 사용하라. 저장 시 반드시 context 파라미터에 {\"project_path\": \"<현재 workspace 절대 경로 (forward slash 사용)>\"} 를 포함하라. 관련 기억 간 create_relationship으로 연결하라.\n\n교훈이 없는 경우:\n  → project-lessons.md 수정 없음, memorygraph 저장 없음. '교훈 없음'으로 보고하라.\n  → 절대로 세션 활동이나 작업 요약을 memorygraph에 저장하지 마라.\n\n5. 범용 원칙(모든 프로젝트에 적용 가능한 것)이 있으면 사용자에게 Global steering 추가를 제안하라.\n6. 최종 결과를 사용자에게 보고하라.\n\n⚠️ project-lessons.md는 최대 10개 항목만 유지하라. 초과 시 오래된 항목은 Memory Graph에만 보존하고 파일에서 제거하라.\n💡 사용자가 세션 중 '교훈 승격' 또는 '패턴 정리'를 요청하면 self-improvement.md의 Step 4.5 절차를 따르라.\n\n⚠️ memorygraph 호출 시 주의사항:\n- get_recent_activity 호출 시 project 파라미터에 현재 workspace 절대 경로를 반드시 전달하라 (Windows hang 버그 방지).\n- store_memory의 context에는 {\"project_path\": \"...\"} 키를 사용하라 ({\"project\": \"...\"} 는 무시됨).\n\n실행 결과를 간결하게 보고하라."
-  }
-}
-```
-
-## Step 4: 프로젝트 교훈 파일 생성
-
-`.kiro/steering/project-lessons.md` 파일을 생성합니다:
-
-```markdown
----
-inclusion: always
----
-# 프로젝트 교훈
-
-이 파일은 Mickey가 이 프로젝트에서 학습한 교훈을 기록합니다.
-세션 종료 시 Mickey가 직접 이 파일을 업데이트합니다.
-
-## 교훈 목록
-
-(Mickey가 자동으로 추가)
-```
-
-## Step 5: Memory Graph 설치
-
-Memory Graph MCP를 설치합니다:
-
-```bash
-pip install --user pipx && pipx ensurepath
-pipx install memorygraphMCP
-```
-
-`.kiro/settings/mcp.json` 파일을 생성합니다:
-```json
-{
-  "mcpServers": {
-    "memorygraph": {
-      "command": "memorygraph",
-      "args": ["--profile", "extended"]
-    }
-  }
-}
-```
-
-## Step 6: 온보딩 완료 확인
-
-다음 파일들이 생성되었는지 확인합니다:
-- `.kiro/sessions/` 디렉토리
-- `.kiro/scripts/session_init.py`
-- `.kiro/hooks/mickey-session-init.kiro.hook`
-- `.kiro/hooks/mickey-session-close.kiro.hook`
-- `.kiro/steering/project-lessons.md`
-- `.kiro/settings/mcp.json`
-
-모두 확인되면 Mickey 사용 준비 완료입니다.
-
-> **💡 Context Window 최적화**: 세션 초기화 시 HANDOFF 전문이 아닌 SESSION-BRIEF.md(핵심 요약)만 로딩하고, memorygraph는 제목/태그 목록만 조회합니다. 상세 내용은 작업 중 필요할 때 on-demand로 조회합니다.
+| 참조 | 위치 |
+|------|------|
+| v17 원본 프롬프트 (T1 정본) | `examples/ai-developer-mickey.json` |
+| T1 dump | `scripts/output/v17_prompt.md` |
+| 이식 매트릭스 (100% 추적성) | `docs/v2-to-v3-mapping.md` |
+| 마이그레이션 계획 | `IMPROVEMENT-PLAN-v10-power-migration.md` |
+| 세션 로그 | `session_history/2026-07-04-mickey-v10-migration.md` |
 
 ---
 
-# 사용법
-
-## 세션 시작
-1. 새 채팅 세션을 연다
-2. Explorer > Agent Hooks에서 "Mickey Session Initialize" 의 ▶ (Start Hook) 클릭
-3. Agent가 세션 초기화 결과를 보고할 때까지 대기
-4. 작업 시작
-
-## 세션 종료
-1. 작업 완료 후 Explorer > Agent Hooks에서 "Mickey Session Close" 의 ▶ (Start Hook) 클릭
-2. Agent가 세션 정리, 교훈 추출, HANDOFF 생성을 수행
-3. 결과 보고 확인
-
----
-
-# When to Load Steering Files
-
-- 코드 작성, 구현, 개발 → `mickey-core.md`
-- 새 세션 시작, 세션 관리, 이전 작업 → `session-protocol.md`
-- 문제 해결, 디버깅, 에러 수정 → `problem-solving.md`
-- 기억, 회상, 이전 결정 → `memory-protocol.md`
-- 세션 정리, 교훈 정리, 개선 → `self-improvement.md`
+**Version**: 10.0.0-alpha (Phase 5 — install 스크립트 개편 · v3 배포 파이프라인)
+**Status**: steering 7개 (activate 직후 pull 6 + 세션 종료 시 pull 1). Curator 로직 흡수 완료. `scripts/deploy_power.py` 로 홈 배포(버전 게이트 2.10 · 백업 · clean-replace). CLI v3 런타임 소비 모델 실측 반영 (steering 수동 pull · MCP 직접 마운트).
+**Last Updated**: 2026-07-14

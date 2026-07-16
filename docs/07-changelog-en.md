@@ -27,6 +27,54 @@
 | v8.1 | 2026-04 | Mickey Self-Improvement | Knowledge Curator subagent + domain/ activation + Personal Vault → domain/ transition |
 | v9 (PLAN) | 2026-05 | Mickey Self-Improvement | 3-Tier (R/G/S) + Domain-centric global knowledge + knowledge-organization Skill — POSTMORTEM-based redesign |
 | v9.1 | 2026-06 | Mickey Self-Improvement | v9 PLAN correction+landing: Curator permission fix + Pre-staged Apply + T1.5 §17/§18 + ADDENDUM-first |
+| v10 (Power Migration) | 2026-07 | Mickey Self-Improvement | CLI v2 agent (v17) → Kiro v3 Power migration. 7 steering (6 always + 1 on-demand) + session hooks/scripts + file-based knowledge graph (memorygraph removed) + install-script v3 deploy pipeline (version gate 2.10) |
+
+---
+
+## v10 (Power Migration, 2026-07-04~13)
+
+**Project**: Mickey Self-Improvement (v10 Power Migration track)
+**Status**: Phase 0~5 in progress. Skeleton rebuild · session hooks/scripts · Curator steering absorption · install-script overhaul complete. Documentation update in progress.
+
+### Key Change: CLI v2 agent (v17) → Kiro v3 Power migration
+
+Port the v17 prompt (CLI agent JSON) into the Kiro v3 Power format (steering + POWER.md). To reduce always-on load, **only T1 (v17 skeleton) is split into 6 steering files**, while **T1.5 deep protocols, knowledge-graph nodes, and the Curator canonical prompt stay in their original files and are pulled on demand** (progressive disclosure). The CLI v2 path is preserved so v2/v3 can be used side by side.
+
+### Major Changes
+
+1. **Steering structure (6 always + 1 on-demand)**
+   - Always (`inclusion: always`): `mickey-core.md`, `session-protocol.md`, `knowledge-graph.md`, `problem-solving.md`, `document-schema.md`, `context-window.md`
+   - On-demand (`inclusion: manual`): `knowledge-curator.md` — pulled via `readSteering` only at session close
+   - Each steering file is a ≤200-line entry point; deep content is pulled from `~/.kiro/mickey/` graph nodes
+
+2. **memorygraph MCP removed**
+   - Knowledge graph managed file-based (`~/.kiro/mickey/` INDEX/GRAPH/PROFILE/entries)
+   - `mcp.json` lists only `aws-knowledge-mcp-server`; Serena/Graphify reuse the user's global home config
+
+3. **Session hooks/scripts (Phase 3)**
+   - 2 CLI v3 hooks (`SessionStart`/`Stop`) + 2 session scripts (`mickey_session_boot.py`/`mickey_session_close.py`); hooks stay thin, logic isolated in scripts
+   - 2 IDE `.kiro.hook` files deferred as skeleton + `_note` pending spec measurement
+
+4. **Knowledge Curator steering absorption (Phase 4-A)**
+   - v2 Curator agent logic ported into the `knowledge-curator.md` (manual) entry point; canonical procedure (`CURATOR-PROMPT.md`) kept original and pulled. Triple-duplicated invocation contract unified into `knowledge-curator.md`
+
+5. **install-script v3 deploy pipeline (Phase 5)**
+   - New `scripts/deploy_power.py`: kiro-cli version gate (2.10) · timestamped backup of existing install · full-dir clean-replace (blocks stale steering orphans) · `installed.json` entry guarantee · `--dry-run`
+   - `install.ps1`/`install.sh` keep v2 deploy (agents JSON + `~/.kiro/mickey`) and add the `deploy_power.py` call. v2 always, v3 version-gated
+   - Consumption model verified: kiro-cli serves the physical copy in `~/.kiro/powers/installed/power-mickey/`
+
+### Verification
+
+- `verify_power_structure.py` 7/7 (steering · front matter · T1 traceability · P3 · inclusion modes)
+- `verify_hooks.py` 6/6 (session hooks/scripts)
+- `verify_deploy_power.py` 25/25 (version gate · backup · orphan removal · idempotent)
+
+### References
+
+- Plan: `IMPROVEMENT-PLAN-v10-power-migration.md`
+- Port matrix (100% traceability): `docs/v2-to-v3-mapping.md`
+- Full narrative: `docs/09-v3-power-migration-en.md`
+- Session logs: `session_history/2026-07-04~13-mickey-v10-migration-*.md`
 
 ---
 
