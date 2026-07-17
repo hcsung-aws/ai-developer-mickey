@@ -15,3 +15,10 @@
 
 ## Last Updated
 2026-03-08
+
+
+## execute_pwsh(cmd 계열) 에서 git commit -m 따옴표 소실 (2026-07-16 트랙 분리 세션, 2회 재현)
+
+- 증상: `git commit -m "여러 단어 메시지"` 실행 시 따옴표가 벗겨져 각 단어가 pathspec 으로 해석됨 (`error: pathspec '...' did not match`)
+- 우회: 메시지를 파일로 작성 후 `git commit -F <파일>` 사용. 커밋 후 파일 삭제
+- 동일 계열: PowerShell 인라인 명령 미실행(에코만 됨) 사례도 M38 에서 관찰 — 2줄 이상 로직은 .py 스크립트로 분리하는 기존 규칙 준수가 안전
