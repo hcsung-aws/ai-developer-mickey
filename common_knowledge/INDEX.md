@@ -12,7 +12,7 @@
 | 그래프 시각화, 지식 지도 시각화, 진단 도구, vis-network, 태그 chip 필터, 이웃 1-hop 강조, self-contained HTML, 클러스터 발견 | mickey-graph-visualization.md | Mickey 지식 그래프 시각화 도구 (`scripts/mickey_graph/`). 글로벌/프로젝트 스코프 self-contained HTML 렌더. Phase 3 필터 UI(태그 chip + kind/edge 체크박스 + 이웃 강조). WELC 101 tests |
 
 ## Last Updated
-2026-07-16 (Mickey 37 — Domain Links out-of-sync 6건 정합: windows-user-path-extension/kiro-cli-lsp-init-settings-location/project-context body 참조 반영)
+2026-07-18 (Mickey 37 — Curator Pre-staged 머지: installer-seed-semantics + prompt-doc-vs-runtime-loading Domain Links 추가. 직전: Domain Links out-of-sync 6건 정합)
 
 
 ## Domain Links
@@ -33,3 +33,5 @@
 | 빈 스캔 불신, 경로 후보 재확인 | ~/.kiro/mickey/domain/entries/empty-scan-distrust.md | 첫 스캔 빈 결과 → 명령어/경로 오류 우선 의심 |
 | 경로 정규화, 다중 후보 전략 | ~/.kiro/mickey/domain/entries/llm-path-normalization.md | 산출물 경로 다중 후보 전략 |
 | 측정 정밀도 반복 심화, 진단 도구 한계 | ~/.kiro/mickey/domain/entries/iterative-measurement-deepening.md | 측정 도구 정밀도는 반복 깊이 확장으로 정정 |
+| install seed 시맨틱, E2E harness, 홈 리다이렉트 | ~/.kiro/mickey/domain/entries/installer-seed-semantics.md | 세대 파일만 갱신 + HOME 리다이렉트 테스트 |
+| Curator 프롬프트 동기화, agent JSON, SoT 런타임 | ~/.kiro/mickey/domain/entries/prompt-doc-vs-runtime-loading.md | SoT→런타임 동기화 실측 교훈 |

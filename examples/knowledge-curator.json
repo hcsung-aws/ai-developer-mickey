@@ -6,7 +6,11 @@
     "*"
   ],
   "toolAliases": {},
-  "allowedTools": [],
+  "allowedTools": [
+    "fs_read",
+    "glob",
+    "grep"
+  ],
   "toolsSettings": {
     "fs_write": {
       "allowedPaths": [
