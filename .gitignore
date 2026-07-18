@@ -11,8 +11,11 @@ __pycache__/
 *.pre-v10-bak.zip
 *.pre-v10-bak/
 
-# Kiro CLI workspace state
-.kiro/
+# Kiro CLI workspace state — hooks/scripts 는 추적 (2026-07-17, clone 유실 방지)
+# 주의: 디렉토리 전체 패턴(.kiro/)이면 하위 negation 이 무효화되므로 .kiro/* 로 완화
+.kiro/*
+!.kiro/hooks/
+!.kiro/scripts/
 
 # Serena LSP memories (per-machine, per-project)
 .serena/

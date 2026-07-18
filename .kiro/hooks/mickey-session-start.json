@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "mickey-session-start",
+      "trigger": "SessionStart",
+      "action": {
+        "type": "command",
+        "command": "python .kiro/scripts/mickey_session_boot.py --read-stdin"
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "_note": "SKELETON: Kiro IDE (.kiro.hook) 규격 최종 실측 시 조정 필요 (Phase 5 회귀 검증 항목). 지금은 CLI v3 hook (mickey-session-stop.json) 을 정본으로 사용.",
+  "name": "mickey-post-task",
+  "trigger": "postTaskExecution",
+  "action": {
+    "type": "command",
+    "command": "python .kiro/scripts/mickey_session_close.py --read-stdin"
+  }
+}
