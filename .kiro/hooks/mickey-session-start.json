@@ -7,7 +7,9 @@
       "action": {
         "type": "command",
         "command": "python .kiro/scripts/mickey_session_boot.py --read-stdin"
-      }
+      },
+      "timeout": 60,
+      "enabled": true
     }
   ]
 }

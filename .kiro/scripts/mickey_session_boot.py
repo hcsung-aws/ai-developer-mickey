@@ -4,9 +4,14 @@
 stdout 리포트로 출력. hook 자동 호출과 사용자 직접 호출을 모두 지원.
 
 관련 산출물:
-- `.kiro/hooks/mickey-session-start.json` (CLI v3 SessionStart hook 예시)
-- `.kiro/hooks/mickey-pre-task.kiro.hook` (IDE preTaskExecution skeleton)
+- `.kiro/hooks/mickey-session-start.json` (v1 JSON SessionStart hook — CLI/IDE 1.0 공용)
 - `scripts/verify_hooks.py` (본 스크립트의 BRANCH 마커 추적 검증)
+- 세션 기록 규약: D-0717-1 (날짜+UID) — kickoff 문서 §2 / DECISIONS.md 참조
+
+개정 이력:
+- 2026-07-19 (세션 551c3f): D-0717-2 집행 — handoff 탐지를 날짜+UID 규약으로 교체
+  (소문자 `*-handoff.md` glob, UID 파싱), "Mickey 1 취급" 오판 guidance 제거,
+  stdout UTF-8 고정 (cp949 mojibake 해소, 07-17/19 실측 근거)
 
 원칙:
 - 사이드 이펙트 없음 (파일 편집·네트워크 접근 없음). 실측·리포트만 수행.
@@ -101,11 +106,27 @@ def detect_purpose_scenario(project_root: Path) -> BranchResult:
 
 
 # BRANCH: HANDOFF
-def detect_handoff(project_root: Path) -> BranchResult:
-    """session_history/ 아래 HANDOFF 문서 최신본 존재 여부를 확인.
+def parse_handoff_uid(handoff_path: Path) -> str | None:
+    """handoff 파일명에서 세션 UID 를 추출.
 
-    존재 시 -> 이전 세션 HANDOFF 로드. 부재 시 -> Mickey 1 세션 취급.
-    (계획서 §6 Phase 3 P3 분기 3)
+    파일명 규약 (D-0717-1): YYYY-MM-DD-<uid>-handoff.md
+    규약 불일치 파일이면 None 반환 (탐지 자체는 유지하되 UID 미표기).
+    """
+    parts = handoff_path.stem.split("-")
+    # 날짜 3토큰 + uid + 'handoff' = 5토큰 이상일 때만 규약 준수로 간주.
+    if len(parts) >= 5 and parts[-1] == "handoff":
+        return parts[-2]
+    return None
+
+
+def detect_handoff(project_root: Path) -> BranchResult:
+    """session_history/ 아래 handoff 문서 최신본 존재 여부를 확인 (D-0717-1).
+
+    glob 은 소문자 `*-handoff.md` 고정 — 구 대문자 HANDOFF 패턴은 Windows 의
+    case-insensitive glob 에서만 우연히 동작했으므로 크로스 플랫폼 보장 위해 교체.
+
+    존재 시 -> 최신본(mtime) + UID 제시. 사용자 확인 후 로드 (자동 진행 금지).
+    부재 시 -> 이 트랙의 첫 기록 세션. UID 생성부터 시작 (Mickey 1 취급 아님).
     """
     history_dir = project_root / "session_history"
     if not history_dir.is_dir():
@@ -114,23 +135,30 @@ def detect_handoff(project_root: Path) -> BranchResult:
             state="missing",
             detail={"latest": None, "reason": "session_history/ dir not found"},
             guidance=(
-                "session_history/ 부재. 이번은 Mickey 1 세션으로 취급."
+                "session_history/ 부재. 날짜+UID 규약(D-0717-1)의 첫 세션으로 시작. "
+                "UID 생성: python .kiro/scripts/gen_session_uid.py"
             ),
         )
-    # HANDOFF 를 이름에 포함하는 파일만 대상 (Mickey 규약).
+    # 날짜+UID 규약 파일만 대상. 소문자 패턴 고정 (크로스 플랫폼).
     candidates = sorted(
-        history_dir.glob("*HANDOFF*.md"),
+        history_dir.glob("*-handoff.md"),
         key=lambda p: p.stat().st_mtime,
         reverse=True,
     )
     if candidates:
         latest = candidates[0]
+        uid = parse_handoff_uid(latest)
         return BranchResult(
             name="HANDOFF",
             state="exists",
-            detail={"latest": str(latest.relative_to(project_root))},
+            detail={
+                "latest": str(latest.relative_to(project_root)),
+                "uid": uid,
+            },
             guidance=(
-                "이전 세션 HANDOFF 로드. Feedback 반영 여부 판정 필요."
+                "최신 handoff 탐지 (위 uid 참조). D-0717-1 이어가기 절차: "
+                "CLI -> 최신본을 사용자에게 제시하고 확인 받은 뒤 진행 (자동 진행 금지). "
+                "IDE -> 사용자가 다른 UID 를 지정하면 해당 UID 의 log/handoff 를 로드."
             ),
         )
     return BranchResult(
@@ -138,7 +166,8 @@ def detect_handoff(project_root: Path) -> BranchResult:
         state="missing",
         detail={"latest": None},
         guidance=(
-            "HANDOFF 문서 부재. 이번은 Mickey 1 세션으로 취급."
+            "규약(-handoff.md) 문서 부재. 날짜+UID 규약(D-0717-1)의 첫 세션으로 시작. "
+            "UID 생성: python .kiro/scripts/gen_session_uid.py"
         ),
     )
 
@@ -324,6 +353,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # hook 소비자(CLI 런타임)는 stdout 을 UTF-8 로 디코딩한다 (07-17/19 mojibake 실측:
+    # U+FFFD 치환 = cp949 바이트를 UTF-8 로 읽은 증거). Windows 기본 cp949 를 UTF-8 로 고정.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     args = build_arg_parser().parse_args(argv)
     project_root = args.project_root.resolve()
 

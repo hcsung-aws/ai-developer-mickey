@@ -4,14 +4,20 @@
 hook 자동 호출과 사용자 직접 호출을 모두 지원.
 
 실측 항목 (3종):
-- HANDOFF: 오늘 날짜의 HANDOFF 문서가 session_history/ 에 존재하는가.
-- SESSION-HISTORY: 오늘 날짜의 세션 로그가 session_history/ 에 존재하는가.
+- HANDOFF: 오늘 날짜의 handoff 문서(`YYYY-MM-DD-<uid>-handoff.md`)가 존재하는가.
+- SESSION-HISTORY: 오늘 날짜의 세션 로그(`YYYY-MM-DD-<uid>-log.md`)가 존재하는가.
 - CURATOR-STAGING: Pre-staged Apply 대기 (_curator-staging/) 가 있는가.
 
 관련 산출물:
-- `.kiro/hooks/mickey-session-stop.json` (CLI v3 Stop hook 예시)
-- `.kiro/hooks/mickey-post-task.kiro.hook` (IDE postTaskExecution skeleton)
 - `scripts/verify_hooks.py` (본 스크립트의 BRANCH 마커 추적 검증)
+- 세션 기록 규약: D-0717-1 (날짜+UID) — kickoff 문서 §2 / DECISIONS.md 참조
+- 참고: Stop hook 은 per-response 발화 특성으로 미채택 (F5 결정) — 본 스크립트는
+  세션 마감 시 사용자/Mickey 가 수동 실행하는 체크리스트 도구
+
+개정 이력:
+- 2026-07-19 (세션 551c3f): D-0717-2 집행 — 탐지 패턴을 날짜+UID 규약으로 교체
+  (소문자 `-handoff.md` / `-log.md` glob, UID 파싱), stdout UTF-8 고정,
+  폐기된 hook (.kiro.hook, session-stop.json) 참조 제거
 
 원칙:
 - 사이드 이펙트 없음. 실측·리포트만.
@@ -67,9 +73,10 @@ def detect_handoff_today(project_root: Path, today: dt.date) -> BranchResult:
             ),
         )
     today_str = today.strftime("%Y-%m-%d")
-    # 오늘 날짜 + HANDOFF 를 모두 포함한 파일만 매치.
+    # 날짜+UID 규약 (D-0717-1): 오늘 날짜로 시작하고 -handoff.md 로 끝나는 파일만 매치.
+    # 소문자 패턴 고정 (구 대문자 HANDOFF 패턴은 Windows glob 에서만 우연히 동작).
     matches = sorted(
-        p for p in history_dir.glob(f"{today_str}*HANDOFF*.md") if p.is_file()
+        p for p in history_dir.glob(f"{today_str}-*-handoff.md") if p.is_file()
     )
     if matches:
         return BranchResult(
@@ -78,9 +85,12 @@ def detect_handoff_today(project_root: Path, today: dt.date) -> BranchResult:
             detail={
                 "date": today_str,
                 "files": [str(p.relative_to(project_root)) for p in matches],
+                # 파일명에서 UID 추출해 함께 표기 (채팅 응답에 UID 명시 의무 지원).
+                "uids": [p.stem.split("-")[-2] for p in matches],
             },
             guidance=(
-                "오늘자 HANDOFF 존재. 세션 종료 규약 준수. Feedback 항목 검토 권장."
+                "오늘자 handoff 존재. 세션 종료 규약 준수. "
+                "채팅 응답에 UID 명시했는지 확인 (D-0717-1 기록 후 의무)."
             ),
         )
     return BranchResult(
@@ -88,7 +98,9 @@ def detect_handoff_today(project_root: Path, today: dt.date) -> BranchResult:
         state="missing",
         detail={"date": today_str, "files": []},
         guidance=(
-            "오늘자 HANDOFF 부재. 세션 종료 전 HANDOFF 문서 작성 필요."
+            "오늘자 handoff 부재. 세션 종료 전 "
+            "session_history/YYYY-MM-DD-<uid>-handoff.md 작성 필요 "
+            "(UID 생성: python .kiro/scripts/gen_session_uid.py)."
         ),
     )
 
@@ -111,9 +123,9 @@ def detect_session_history_today(project_root: Path, today: dt.date) -> BranchRe
             ),
         )
     today_str = today.strftime("%Y-%m-%d")
+    # 날짜+UID 규약 (D-0717-1): 오늘 날짜의 -log.md 파일만 매치 (handoff 는 별도 분기).
     matches = sorted(
-        p for p in history_dir.glob(f"{today_str}*.md")
-        if p.is_file() and "HANDOFF" not in p.name
+        p for p in history_dir.glob(f"{today_str}-*-log.md") if p.is_file()
     )
     if matches:
         return BranchResult(
@@ -122,6 +134,7 @@ def detect_session_history_today(project_root: Path, today: dt.date) -> BranchRe
             detail={
                 "date": today_str,
                 "files": [str(p.relative_to(project_root)) for p in matches],
+                "uids": [p.stem.split("-")[-2] for p in matches],
             },
             guidance=(
                 "오늘자 세션 로그 존재. 마감 항목(결정 이력·반성·인계) 채움 여부 확인."
@@ -132,7 +145,8 @@ def detect_session_history_today(project_root: Path, today: dt.date) -> BranchRe
         state="missing",
         detail={"date": today_str, "files": []},
         guidance=(
-            "오늘자 세션 로그 부재. 세션 종료 전 로그 신규 작성 필요."
+            "오늘자 세션 로그 부재. 세션 종료 전 "
+            "session_history/YYYY-MM-DD-<uid>-log.md 작성 필요."
         ),
     )
 
@@ -257,6 +271,10 @@ def resolve_today(raw: str | None) -> dt.date:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # hook 소비자(CLI 런타임)는 stdout 을 UTF-8 로 디코딩한다 (boot 스크립트와 동일 근거).
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     args = build_arg_parser().parse_args(argv)
     project_root = args.project_root.resolve()
 

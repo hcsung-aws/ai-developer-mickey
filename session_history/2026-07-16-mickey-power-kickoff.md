@@ -10,11 +10,21 @@
 - **통합 계획**: Kiro CLI v3 정식 출시 시 v3(power)로 완전 통합, 이 분리는 그때까지의 과도기 구조 (D-38-1)
 - **지식 그래프는 공유**: 양 트랙 모두 `~/.kiro/mickey/` (글로벌 SoT)를 참조한다. 브랜치 분리로 지식이 갈라지지 않는 것이 정상
 
-## 2. 세션 규약 (이 디렉토리 한정)
+## 2. 세션 규약 (이 디렉토리 한정) — 날짜+UID 규약 (D-0717-1)
 
-- **세션 로그**: `session_history/YYYY-MM-DD-<주제>.md` (기존 v10 트랙 규약 유지). 날짜 기반이므로 세션 번호 발급 없음
-- **`sessions/MICKEY-N-*` 는 master(CLI 트랙) 소유 — 이 디렉토리에서 생성/갱신 금지.** steering 의 MICKEY-N-SESSION 생성 절차는 이 디렉토리에서는 위 날짜 로그로 대체한다 (번호 충돌 방지, v3 통합 시 병합 안전)
+> 2026-07-17 사용자 확정 (세션 b3d7e1). 구 규약(`YYYY-MM-DD-<주제>.md`)을 대체한다.
+> 배경: 같은 프로젝트에서 세션이 여러 개 동시에 열리는 IDE 상황 + CLI 연속성 공백(boot hook이 매번 "Mickey 1" 오판) 해소.
+
+- **로그 파일명**: `session_history/YYYY-MM-DD-<UID>-log.md`
+- **HANDOFF 파일명**: `session_history/YYYY-MM-DD-<UID>-handoff.md`
+- **UID**: 6자리 hex 권장 (예: `b3d7e1`). session_history/ 내 유일성 확보. 생성: `python .kiro/scripts/gen_session_uid.py` (충돌 회피 내장. one-liner 금지 규칙 준수)
+- **기록 후 의무**: 채팅 응답에 UID를 명시적으로 남긴다 (IDE는 지난 채팅을 열람 가능하므로 이것이 세션 선택의 열쇠)
+- **이어가기 절차 (양쪽 분기)**:
+  - **IDE**: 사용자가 새 세션에서 UID를 알려주면 → 해당 UID의 log/handoff 로드. UID 미지정 시 → CLI 경로와 동일하게 최신본 제시 후 확인.
+  - **CLI**: 가장 최근 저장된 log + handoff를 탐지 → **사용자 확인 받은 뒤** 진행 (자동 진행 금지).
+- **`sessions/MICKEY-N-*` 는 master(CLI 트랙) 소유 — 이 디렉토리에서 생성/갱신 금지.** steering 의 MICKEY-N-SESSION 생성 절차는 이 디렉토리에서는 위 날짜+UID 로그로 대체한다 (번호 충돌 방지, v3 통합 시 병합 안전)
 - 그 외 프로토콜(REMEMBER, 10단계, Curator, context-window)은 steering 그대로 적용
+- power steering(session-protocol.md)으로의 일반화("MICKEY-N 사용 불가 환경" 분기)는 **v3 통합 시점 판단으로 보류** — 사용자 재확인 전 steering 수정 금지 (D-0717-1 부속 결정)
 
 ## 3. 현재 상태 (2026-07-16 실측)
 
@@ -49,7 +59,7 @@
 - 계획서: `IMPROVEMENT-PLAN-v10-power-migration.md`, `VERIFICATION-PLAN-v3-power-runtime.md`
 - 직전 로그: `session_history/2026-07-14-v3-power-runtime-verification.md` (V1~V8 결과표 + F1~F5 처리)
 - 이식 매트릭스: `docs/v2-to-v3-mapping.md`
-- 알려진 환경 제약: SessionStart hook 은 터미널 `kiro-cli chat --agent-engine v3` 에서만 발화, acp-client 미발화 (V6) → acp-client 세션에서는 시작 시 `python scripts/check_disk_sync.py` 수동 실행 권장
+- 환경 갱신 (2026-07-17/19 실측): SessionStart hook 이 **acp-client 에서도 발화 확인됨** (V6 당시 "미발화" 기록은 구버전 클라이언트 기준 — 버전업으로 해소 추정). 단, hook stdout 한글 mojibake 이슈는 별도 (hook 개정에서 처리)
 
 ## Last Updated
-2026-07-16 (Mickey 38 — 트랙 분리 kickoff)
+2026-07-19 (세션 551c3f — §2 날짜+UID 규약 성문화, §6 acp-client hook 발화 사실 갱신)

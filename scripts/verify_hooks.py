@@ -1,20 +1,26 @@
-"""Mickey v10 Phase 3 검증기 (Test Harness).
+"""Mickey hook · session 스크립트 검증기 (Test Harness).
 
-계획서 §6 Phase 3 CC 4개 항목을 자동 검증:
+검증 항목 (7종):
 
-1. 파이썬 스크립트 파일 존재 (mickey_session_boot.py · mickey_session_close.py).
-2. CLI v3 hook JSON 유효성 (mickey-session-start.json) + 폐기 hook 부재 가드
+1. 파이썬 스크립트 파일 존재 (boot · close · gen_session_uid).
+2. v1 JSON hook 유효성 (mickey-session-start.json) + 폐기 hook 부재 가드
    (mickey-session-stop.json — F5: Stop 은 per-response 발화라 세션 마감 의도와 불일치, 폐기됨).
-3. IDE hook skeleton 존재 및 _note 필드 (mickey-pre-task.kiro.hook · mickey-post-task.kiro.hook).
+3. legacy `.kiro.hook` 부재 가드 (D-0717-2: IDE 1.0 이 legacy 규격을 로딩하지 않음 확정,
+   2026-07-19 삭제. 재도입 회귀 방지).
 4. 스크립트 --help exit 0.
 5. 스크립트 실 실행 exit 0.
 6. P3 BRANCH 마커 (boot 4종 · close 3종) 가 stdout 에 등장.
+7. D-0717-1 규약 계약: boot/close 소스에 소문자 `-handoff.md` glob + stdout UTF-8 고정 존재.
 
 원칙 (Phase 2c 검증기 계승):
 - 단일 파일 · 각 검증 항목은 단일 책임 함수.
 - 표준 출력 ASCII only (Windows cp949 콘솔 대응).
 - 사이드 이펙트 없음. 사이드 이펙트가 필요한 subprocess 는 --dry-run 성격의 실측만 수행.
 - 종료 코드: PASS 0 / FAIL 1.
+
+기준값 이력:
+- ~2026-07-19 (개정 전): 6/6 (IDE skeleton 존재 검증 포함 — WELC 기록은 551c3f 세션 로그 참조)
+- 2026-07-19 (D-0717-2 개정): 7/7 이 새 기준값. 항목 3이 '존재'에서 '부재' 가드로 반전됨.
 
 관심사 분리: verify_power_structure.py 는 steering 구조 검증, 본 스크립트는 hook·session 스크립트 검증.
 """
@@ -51,6 +57,11 @@ SESSION_SCRIPTS: dict[str, dict[str, list[str]]] = {
     },
 }
 
+# 규약 보조 스크립트 (BRANCH 마커 없음 — 존재 확인만 수행).
+AUX_SCRIPTS: tuple[str, ...] = (
+    ".kiro/scripts/gen_session_uid.py",
+)
+
 CLI_V3_HOOKS: dict[str, dict[str, str]] = {
     ".kiro/hooks/mickey-session-start.json": {
         "expected_trigger": "SessionStart",
@@ -65,15 +76,19 @@ REMOVED_HOOKS: tuple[str, ...] = (
     ".kiro/hooks/mickey-session-stop.json",
 )
 
-IDE_HOOKS: dict[str, dict[str, str]] = {
-    ".kiro/hooks/mickey-pre-task.kiro.hook": {
-        "expected_trigger": "preTaskExecution",
-        "expected_command_hint": "mickey_session_boot.py",
-    },
-    ".kiro/hooks/mickey-post-task.kiro.hook": {
-        "expected_trigger": "postTaskExecution",
-        "expected_command_hint": "mickey_session_close.py",
-    },
+# D-0717-1 규약 계약: 각 스크립트 소스에 반드시 존재해야 하는 문자열.
+# - 소문자 -handoff.md glob: 구 대문자 *HANDOFF* 는 Windows 에서만 우연히 동작 (크로스 플랫폼 회귀 방지)
+# - reconfigure utf-8: hook 소비자가 UTF-8 디코딩 (cp949 mojibake 회귀 방지, 07-19 실측)
+CONVENTION_CONTRACTS: dict[str, list[str]] = {
+    ".kiro/scripts/mickey_session_boot.py": [
+        "-handoff.md",
+        'reconfigure(encoding="utf-8")',
+    ],
+    ".kiro/scripts/mickey_session_close.py": [
+        "-handoff.md",
+        "-log.md",
+        'reconfigure(encoding="utf-8")',
+    ],
 }
 
 
@@ -124,10 +139,10 @@ def _run_python(
 # --- 검증 함수 -----------------------------------------------------------
 
 def check_scripts_exist(root: Path) -> CheckResult:
-    """스크립트 2건 파일 존재 확인."""
+    """세션 스크립트 + 규약 보조 스크립트 파일 존재 확인."""
     details: list[str] = []
     passed = True
-    for rel in SESSION_SCRIPTS:
+    for rel in (*SESSION_SCRIPTS, *AUX_SCRIPTS):
         p = root / rel
         exists = p.is_file()
         passed = passed and exists
@@ -206,37 +221,29 @@ def _validate_v3_hook_dict(
     return True, notes
 
 
-def check_hooks_ide_skeleton(root: Path) -> CheckResult:
-    """IDE hook skeleton 파일 존재 · JSON 파싱 · _note 필드 · 예상 트리거 확인.
+def check_legacy_hooks_absent(root: Path) -> CheckResult:
+    """legacy `.kiro.hook` 부재 가드 (D-0717-2).
 
-    _note 필드는 사용자가 skeleton 임을 인지하도록 하는 표식. 반드시 존재해야 함 (Q3(a)).
+    IDE 1.0 은 legacy when/then 규격을 로딩하지 않는다 (upgrade badge 만 표시,
+    whats-new-1-0 실측). 2026-07-19 전체 삭제 — glob 으로 어떤 .kiro.hook 도
+    재도입되지 않았는지 검증한다 (특정 파일명이 아닌 규격 자체를 차단).
     """
+    hooks_dir = root / ".kiro" / "hooks"
+    legacy = sorted(hooks_dir.glob("*.kiro.hook")) if hooks_dir.is_dir() else []
+    passed = not legacy
     details: list[str] = []
-    passed = True
-    for rel, spec in IDE_HOOKS.items():
-        p = root / rel
-        if not p.is_file():
-            passed = False
-            details.append(f"{_mark(False)} {rel}: file missing")
-            continue
-        try:
-            data = json.loads(p.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            passed = False
-            details.append(f"{_mark(False)} {rel}: json parse error: {exc}")
-            continue
-
-        note = data.get("_note", "") if isinstance(data, dict) else ""
-        trigger = data.get("trigger", "") if isinstance(data, dict) else ""
-        note_ok = "SKELETON" in note
-        trigger_ok = trigger == spec["expected_trigger"]
-        item_ok = note_ok and trigger_ok
-        passed = passed and item_ok
+    if passed:
         details.append(
-            f"{_mark(item_ok)} {rel}: "
-            f"trigger={trigger} note_has_SKELETON={note_ok}"
+            f"{_mark(True)} .kiro/hooks/*.kiro.hook: absent "
+            "(legacy format removed by D-0717-2, IDE 1.0 does not load it)"
         )
-    return CheckResult(name="3. IDE hooks skeleton", passed=passed, details=details)
+    else:
+        for p in legacy:
+            details.append(
+                f"{_mark(False)} {p.relative_to(root)}: "
+                "MUST NOT exist (legacy .kiro.hook format, see D-0717-2)"
+            )
+    return CheckResult(name="3. Legacy .kiro.hook absent", passed=passed, details=details)
 
 
 def check_scripts_help(root: Path) -> CheckResult:
@@ -311,13 +318,46 @@ def check_p3_branches(root: Path) -> CheckResult:
 
 # --- 리포트 · 진입점 -----------------------------------------------------
 
+def check_convention_contract(root: Path) -> CheckResult:
+    """D-0717-1 규약 계약 정적 검증.
+
+    스크립트 소스에 소문자 glob 패턴(-handoff.md / -log.md)과 stdout UTF-8 고정이
+    존재하는지 grep. 구 규격(대문자 *HANDOFF* glob)으로의 회귀를 정적으로 차단한다.
+    """
+    details: list[str] = []
+    passed = True
+    for rel, needles in CONVENTION_CONTRACTS.items():
+        p = root / rel
+        if not p.is_file():
+            passed = False
+            details.append(f"{_mark(False)} {rel}: file missing")
+            continue
+        source = p.read_text(encoding="utf-8")
+        missing = [n for n in needles if n not in source]
+        # 구 대문자 glob 잔존 여부도 함께 가드 (회귀 방지).
+        stale = "*HANDOFF*" in source
+        ok = not missing and not stale
+        passed = passed and ok
+        if ok:
+            details.append(f"{_mark(True)} {rel}: {len(needles)} contracts present, no stale glob")
+        else:
+            notes = []
+            if missing:
+                notes.append(f"missing {missing}")
+            if stale:
+                notes.append("stale '*HANDOFF*' glob present")
+            details.append(f"{_mark(False)} {rel}: " + "; ".join(notes))
+    return CheckResult(name="7. D-0717-1 convention contract", passed=passed, details=details)
+
+
 CHECKS = (
     check_scripts_exist,
     check_hooks_v3_valid,
-    check_hooks_ide_skeleton,
+    check_legacy_hooks_absent,
     check_scripts_help,
     check_scripts_run,
     check_p3_branches,
+    check_convention_contract,
 )
 
 
