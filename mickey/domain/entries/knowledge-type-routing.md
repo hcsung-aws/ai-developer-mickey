@@ -1,5 +1,9 @@
 # 지식 성격별 활용 경로 분기
 
+> **[Seed 예시]** 이 파일은 교육·데모용 seed 예시이다 (IMPROVEMENT-PLAN-v10 §8-a).
+> 실제 지식 그래프는 각 사용자 홈 `~/.kiro/mickey/domain/`에서 Knowledge Curator가 축적하며,
+> 이 예시는 새 사용자가 entry 형식(Core/Decision Context/Tags/Links/Content/Evidence)을 파악하는 참고용이다.
+
 ## Core
 지식을 단일 저장소로 묶지 않고, 성격(R=방식/판단, G=사실/구조, S=절차/동작)에 따라 활용 경로를 분리 설계한다.
 

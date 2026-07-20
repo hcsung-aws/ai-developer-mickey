@@ -1,5 +1,9 @@
 # Script-to-Library Extraction
 
+> **[Seed 예시]** 이 파일은 교육·데모용 seed 예시이다 (IMPROVEMENT-PLAN-v10 §8-a).
+> 실제 지식 그래프는 각 사용자 홈 `~/.kiro/mickey/domain/`에서 Knowledge Curator가 축적하며,
+> 이 예시는 새 사용자가 entry 형식(Core/Decision Context/Tags/Links/Content/Evidence)을 파악하는 참고용이다.
+
 ## Core
 독립 스크립트의 핵심 로직을 함수로 추출하여 라이브러리화하고, 오케스트레이터에서 import하여 "설정 하나로 전체 파이프라인"을 실현한다.
 

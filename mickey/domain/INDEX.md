@@ -2,6 +2,9 @@
 
 > 프로젝트에서 승격된 도메인 지식. "다른 프로젝트에서 같은 기술/도구를 쓸 때 참고할 가치가 있는가?"가 승격 기준.
 > 관계 맵: GRAPH.md 참조. 상세: entries/ 참조.
+>
+> **[Seed 예시]** 이 INDEX와 `entries/` 10건은 교육·데모용 seed 예시이다 (IMPROVEMENT-PLAN-v10 §8-a).
+> 실제 지식 그래프는 각 사용자 홈 `~/.kiro/mickey/domain/`에서 개인화되어 축적된다.
 
 ## Domain Map
 

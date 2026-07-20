@@ -1,5 +1,9 @@
 # Passive > Active 지식 활용
 
+> **[Seed 예시]** 이 파일은 교육·데모용 seed 예시이다 (IMPROVEMENT-PLAN-v10 §8-a).
+> 실제 지식 그래프는 각 사용자 홈 `~/.kiro/mickey/domain/`에서 Knowledge Curator가 축적하며,
+> 이 예시는 새 사용자가 entry 형식(Core/Decision Context/Tags/Links/Content/Evidence)을 파악하는 참고용이다.
+
 ## Core
 에이전트/사용자의 지식 활용은 Active 검색(의식적으로 찾아보기)이 아닌 Passive 발견(context window에 자연스럽게 노출)으로 설계해야 동작한다.
 

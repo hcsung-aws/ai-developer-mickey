@@ -1,5 +1,9 @@
 # WELC Test Harness
 
+> **[Seed 예시]** 이 파일은 교육·데모용 seed 예시이다 (IMPROVEMENT-PLAN-v10 §8-a).
+> 실제 지식 그래프는 각 사용자 홈 `~/.kiro/mickey/domain/`에서 Knowledge Curator가 축적하며,
+> 이 예시는 새 사용자가 entry 형식(Core/Decision Context/Tags/Links/Content/Evidence)을 파악하는 참고용이다.
+
 ## Core
 수정 전 기존 동작을 테스트로 캡처(Characterization test)한 뒤 수정하여 사이드이펙트를 즉시 감지한다.
 

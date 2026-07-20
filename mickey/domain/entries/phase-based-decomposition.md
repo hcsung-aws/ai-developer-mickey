@@ -1,5 +1,9 @@
 # Phase 기반 점진적 분해
 
+> **[Seed 예시]** 이 파일은 교육·데모용 seed 예시이다 (IMPROVEMENT-PLAN-v10 §8-a).
+> 실제 지식 그래프는 각 사용자 홈 `~/.kiro/mickey/domain/`에서 Knowledge Curator가 축적하며,
+> 이 예시는 새 사용자가 entry 형식(Core/Decision Context/Tags/Links/Content/Evidence)을 파악하는 참고용이다.
+
 ## Core
 큰 목표를 Phase→Step으로 분해하고, 각 단계를 E2E 검증한 뒤 다음으로 진행한다.
 
