@@ -22,3 +22,11 @@
 - 증상: `git commit -m "여러 단어 메시지"` 실행 시 따옴표가 벗겨져 각 단어가 pathspec 으로 해석됨 (`error: pathspec '...' did not match`)
 - 우회: 메시지를 파일로 작성 후 `git commit -F <파일>` 사용. 커밋 후 파일 삭제
 - 동일 계열: PowerShell 인라인 명령 미실행(에코만 됨) 사례도 M38 에서 관찰 — 2줄 이상 로직은 .py 스크립트로 분리하는 기존 규칙 준수가 안전
+
+## delegate subagent 상태의 프로세스 간 공유 (2026-07-21, Mickey 40)
+
+- 증상: 이 세션에서 knowledge-curator를 한 번도 launch하지 않았는데 첫 launch 시도가 "Agent 'knowledge-curator' is already running"으로 거부됨. 약 2분+ 대기 후에도 동일
+- 추정: delegate의 agent별 단일 실행 lock이 kiro-cli 프로세스 간 공유됨 — 타 세션(동시 오픈)의 Curator 실행 또는 비정상 종료 잔여 lock과 충돌
+- 관찰: 작업 파일 위치로 문서화된 `.kiro/.subagents/`는 프로젝트/홈 어디에도 미존재 (lock 실체 미확인)
+- 영향: 세션 종료 프로토콜의 Curator 호출이 타 세션과 직렬화됨. 동시 실행 시 글로벌 domain/ 동시 수정 위험은 오히려 차단되는 효과도 있음
+- 대응(M40): Curator 역할을 메인 세션이 직접 수행(직접 수정 + Pre-staged 절차 동일 적용). 검증 3회차 카운트에는 불포함

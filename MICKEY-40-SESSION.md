@@ -37,7 +37,9 @@ Infrastructure (자기 개선) — §20 판단 지침의 정확성을 정량 검
   - verification: 엣지 응집률 0.26 = 우연 기대치(16/61≈0.26)와 정확히 일치, 과반 공유 co-tag 없음, co-tag 92종 분산 → **aspect 판정 데이터로 확증**
   - testing: 내부 밀도 0.476 (전체 평균 0.119의 4배), 응집률 0.24 (우연 기대치 0.098의 2.5배), 과반 공유 co-tag verification(5/7), extends/applies-to 강한 엣지 위주 → **통계적으로는 응집 클러스터**. 단 구성원 엄선(주 도메인 판정) 시 핵심 ~5건으로 임계 미달 → flat 잔류 합리적
   - 참고: cloud/(승인된 도메인) 내부 밀도 0.124 — 밀도 단독으로는 aspect/domain 판정 불가 (verification 멤버는 고차수 허브라 밀도 높지만 상호 선호 없음)
-- **§20 판단 지침 실측 기준화 (옵션 A, 사용자 확정)**: 예시 목록 제거 + 실측 기준 3가지(① 과반 공유 co-tag ② 엣지 응집률 vs 우연 기대치 (k−1)/(N−1) ③ 엄선 후 임계 유지) + 판정 규칙(①②미달→aspect / ③미달→flat 잔류 / 전충족→파이프라인). extended-protocols v19→**v20**. 수정 3곳: global extended-protocols.md + global domain/INDEX.md(§20 참조로 축약) + repo mickey/extended-protocols.md(global과 해시 일치 검증). 백업 .m40-bak 2건. 구 문구 잔존 0건 검증
+- **§20 판단 지침 실측 기준화 (옵션 A, 사용자 확정)**: 예시 목록 제거 + 실측 기준 3가지(① 과반 공유 co-tag ② 엣지 응집률 vs 우연 기대치 (k−1)/(N−1) ③ 엄선 후 임계 유지) + 판정 규칙(①②미달→aspect / ③미달→flat 잔류 / 전충족→파이프라인). extended-protocols v19→**v20**. 수정 3곳: global extended-protocols.md + global domain/INDEX.md(§20 참조로 축약) + repo mickey/extended-protocols.md(global과 해시 일치 검증). 백업 .m40-bak 2건. 구 문구 잔존 0건 검증. 커밋 595214e push 완료
+- **세션 종료 큐레이션 (본좌 직접 수행)**: knowledge-curator delegate가 "already running" 거부 — 락 보유자는 mickey-power 트랙 세션(058f5f)의 Curator로 사후 판명. 사용자 지시로 메인 세션이 Curator 역할 대행. R/G/S 분기: 교훈 2건 모두 G(글로벌 domain) — `normative-example-list-trap` + `degree-corrected-cluster-cohesion` 신설 (노드 +2, 엣지 +6, INDEX 트리거 2행). GRAPH.md 백업 .m40-bak 생성. 무결성 검증 `scripts/m40_dangling_check.py` (하위 GRAPH 병합 시맨틱 보정 후) **PASS** (83노드/253엣지, dangling 0, missing path 0)
+- **동시 쓰기 충돌 판정**: 스냅샷 --post diff에 타 세션(058f5f) 변경 혼입 발견 (m058f5f-bak 백업, entry 2건 보강, machine-env.md) → 정밀 실측 13/13 PASS — 본좌 변경 유실 없음, 타 세션 Curator가 본좌 이후 실행되며 보존, Last Updated 체인 정상 ("직전: Mickey 40")
 
 ### In Progress
 - (없음)
@@ -56,11 +58,15 @@ Infrastructure (자기 개선) — §20 판단 지침의 정확성을 정량 검
 - mickey/extended-protocols.md (global 동기화, 해시 일치 검증 — adaptive #3)
 
 ## Lessons Learned
-- 지침 내 괄호 예시가 LLM에게 사실상 제외 목록으로 기능함 — "제외 목록은 두지 않음"이라 명시해도 예시 나열이 있으면 실측을 생략하고 예시 매칭으로 판단함. 규범 문서에는 예시 대신 측정 가능한 기준을 적을 것 (M40, verification/testing skip 사례)
-- 클러스터 응집도 판정에서 내부 밀도는 허브 효과로 왜곡됨 — 차수 보정된 응집률(내부/(내부+경계) vs 우연 기대치 (k−1)/(N−1))이 aspect/domain을 변별함 (verification: 밀도 2.4배인데 응집률은 정확히 우연 수준)
+- 지침 내 괄호 예시가 LLM에게 사실상 제외 목록으로 기능함 — "제외 목록은 두지 않음"이라 명시해도 예시 나열이 있으면 실측을 생략하고 예시 매칭으로 판단함. 규범 문서에는 예시 대신 측정 가능한 기준을 적을 것 (M40, verification/testing skip 사례 → entry: normative-example-list-trap)
+- 클러스터 응집도 판정에서 내부 밀도는 허브 효과로 왜곡됨 — 차수 보정된 응집률(내부/(내부+경계) vs 우연 기대치 (k−1)/(N−1))이 aspect/domain을 변별함 (verification: 밀도 2.4배인데 응집률은 정확히 우연 수준 → entry: degree-corrected-cluster-cohesion)
+- [Protocol] delegate subagent lock이 kiro-cli 프로세스 간 공유됨 — 세션 종료 Curator 호출이 타 세션과 직렬화. "already running" 시 락 보유자 확인 불가하므로, 글로벌 파일 수정 후에는 스냅샷 diff로 타 세션 변경 혼입/충돌 여부를 실측할 것 (M40에서 혼입 발견, 유실은 없었음)
+- 무결성 검증 도구도 시스템 규약(§20 하위 GRAPH 병합)과 시맨틱을 맞춰야 함 — 상위 GRAPH만 검사하면 cross-category 엣지 49건이 위양성 dangling으로 나옴 (tool-and-target-coevolution 계열)
 
 ## Context Window Status
-~15% (추정)
+~35% (세션 종료 시점)
 
 ## Next Steps
-- 사용자 작업 지시 대기
+- (M41 인계) 글로벌 백업 .m40-bak 2건 — 안정 확인 후 정리
+- (M41 인계) 포스트모템 트리거 2026-07-24 이후 도달 시 §18 Activity Metrics 실측
+- (M41 인계) cloud/ 클러스터 감시 지속 (당장 아님)

@@ -12,7 +12,7 @@
 | 그래프 시각화, 지식 지도 시각화, 진단 도구, vis-network, 태그 chip 필터, 이웃 1-hop 강조, self-contained HTML, 클러스터 발견 | mickey-graph-visualization.md | Mickey 지식 그래프 시각화 도구 (`scripts/mickey_graph/`). 글로벌/프로젝트 스코프 self-contained HTML 렌더. Phase 3 필터 UI(태그 chip + kind/edge 체크박스 + 이웃 강조). WELC 101 tests |
 
 ## Last Updated
-2026-07-21 (Mickey 39 Curator — Domain Links 2건 추가: invariant-vs-snapshot-verification + data-merge-vs-view-visibility. 직전: M37 Pre-staged 머지)
+2026-07-21 (Mickey 40 — Domain Links 2건 추가: normative-example-list-trap + degree-corrected-cluster-cohesion. 직전: Mickey 39 Curator)
 
 
 ## Domain Links
@@ -37,3 +37,5 @@
 | Curator 프롬프트 동기화, agent JSON, SoT 런타임 | ~/.kiro/mickey/domain/entries/prompt-doc-vs-runtime-loading.md | SoT→런타임 동기화 실측 교훈 |
 | 검증 스크립트 기준값, EXPECTED_TOTAL, 무결성 vs 스냅샷 | ~/.kiro/mickey/domain/entries/invariant-vs-snapshot-verification.md | 성장 시스템에서 불변 조건과 고정 카운트 검증 구분 해석 |
 | 계층 시각화, member-of 합성, builder 파생 엣지, 병합됨 보임 | ~/.kiro/mickey/domain/entries/data-merge-vs-view-visibility.md | 데이터 병합 ≠ 뷰 표현 — builder 파생 엣지 합성(SoT 불변) |
+| 지침 예시, 예시 목록 오독, 규범 문서 설계, 측정 가능 기준 | ~/.kiro/mickey/domain/entries/normative-example-list-trap.md | 규범 문서의 괄호 예시는 LLM에게 분류 규칙으로 소비됨 — 예시 대신 측정 가능 기준 |
+| 클러스터 응집도, 허브 효과, aspect 판정, 우연 기대치 | ~/.kiro/mickey/domain/entries/degree-corrected-cluster-cohesion.md | 내부 밀도는 허브 왜곡 — 응집률 vs (k−1)/(N−1) 비교로 aspect/domain 변별 |
