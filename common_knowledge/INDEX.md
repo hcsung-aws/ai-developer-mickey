@@ -12,7 +12,7 @@
 | 그래프 시각화, 지식 지도 시각화, 진단 도구, vis-network, 태그 chip 필터, 이웃 1-hop 강조, self-contained HTML, 클러스터 발견 | mickey-graph-visualization.md | Mickey 지식 그래프 시각화 도구 (`scripts/mickey_graph/`). 글로벌/프로젝트 스코프 self-contained HTML 렌더. Phase 3 필터 UI(태그 chip + kind/edge 체크박스 + 이웃 강조). WELC 101 tests |
 
 ## Last Updated
-2026-07-18 (Mickey 37 — Curator Pre-staged 머지: installer-seed-semantics + prompt-doc-vs-runtime-loading Domain Links 추가. 직전: Domain Links out-of-sync 6건 정합)
+2026-07-21 (Mickey 39 Curator — Domain Links 2건 추가: invariant-vs-snapshot-verification + data-merge-vs-view-visibility. 직전: M37 Pre-staged 머지)
 
 
 ## Domain Links
@@ -35,3 +35,5 @@
 | 측정 정밀도 반복 심화, 진단 도구 한계 | ~/.kiro/mickey/domain/entries/iterative-measurement-deepening.md | 측정 도구 정밀도는 반복 깊이 확장으로 정정 |
 | install seed 시맨틱, E2E harness, 홈 리다이렉트 | ~/.kiro/mickey/domain/entries/installer-seed-semantics.md | 세대 파일만 갱신 + HOME 리다이렉트 테스트 |
 | Curator 프롬프트 동기화, agent JSON, SoT 런타임 | ~/.kiro/mickey/domain/entries/prompt-doc-vs-runtime-loading.md | SoT→런타임 동기화 실측 교훈 |
+| 검증 스크립트 기준값, EXPECTED_TOTAL, 무결성 vs 스냅샷 | ~/.kiro/mickey/domain/entries/invariant-vs-snapshot-verification.md | 성장 시스템에서 불변 조건과 고정 카운트 검증 구분 해석 |
+| 계층 시각화, member-of 합성, builder 파생 엣지, 병합됨 보임 | ~/.kiro/mickey/domain/entries/data-merge-vs-view-visibility.md | 데이터 병합 ≠ 뷰 표현 — builder 파생 엣지 합성(SoT 불변) |

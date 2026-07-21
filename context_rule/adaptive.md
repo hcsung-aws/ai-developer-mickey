@@ -16,3 +16,5 @@
 10. **git 미추적 글로벌 파일(~/.kiro/mickey/) 편집 전 동일 디렉토리에 백업 파일 생성 필수 — 되돌리기 안전장치 없으면 수술 실패 시 복원 불가** — Mickey 36, GRAPH.md 병합+orphan 수술 전 .m36-bak 생성으로 안전 확보 (M35 domain entry 편집 시도와 동일 패턴 2회차)
 11. **프롬프트/설정류 수정 전 런타임 로딩 경로를 실측하라 — SoT 문서 수정 ≠ 런타임 반영** — Mickey 37, CURATOR-PROMPT.md(SoT) 수정분(M36 포함)이 agent JSON 내장 prompt에 미전파 상태였음. md→JSON 동기화 스크립트(m37_sync_curator_prompt.py)를 수정 파이프라인에 포함할 것
 12. **인계받은 위험 서술은 diff 실측으로 재정의 후 해법을 정하라** — Mickey 37, M36 인계의 "GLOBAL_ONLY 63건 소실" 추정이 실측(copy-only + DIFF 10건 stale 롤백)으로 뒤집혀 해결 방향 자체(미러링→seed 시맨틱)가 바뀜
+13. **파일 쓰기 도구의 취소/실패 보고도 디스크 실측으로 확인 — 취소 보고된 쓰기가 실제 적용된 사례 존재, str_replace 재시도 전 grep으로 디스크 상태 우선 확인** — Mickey 39, adaptive #9(SESSION 냉동 vs 디스크)와 동일한 "보고≠디스크" 계열의 역방향 변형 (3회차)
+14. **cp949 콘솔에서 execute_cmd 한글 출력이 잘려 보일 수 있음 — PASS/FAIL 판정은 콘솔 출력이 아닌 파일 리다이렉트 후 실측** — Mickey 39, cp949 계열 2회차 (#8 UnicodeEncodeError → 이번 출력 잘림)
