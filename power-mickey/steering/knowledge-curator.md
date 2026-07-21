@@ -97,3 +97,4 @@ dangling 항목이 3세션 이상 보류되면 "자동 폐기 후보" 로 알린
 - `session-protocol.md` End Step 2 — Curator 호출 트리거.
 - `knowledge-graph.md` — 지식 그래프 접근 규약(상시). Curator 상세 규약은 이 파일로 이관됨.
 - `~/.kiro/mickey/extended-protocols.md` §17 (Knowledge Lifecycle) — 심층 절차. §18 (Activity Metrics)·§12 (Global Knowledge) 는 승격 판단 시 pull.
+- `~/.kiro/mickey/extended-protocols.md` §20 (Progressive Domain Hierarchy) — Curator 가 domain entry **신규 등록 시** Step 1 규약(flat 배치 + GRAPH Path 컬럼 + 노드 ID 링크) 준수. 카테고리(`entries/{category}/`) **존재 시** 주 도메인 판정 후 배치, **미존재 시** flat 배치. 분할·카테고리화 후보 감지는 엔트로피 체크(§3-6·7) 소관.
