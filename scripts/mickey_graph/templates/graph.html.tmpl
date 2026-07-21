@@ -152,6 +152,7 @@ const edgeColor = {
   'similar-to': '#22c55e',
   'prerequisite': '#eab308',
   'cross-scope': '#ec4899',
+  'member-of': '#14b8a6',
   'unknown': '#94a3b8'
 };
 
@@ -219,7 +220,7 @@ const visEdges = MICKEY_GRAPH.edges.map(function(e, i) {
     arrows: 'to',
     color: { color: edgeColor[e.type] || '#94a3b8', opacity: 0.5 },
     title: e.type + (e.reason ? ': ' + e.reason : ''),
-    dashes: e.type === 'cross-scope' || e.type === 'extends',
+    dashes: e.type === 'cross-scope' || e.type === 'extends' || e.type === 'member-of',
     width: e.type === 'cross-scope' ? 2 : 1
   };
 });
@@ -447,7 +448,7 @@ function renderKindChecks() {
 function renderEdgeTypeChecks() {
   const container = document.getElementById('edge-type-filter');
   container.innerHTML = '';
-  const orderedTypes = ['applies-to', 'extends', 'similar-to', 'prerequisite', 'cross-scope', 'unknown'];
+  const orderedTypes = ['applies-to', 'extends', 'similar-to', 'prerequisite', 'cross-scope', 'member-of', 'unknown'];
   orderedTypes.forEach(function(et) {
     if (!edgeTypeCounts.has(et)) return;
     const count = edgeTypeCounts.get(et);

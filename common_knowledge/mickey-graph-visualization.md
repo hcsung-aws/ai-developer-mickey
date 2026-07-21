@@ -39,7 +39,7 @@ python scripts/mickey_graph_viz.py --scope global --mickey-root <경로>
 - **필터 바** (chip + checkbox):
   - **Tags**: 태그 chip 목록. 사용 빈도 내림차순 정렬 + count 표시. 클릭 토글. 다태그 데이터셋(380+) 대응 위해 기본은 count>=2 표시, `Show all (+N)` 로 전체 확장. `Hide singletons` 로 복귀. All/None 버튼
   - **Kinds**: 노드 kind 5종(entry/pattern/graduated/project_knowledge/unknown) 체크박스 (색상 swatch 병기)
-  - **Edges**: 엣지 type 6종(applies-to/extends/similar-to/prerequisite/cross-scope/unknown) 체크박스 (색상 line swatch)
+  - **Edges**: 엣지 type 7종(applies-to/extends/similar-to/prerequisite/cross-scope/member-of/unknown) 체크박스 (색상 line swatch)
 - **노드 클릭**: 상세 패널(제목/degree/kind/core/tags/source) + 1-hop 이웃 강조 (자신+이웃 opacity 1.0, 나머지 노드 0.15 / 엣지 0.05)
 - **배경 클릭**: 강조 해제 + 상세 패널 초기화 (placeholder + hint 복귀)
 
@@ -52,7 +52,7 @@ python scripts/mickey_graph_viz.py --scope global --mickey-root <경로>
 | 노드 크기 | 총 연결 수(in + out) 기반. min 10, max 40 |
 | 노드 border 두께 | out_degree 기반. 굵을수록 나가는 링크 많음(탐색 허브) |
 | 노드 border 색 (핑크) | 프로젝트가 backlink 로 참조한 글로벌 entry (project 스코프) |
-| 엣지 색상 (type) | applies-to=파랑 / extends=보라(점선) / similar-to=초록 / prerequisite=노랑 / cross-scope=핑크(점선+굵음) |
+| 엣지 색상 (type) | applies-to=파랑 / extends=보라(점선) / similar-to=초록 / prerequisite=노랑 / cross-scope=핑크(점선+굵음) / member-of=teal(점선, builder 합성) |
 | 라벨 표시 | 총 연결 3+ 노드만 항상 표시. 나머지는 hover 시 표시 |
 
 ## 확장 계획 (Phase 4, 미구현)
@@ -86,5 +86,9 @@ python scripts/mickey_graph_viz.py --scope global --mickey-root <경로>
 - **WELC harness**: 각 계층 유닛 테스트 + fixture 기반 스냅샷 회귀. renderer 변경 없이 UI 확장 가능 (JSON 직렬화에 필터 대상 필드 모두 포함)
 - **오프라인 self-contained**: vendor 인라인, 네트워크 접근 없음 (single-artifact-deployment 도메인 패턴 준수)
 
+## 계층화 표현 (M39)
+
+§20 카테고리화(entries/{category}/ + anchor)의 membership은 md에 엣지로 존재하지 않고 파일 위치로만 표현되므로, builder가 하위 GRAPH 병합 시 `하위 entry → anchor` 방향의 **member-of 엣지를 합성**한다 (md는 불변, 데이터 파생). anchor가 상위 GRAPH에 없으면 member-of가 dangling 승격되어 UNKNOWN(빨강)으로 §20 계약 위반이 시각적으로 표면화된다 (health-scanner 겸용).
+
 ## Last Updated
-2026-07-11 (Mickey 35 — Phase 2 완료 문서화 + Phase 3 UI 등재)
+2026-07-20 (Mickey 39 — member-of 계층 엣지 합성. 직전: M35 Phase 3 UI 등재)

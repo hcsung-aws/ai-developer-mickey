@@ -42,7 +42,8 @@ class TestBuildGlobalGraph:
 
     def test_sub_category_graph_merged(self, fake_mickey_root: Path):
         """§20 Step 3 하위 카테고리 GRAPH 병합: entries/{cat}/GRAPH.md 노드/엣지가 합류하고
-        cross-category 엣지(상위 노드 → 하위 노드)가 dangling 승격되지 않아야 한다."""
+        cross-category 엣지(상위 노드 → 하위 노드)가 dangling 승격되지 않아야 한다.
+        또한 하위 노드 → anchor 의 member-of 엣지가 합성되어 계층이 시각화되어야 한다 (M39)."""
         sub_dir = fake_mickey_root / "domain" / "entries" / "cloudx"
         sub_dir.mkdir(parents=True)
         (sub_dir / "GRAPH.md").write_text(
@@ -58,9 +59,14 @@ class TestBuildGlobalGraph:
             "| sub-one | sub-two | extends | internal edge |\n",
             encoding="utf-8",
         )
-        # 상위 GRAPH에 cross-category 엣지 추가 (alpha → sub-one)
+        # 상위 GRAPH에 §20 계약대로 anchor 행 + cross-category 엣지 추가
         top = fake_mickey_root / "domain" / "GRAPH.md"
         text = top.read_text(encoding="utf-8")
+        text = text.replace(
+            "| gamma | Gamma Node | tag-c | Core desc C |",
+            "| gamma | Gamma Node | tag-c | Core desc C |\n"
+            "| cloudx | Cloudx Category [ANCHOR] | category-anchor | anchor row |",
+        )
         text = text.replace(
             "| alpha | ghost | similar-to | dangling target for test |",
             "| alpha | ghost | similar-to | dangling target for test |\n"
@@ -75,6 +81,29 @@ class TestBuildGlobalGraph:
         # sub-one 은 실노드로 로딩되므로 UNKNOWN 승격 대상은 기존 ghost 1건만
         unknown = [n for n in graph.nodes if n.kind == NodeKind.UNKNOWN]
         assert [n.id for n in unknown] == ["ghost"], "cross-category 엣지 dangling 승격 없음"
+        # member-of 합성: 하위 노드 2개 → anchor. anchor 자기 참조는 없어야 함
+        member_edges = [e for e in graph.edges if e.type == EdgeType.MEMBER_OF]
+        assert {(e.from_id, e.to_id) for e in member_edges} == {
+            ("sub-one", "cloudx"),
+            ("sub-two", "cloudx"),
+        }, "하위 노드 → anchor member-of 엣지 합성"
+
+    def test_sub_category_missing_anchor_promoted_unknown(self, fake_mickey_root: Path):
+        """상위 GRAPH에 anchor 행이 없는 하위 카테고리는 member-of 엣지의 dangling 승격으로
+        UNKNOWN(빨강) 노드가 표면화되어 §20 계약 위반을 시각적으로 드러내야 한다 (health-scanner)."""
+        sub_dir = fake_mickey_root / "domain" / "entries" / "orphancat"
+        sub_dir.mkdir(parents=True)
+        (sub_dir / "GRAPH.md").write_text(
+            "# Sub Graph\n\n"
+            "## Nodes\n"
+            "| ID | Title | Tags | Core | Path |\n"
+            "|----|-------|------|------|------|\n"
+            "| lonely | Lonely | tag-z | core Z | entries/orphancat/lonely.md |\n",
+            encoding="utf-8",
+        )
+        graph, stats = build_global_graph(fake_mickey_root)
+        unknown_ids = {n.id for n in graph.nodes if n.kind == NodeKind.UNKNOWN}
+        assert "orphancat" in unknown_ids, "anchor 누락 시 UNKNOWN 승격으로 표면화"
 
     def test_returns_expected_edge_count(self, fake_mickey_root: Path):
         """3 edges (graph). Graduated 'Old Pattern' → foo 는 self-loop 이므로 흡수 엣지 미생성."""

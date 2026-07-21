@@ -99,10 +99,25 @@ def build_global_graph(mickey_root: Path) -> tuple[GraphData, GraphBuildStats]:
     # 하위 카테고리 GRAPH (extended-protocols §20 Step 3):
     # domain/entries/{category}/GRAPH.md 를 재귀 스캔하여 상위 그래프에 병합.
     # 상위에는 anchor 행만 남으므로, 하위 노드를 로딩해야 cross-category 엣지가 dangling 되지 않는다.
+    # 또한 §20의 membership(파일 위치 = 카테고리 소속)은 md에 엣지로 존재하지 않으므로,
+    # 시각화에서 계층이 보이도록 "하위 entry → anchor" member-of 엣지를 여기서 합성한다 (M39).
     for sub_graph_file in sorted((mickey_root / "domain" / "entries").rglob("GRAPH.md")):
         text = load_graph_file(sub_graph_file)
-        nodes.extend(parse_nodes_from_graph(text, source=str(sub_graph_file)))
+        sub_nodes = parse_nodes_from_graph(text, source=str(sub_graph_file))
+        nodes.extend(sub_nodes)
         edges.extend(parse_edges_from_graph(text))
+        # anchor ID = 카테고리 디렉토리명 (상위 GRAPH의 anchor 행 ID와 §20 규약상 일치)
+        anchor_id = sub_graph_file.parent.name
+        edges.extend(
+            Edge(
+                from_id=n.id,
+                to_id=anchor_id,
+                type=EdgeType.MEMBER_OF,
+                reason=f"entries/{anchor_id}/ 소속 (builder 합성)",
+            )
+            for n in sub_nodes
+            if n.id != anchor_id  # anchor 자기 참조 방지
+        )
 
     if patterns_file.exists():
         text = load_graph_file(patterns_file)

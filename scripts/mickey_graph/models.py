@@ -26,6 +26,7 @@ class EdgeType(str, Enum):
     SIMILAR_TO = "similar-to"
     PREREQUISITE = "prerequisite"
     CROSS_SCOPE = "cross-scope"       # 프로젝트 지식 → 글로벌 domain entry backlink
+    MEMBER_OF = "member-of"           # 하위 카테고리 entry → anchor 노드 소속 (builder가 파일 위치에서 합성)
     UNKNOWN = "unknown"
 
     @classmethod
