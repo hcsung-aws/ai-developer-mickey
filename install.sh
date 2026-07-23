@@ -23,6 +23,10 @@ mkdir -p "$MICKEY_DIR" "$MICKEY_DIR/patterns" "$MICKEY_DIR/domain" "$MICKEY_DIR/
 cp "$SCRIPT_DIR/mickey/extended-protocols.md" "$MICKEY_DIR/"
 cp "$SCRIPT_DIR/mickey/domain/CURATOR-PROMPT.md" "$MICKEY_DIR/domain/"
 
+# 글로벌 승격 스크립트: 세대 관리 (결정론적 도구 — 항상 최신 배포, §17 락 규약)
+mkdir -p "$MICKEY_DIR/scripts"
+cp "$SCRIPT_DIR/scripts/promote_knowledge.py" "$MICKEY_DIR/scripts/"
+
 # seed 복사: 대상에 같은 이름 파일이 없을 때만 (개인 지식 덮어쓰기 금지)
 copy_seed_glob() { # $1=소스 디렉토리, $2=대상 디렉토리, $3=제외 파일명(옵션)
   local src dest

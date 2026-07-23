@@ -41,6 +41,10 @@ function Copy-SeedFiles {
 Copy-Item (Join-Path $ScriptDir 'mickey\extended-protocols.md') $MickeyDir -Force
 Copy-Item (Join-Path $ScriptDir 'mickey\domain\CURATOR-PROMPT.md') (Join-Path $MickeyDir 'domain') -Force
 
+# 글로벌 승격 스크립트: 세대 관리 (결정론적 도구 — 항상 최신 배포, §17 락 규약)
+$null = New-Item -ItemType Directory -Force -Path (Join-Path $MickeyDir 'scripts')
+Copy-Item (Join-Path $ScriptDir 'scripts\promote_knowledge.py') (Join-Path $MickeyDir 'scripts') -Force
+
 # seed 파일: 미존재 시에만 복사 (CURATOR-PROMPT.md 는 위 세대 관리에서 처리됨)
 Copy-SeedFiles (Join-Path $ScriptDir 'mickey\patterns\*.md') (Join-Path $MickeyDir 'patterns')
 Copy-SeedFiles (Join-Path $ScriptDir 'mickey\domain\*.md') (Join-Path $MickeyDir 'domain') -ExcludeNames @('CURATOR-PROMPT.md')
