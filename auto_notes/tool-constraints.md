@@ -30,3 +30,9 @@
 - 관찰: 작업 파일 위치로 문서화된 `.kiro/.subagents/`는 프로젝트/홈 어디에도 미존재 (lock 실체 미확인)
 - 영향: 세션 종료 프로토콜의 Curator 호출이 타 세션과 직렬화됨. 동시 실행 시 글로벌 domain/ 동시 수정 위험은 오히려 차단되는 효과도 있음
 - 대응(M40): Curator 역할을 메인 세션이 직접 수행(직접 수정 + Pre-staged 절차 동일 적용). 검증 3회차 카운트에는 불포함
+
+## delegate subagent는 launch 시점에 agent JSON을 새로 읽음 (2026-07-23, Mickey 41)
+
+- 실측: 세션 부팅 후 knowledge-curator.json을 수정(M41 격리 개정)하고 같은 세션에서 delegate launch → probe 응답이 개정본 프롬프트 확인 ("격리 원칙 M41" 존재, 3단계 제목 개정판)
+- 의미: M23의 "agent JSON 캐시 — 새 세션 부팅 필요" 제약은 **메인 세션 agent에 한정**. delegate subagent는 launch 시점 디스크의 JSON을 사용하므로 본 세션 내 즉시 반영됨
+- 활용: Curator 설정 변경 후 무해한 probe(파일 접근 금지 + 프롬프트 내 마커 문구 질의)로 버전 확인 가능 (비용 ~6초)

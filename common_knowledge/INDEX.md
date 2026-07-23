@@ -39,3 +39,4 @@
 | 계층 시각화, member-of 합성, builder 파생 엣지, 병합됨 보임 | ~/.kiro/mickey/domain/entries/data-merge-vs-view-visibility.md | 데이터 병합 ≠ 뷰 표현 — builder 파생 엣지 합성(SoT 불변) |
 | 지침 예시, 예시 목록 오독, 규범 문서 설계, 측정 가능 기준 | ~/.kiro/mickey/domain/entries/normative-example-list-trap.md | 규범 문서의 괄호 예시는 LLM에게 분류 규칙으로 소비됨 — 예시 대신 측정 가능 기준 |
 | 클러스터 응집도, 허브 효과, aspect 판정, 우연 기대치 | ~/.kiro/mickey/domain/entries/degree-corrected-cluster-cohesion.md | 내부 밀도는 허브 왜곡 — 응집률 vs (k−1)/(N−1) 비교로 aspect/domain 변별 |
+| 멀티 세션 격리, Curator 격리, promote 스크립트 | ~/.kiro/mickey/domain/entries/staged-promotion-write-isolation.md | 공유 가변 자원 쓰기는 결정론적 승격 스크립트만의 권한 |

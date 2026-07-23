@@ -1,7 +1,7 @@
 # Mickey 41 Session
 
 ## Checkpoint
-[2/5]
+[4/5]
 
 ## Session Meta
 - Type: Self-Improvement (멀티 세션 동시 실행 시 세션 종료/큐레이션 충돌 해소)
@@ -40,6 +40,10 @@ Infrastructure (자기 개선) — 진화 루프(Curator + 글로벌 domain)의 
 - **install.ps1/sh**: promote_knowledge.py를 세대 관리 파일로 배포 추가 (~/.kiro/mickey/scripts/) + 즉시 수동 배포 완료
 - **백업 정리**: 글로벌 .m40-bak 3건 삭제(M40 인계, 안정 확인됨). repo 내 .bak 잔재 정리(git 추적이므로 불필요)
 
+- **Curator 런타임 반영 실측 (probe)**: 파일 접근 금지 probe를 delegate로 실행 → 개정본 프롬프트 확인 ("격리 원칙 M41" YES, 3단계 제목 "직접 수정 실행 (adaptive.md만)"). **delegate subagent는 launch 시점에 agent JSON을 새로 읽음** — M23 캐시 제약은 메인 세션 agent 한정 (auto_notes/tool-constraints.md 기록)
+- **세션 종료 큐레이션 (Curator 검증 3회차 — 격리 구조 첫 실전) PASS**: 글로벌 쓰기 0건 (스냅샷 diff의 글로벌 변경은 전부 back-to-basic-modernize의 promote 실행분 — owner 명의로 즉시 식별, 신규 설계 실전 가동 확인). Curator 산출: adaptive #15 직접 수정 + staging 4건 (gd- 2, profile- 1, cr-index 1). 사용자 전체 승인
+- **승격 실행**: Base-Hash 스탬프(m41_stamp_base_hash.py) → promote 2/2 PASS (신규 staged-promotion-write-isolation 엣지+3, augment prompt-doc-vs-runtime-loading 엣지+1, 무결성 dangling 0). PROFILE.md "LLM-결정론적 하이브리드" 성향 추가(백업 규약 준수). context_rule/INDEX 카운트 15 갱신. staging 청소 완료
+
 ### In Progress
 - (없음)
 
@@ -65,9 +69,10 @@ Infrastructure (자기 개선) — 진화 루프(Curator + 글로벌 domain)의 
 - serena create_text_file이 활성 프로젝트 루트(work\kiro 상위)에 오배치 — tool-implicit-root-path-trap 재현 2회차. 세션 시작 시 도구 활성 컨텍스트 확인 필요 (M41)
 - PowerShell `;` 체이닝에서 New-Item이 Copy-Item 뒤에 오면 디렉토리 미존재 실패 — 생성을 항상 선행 (사소하나 순서 의존)
 - cp949 콘솔 잘림 재확인 (adaptive #14 준수): 적용 스크립트 stdout이 잘려도 리포트 파일 실측으로 판정
+- [Protocol] delegate subagent는 launch 시점에 디스크의 agent JSON을 로딩 — M23 "agent JSON 캐시, 새 세션 부팅 필요"는 메인 세션 agent에 한정됨. 설정 변경 후 무해 probe(도구 금지 + 프롬프트 마커 질의)로 ~6초에 버전 검증 가능 (M41)
 
 ## Context Window Status
-~55% (구현 완료 시점)
+~75% (세션 종료 시점)
 
 ## Next Steps
 - **power 트랙 인계**: power-mickey/steering/knowledge-curator.md + session-protocol.md가 구 구조(Curator 직접 수정) 기술 — v21 격리 구조로 개정 필요. D-38-1에 따라 mickey-power 디렉토리 세션에서 수행할 것. 참조: 이 SESSION의 Progress + §17 v21
