@@ -426,7 +426,7 @@ Mickey 22에서 Discovery가 missing_dependencies를 감지했지만 사용자�
 auto_notes/ (G의 입구, 프로젝트 내)
   ↓ 5/5 체크포인트 도달 또는 세션 종료
   ↓
-Knowledge Curator (subagent delegate — 락 사용 중이면 메인 세션이 직접 대행, 격리 구조상 항상 안전)
+Knowledge Curator (use_subagent 동기 호출 — 결과 in-band 반환. 실패/미완주 시 메인 세션이 직접 대행, 격리 구조상 항상 안전)
   ├── 직접 수정 영역 (프로젝트 로컬만)
   │   └── {project}/context_rule/adaptive.md — 프로젝트 반복 패턴
   │
@@ -442,6 +442,15 @@ Knowledge Curator (subagent delegate — 락 사용 중이면 메인 세션이 �
         │     (글로벌 락 직렬화 + 백업 + GRAPH/INDEX 삽입 + 무결성 검증/자동 롤백 + backlink)
         └── 그 외 승인분 → Mickey가 staging → 정식 위치 이동 또는 폐기
 ```
+
+### Curator 호출 전송 규약 (M42)
+
+Curator 호출은 **use_subagent(동기)** 로만 수행한다. **delegate 사용 금지.**
+
+- 금지 근거 (M42 실측): delegate는 머신 전역 단일 저장소(`<AppData>/kiro-cli/.subagents/`)에 **agent 이름 키**로 상태를 남기고, 결과 수신은 status 폴링뿐 — 상태 파일에 세션 식별자가 없고 `user_notified` 선점 플래그만 있어, **먼저 조회한 세션이 결과를 가로챈다** (crosstalk). 같은 agent를 타 세션이 launch하면 기존 작업이 replace됨
+- use_subagent 안전 근거: 동기 실행 + 결과 in-band 반환(summary 도구) + 실행 아티팩트는 실행별 UUID 키 — 랑데부 저장소 자체가 없어 crosstalk 구조적 불가 (probe 실측: 전역 .subagents 무변화)
+- 알려진 위험 (Kiro #6765): 응답 채널이 60~95초에 끊겨 장시간 작업이 미완주할 수 있음 — **완주 판정은 use_subagent 응답 표면이 아닌 staging 파일 디스크 실측으로**. 실패/미완주 시 메인 세션이 직접 대행 (격리 구조상 안전)
+- 여러 세션의 동시 큐레이션은 안전 (쓰기 대상이 각 프로젝트 로컬 + 글로벌은 promote 락). 단 **같은 프로젝트**를 두 세션이 동시 정리하는 것은 피한다 (staging/adaptive.md 공유)
 
 ### 분기 판단 기준 (Curator 내부)
 
@@ -594,6 +603,7 @@ First Session Step 4a / Continuing Session 엔트로피 체크에서 다음을 �
 4. 감지 결과를 다음 위치에 기록:
    - `ENVIRONMENT.md` "Code Analysis Tools" 항목 (한 번만 기록)
    - `common_knowledge/INDEX.md` "Tool Links" 섹션 (트리거 매핑)
+5. **마커 미감지 ≠ 도구 부재**: 로컬 마커가 없어도 MCP 도구 목록에 해당 서버가 노출되어 있으면 활용 가능 — Serena 는 `activate_project` 즉시 사용 가능, Graphify 는 대상 프로젝트에 `/graphify .` 실행 이력이 있어야 유효 (타 프로젝트 그래프 로드 상태는 부적합). 이 경로로 감지 시 `ENVIRONMENT.md` 에 "MCP 서버 경유" 여부를 병기한다.
 
 Continuing Session 에서 감지 결과가 이전 세션과 다르면 변경 사유 확인.
 
@@ -703,8 +713,34 @@ Tier 3 (`code` 도구) 사용 흔적은 `SESSION.md` Progress 에 기록하여 �
 
 ---
 
-**Version**: 21
-**Last Updated**: 2026-07-22
+## 21. 기호-맥락 병기 커뮤니케이션 (Symbol-Context Pairing)
+
+> 사용자에게 상황을 설명할 때, 내부 기호(D-015, OP-1, R-010, P3-1, T5 등)만으로 서술하지 않는다.
+> 기호는 Mickey의 압축 언어일 뿐 — 사용자는 기호가 아니라 **맥락 위에서 판단**한다.
+
+### 규칙
+
+1. **기호 첫 등장 시 의미 병기**: 세션 내에서 기호를 처음 언급할 때 반드시 그 실체를 한 줄로 풀어 쓴다
+   - ❌ "D-015에 따라 OP-1부터 진행합니다"
+   - ✅ "D-015(조작 트랙을 판정보다 먼저 진행하기로 한 순서 결정)에 따라 OP-1(표적 버튼 클릭 Agent 신설)부터 진행합니다"
+2. **판단 요청 시 목적 사슬 제시**: 사용자에게 결정을 요청할 때는 "이 작업이 왜 존재하는가"를 상위 목적까지 연결하여 설명 (작업 → 소속 트랙/Phase → 프로젝트 목적)
+3. **복귀 사용자 감지 시 전체 지도 선행**: 사용자가 오랜만에 복귀했거나("오랜만에", "맥락을 다시" 등 신호) 흐름을 놓친 정황이면, 개별 작업 설명 전에 프로젝트 전체 상태 지도(완료/현재/다음)를 먼저 제시
+4. **결과 보고도 맥락과 조합**: 실측/구현 결과를 나열하지 말고 "이 결과가 다음 판단에 어떤 의미인가"를 함께 서술
+
+### §13과의 관계
+- §13은 **기록**(SESSION/HANDOFF에 남기는 것) 품질 — 다음 세션의 Mickey가 독자
+- 본 절은 **설명**(사용자 대면 응답) 품질 — 지금의 사용자가 독자
+- 양쪽 모두 "압축으로 인한 맥락 유실 방지"가 목적이나 독자가 다르므로 별도 규정
+
+### 근거
+- anjin-llm-scenario-poc Mickey 9 (2026-08-08): 사용자가 타 업무 후 복귀하며 "D-1, OP-1 같은 기호만 보다가 전체 맥락을 놓치지 않도록 상황 설명 시 맥락을 꼭 같이 설명하라" 명시 요청. 목적 중심 전체 지도 설명이 유효했음을 확인
+
+---
+
+**Version**: 24
+**Last Updated**: 2026-08-19
+**Changes (v24)**: §17 Curator 호출 전송 규약 신설 (ai-developer-mickey M42): delegate → use_subagent(동기) 전환. 근거: delegate 전역 상태(.subagents, agent 이름 키 + user_notified 선점 + status 폴링)가 session-agnostic이라 멀티 세션 crosstalk/replace 실측. use_subagent는 in-band 반환 + UUID 키로 구조적 안전 (probe 검증). 완주 판정은 staging 디스크 실측 (Kiro #6765 채널 절단 대비), 실패 시 직접 대행. T1 v19와 연동.
+**Changes (v23)**: §21 기호-맥락 병기 커뮤니케이션 신설 (anjin-llm-scenario-poc M9): 사용자 대면 설명에서 내부 기호(D-xxx/OP-x/R-xxx) 첫 등장 시 의미 병기 + 판단 요청 시 목적 사슬 제시 + 복귀 사용자에게 전체 지도 선행 + 결과 보고를 맥락과 조합. §13(기록 품질)과 독자가 다른 별도 규정 — 사용자 명시 요청.
+**Changes (v22)**: §19.2 감지 규칙에 5항 신설 (epic-lore-benchmark M17, 원 발견 동 프로젝트 M7): 로컬 마커 미감지 ≠ 도구 부재 — MCP 도구 목록 노출 시 활용 가능 (Serena 는 `activate_project` 즉시, Graphify 는 대상 프로젝트 `/graphify .` 실행 이력 필요, 타 프로젝트 그래프 로드 상태는 부적합). 마커 중심 서술만 따르면 가용 Tier 1 도구를 놓치고 Tier 3 로 후퇴하는 갭을 봉합. MCP 경유 감지 시 ENVIRONMENT.md "MCP 서버 경유" 병기 의무.
 **Changes (v21)**: §17 멀티 세션 격리 (M41, 옵션 A): Curator 글로벌 직접 수정 폐지 → 프로젝트 로컬 staging(gd- 승격 번들) + promote_knowledge.py(락 직렬화 + Base-Hash 낙관적 검증 + 무결성 롤백)로 이원화. 글로벌 _curator-staging deprecated. 글로벌 백업 네이밍 규약(.bak-<project>-m<N>) 신설. 근거: delegate lock 프로세스 간 공유(M40) + 직접 대행 우회 시 동시 쓰기 무방비 + 글로벌 staging 혼입 실측
-**Changes**: §20 Step 3 판단 지침 실측 기준화 (M40): 예시 나열("verification/testing/distrust/architecture")이 사실상 제외 목록으로 기능하여 타 프로젝트 세션에서 실측 생략 skip을 유발한 사례 발견 → 예시 제거 + 실측 기준 3가지(① 과반 공유 co-tag ② 엣지 응집률 vs 우연 기대치 (k−1)/(N−1) ③ 엄선 후 임계 유지)로 교체. 실측 근거: verification(17) 응집률 0.26=우연 수준(aspect 확증), testing(7) 밀도 4배+응집률 2.5배로 응집 실재하나 엄선 후 ~5건 임계 미달(flat 잔류).
-**Prev Changes (v19)**: §20 Step 3 카테고리화 파이프라인 고정 순서 명문화 (M37): ① 트리거 notify → ② 연관 태그 합집합 실측으로 카테고리 경계 판단 → ③ 구성원 엄선(확실한 것만 이동, 애매한 것 flat 잔류) → ④ 계획 사용자 검증(생략 불가, 자의성 통제 장치) → ⑤ 분할 이동+그래프 구축(백업→이동→하위 GRAPH→ANCHOR→INDEX→링크 재검증).
+**Changes (v20)**: §20 Step 3 판단 지침 실측 기준화 (M40): 예시 나열("verification/testing/distrust/architecture")이 사실상 제외 목록으로 기능하여 타 프로젝트 세션에서 실측 생략 skip을 유발한 사례 발견 → 예시 제거 + 실측 기준 3가지(① 과반 공유 co-tag ② 엣지 응집률 vs 우연 기대치 (k−1)/(N−1) ③ 엄선 후 임계 유지)로 교체. 실측 근거: verification(17) 응집률 0.26=우연 수준(aspect 확증), testing(7) 밀도 4배+응집률 2.5배로 응집 실재하나 엄선 후 ~5건 임계 미달(flat 잔류).

@@ -36,3 +36,17 @@
 - 실측: 세션 부팅 후 knowledge-curator.json을 수정(M41 격리 개정)하고 같은 세션에서 delegate launch → probe 응답이 개정본 프롬프트 확인 ("격리 원칙 M41" 존재, 3단계 제목 개정판)
 - 의미: M23의 "agent JSON 캐시 — 새 세션 부팅 필요" 제약은 **메인 세션 agent에 한정**. delegate subagent는 launch 시점 디스크의 JSON을 사용하므로 본 세션 내 즉시 반영됨
 - 활용: Curator 설정 변경 후 무해한 probe(파일 접근 금지 + 프롬프트 내 마커 문구 질의)로 버전 확인 가능 (비용 ~6초)
+
+## delegate 결과 crosstalk의 실체 — 머신 전역 상태 + user_notified 선점 (2026-08-19, Mickey 42)
+
+- 실측: delegate 상태 저장소는 `C:\Users\hcsung\AppData\Local\kiro-cli\.subagents\` — 머신 전역 단일 디렉토리 (M40 "lock 실체 미확인" 종결). 상태 파일 키는 **agent 이름** (`knowledge-curator.json`), 필드: agent/task/status/pid/output/`user_notified`/cwd — **세션 식별자 없음**
+- 메커니즘: 결과 수신은 status 폴링뿐 + `user_notified` 선점 플래그 → 먼저 조회한 세션이 타 세션의 결과를 가로챔 (crosstalk). 같은 agent launch 시 기존 작업 replace (문서 명시)
+- use_subagent 대비 실측 (probe): 결과 in-band 반환 (summary 도구, 마커 왕복 확인) + 전역 .subagents 무변화 + 실행 아티팩트는 UUID 키 (`cli-checkouts/<UUID>`, `run-receipts/<UUID>`) — crosstalk 구조적 불가
+- 잔여 위험: Kiro #6765 (use_subagent 응답 채널 60~95초 절단) — Curator 실전 1회차에서 완주 검증 필요, 완주 판정은 staging 디스크 실측
+- 조치 (M42): T1 v19 + T1.5 §17 v24 — Curator 호출 delegate 금지, use_subagent(동기) 전환
+
+## Format-Table 파이프 출력 소실 — 항목 있는데 빈 표 (2026-08-19, Mickey 42)
+
+- 증상: `Get-ChildItem | Select-Object ... | Format-Table | Out-String` 이 항목 2건 존재하는데 빈 출력 반환 (execute 계층에서 렌더 소실 추정)
+- 우회: `ForEach-Object { Write-Output (...) }` 로 문자열 직접 조립 — 동일 데이터 정상 출력
+- empty-scan-distrust 재현 사례: 첫 스캔 "비어 있음"을 Measure-Object 카운트(2)로 반증 후 재조회
