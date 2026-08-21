@@ -1,7 +1,7 @@
 # Mickey 42 Session
 
 ## Checkpoint
-[2/5]
+[3/5]
 
 ## Session Meta
 - Type: Self-Improvement (멀티 세션 Curator 결과 crosstalk 버그 조사)
@@ -47,6 +47,12 @@ Infrastructure (자기 개선) — 진화 루프의 Curator 호출 경로(세션
   - m42_apply_protocols_v24.py: §17 "Curator 호출 전송 규약 (M42)" 소절 신설 + 다이어그램 개정 + v24 푸터 — 글로벌+repo, RESULT: ALL PASS
   - m42_apply_t1_v19.py: Session End 2단계 delegate→use_subagent + 완주 디스크 실측 + Changes 갱신 — 활성 JSON+repo JSON, RESULT: ALL PASS
   - auto_notes/tool-constraints.md: M42 실측 2건 기록 (crosstalk 실체, Format-Table 출력 소실) + NOTES.md 갱신
+
+- **경량 포스트모템 (§9 + §18) 완료** → POSTMORTEM-2026-08-21.md:
+  - §18 실측: 활성 11 프로젝트 104세션 (m42_measure_usage.py, m21 패턴 동일). 4개 지표 전부 임계값 상회 — 위반 0. 타 프로젝트만 분리(표본 가드): domain 2.05 / curator 4.80 / auto_notes 3.77 / [Protocol] 2.07
+  - 측정 오염 발견·제거: mickey-power sessions/ 33건이 m38 복사 산물 (동일 mtime 07-16) — measurement-noise-isolation 실전 적용
+  - [Protocol] 태그 332건 (타 프로젝트 170건 정독): M41 격리 + M42 전환 모두 타 프로젝트 실전 검증 (anjin M10 크래시 안전 / M11 use_subagent 첫 실전 성공). 반복 마찰 1위 = PowerShell execute 계층 함정
+  - 개선 후보 2건 도출 (사용자 결정 대기): ① PowerShell 원스트라이크 규약 ② Curator 회피 지시 명문화
 
 ### In Progress
 - (없음)

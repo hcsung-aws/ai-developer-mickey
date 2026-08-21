@@ -16,3 +16,6 @@ __pycache__/
 
 # Serena LSP memories (per-machine, per-project)
 .serena/
+
+# apply 스크립트가 생성하는 로컬 백업 (git 이력이 원본을 담보하므로 추적 불필요)
+*.bak-*
