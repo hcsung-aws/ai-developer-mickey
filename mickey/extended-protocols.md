@@ -749,8 +749,28 @@ Tier 3 (`code` 도구) 사용 흔적은 `SESSION.md` Progress 에 기록하여 �
 
 ---
 
-**Version**: 25
+## 22. PowerShell 원스트라이크 (Shell Execution Enforcement)
+
+> 개별 규칙(인라인 python -c 금지, `&&` 미지원 등)은 이미 존재하나 위반이 구조적으로 재발 (POSTMORTEM 2026-08-21: 반복 마찰 1위). 본 조항은 새 규칙이 아니라 **기존 규칙의 강제 장치**다.
+
+### 규약
+
+- 세션 중 PowerShell 인라인 명령이 구문/이스케이프/출력 계층 함정으로 **1회라도** 실패하거나 위반을 자각하면 — 그 즉시 해당 세션의 잔여 셸 작업을 **.py 스크립트 파일 전용으로 전환**한다
+  - 함정 예: `&&` 파서 오류, 따옴표 중첩, python -c one-liner, Format-Table/Select-String 출력 유실, `$_`/`$env:` 소실, `[`로 시작하는 출력 라인 소실
+- **인라인 변형 재시도 금지** — 같은 명령을 따옴표/구분자만 바꿔 재시도하는 것이 반복 마찰의 실체
+- 예외: 단일 명령 + 단순 인자(git status, python script.py 등 이스케이프 불요 명령)는 전환 후에도 인라인 허용
+- 위반/전환 사실을 SESSION.md Lessons Learned에 `[Protocol]` 태그로 기록 (§18 측정 대상)
+
+### 근거
+
+- POSTMORTEM 2026-08-21: python -c 재발 (epic-lore M15 2회 + anjin M9), `&&` 소실 (M43 재현), Format-Table/Select-String 출력 유실 (anjin M7 + M42 + M43 `[` 라인 소실), 한/영 미전환 4회 (back-to-basic M15)
+- epic-lore M15 진단: "규칙 존재만으로 부족" — 위반 감지 시점에 실행 계층 자체를 바꾸는 구조적 차단이 필요
+
+---
+
+**Version**: 26
 **Last Updated**: 2026-08-22
+**Changes (v26)**: §22 PowerShell 원스트라이크 신설 (ai-developer-mickey M43, POSTMORTEM 2026-08-21 개선 후보 ①): 인라인 셸 함정 1회 위반 시 세션 잔여를 .py 스크립트 전용 전환 — 기존 셸 규칙의 강제 장치. 인라인 변형 재시도 금지. 근거: PowerShell execute 계층 함정이 8개 프로젝트 [Protocol] 태그 반복 마찰 1위.
 **Changes (v25)**: §17 Curator 호출 코드화 (ai-developer-mickey M43): use_subagent → invoke_curator.py 유일 진입점. curation 락(프로젝트 로컬, mkdir 원자성, 자동 회수 없음 + --force human-in-the-loop, awaiting-merge 상태 유지)을 호출과 같은 코드 경로에 내장 — 같은 프로젝트 동시 큐레이션을 지시가 아닌 코드로 차단. 전송은 headless 자식 프로세스 stdout in-band (M43 probe: .subagents 무변화). 완주 판정 디스크 실측도 스크립트에 내장. mickey_lock.py로 promote 락과 코드 통합. T1 v20 연동.
 **Changes (v24)**: §17 Curator 호출 전송 규약 신설 (ai-developer-mickey M42): delegate → use_subagent(동기) 전환. 근거: delegate 전역 상태(.subagents, agent 이름 키 + user_notified 선점 + status 폴링)가 session-agnostic이라 멀티 세션 crosstalk/replace 실측. use_subagent는 in-band 반환 + UUID 키로 구조적 안전 (probe 검증). 완주 판정은 staging 디스크 실측 (Kiro #6765 채널 절단 대비), 실패 시 직접 대행. T1 v19와 연동.
 **Changes (v23)**: §21 기호-맥락 병기 커뮤니케이션 신설 (anjin-llm-scenario-poc M9): 사용자 대면 설명에서 내부 기호(D-xxx/OP-x/R-xxx) 첫 등장 시 의미 병기 + 판단 요청 시 목적 사슬 제시 + 복귀 사용자에게 전체 지도 선행 + 결과 보고를 맥락과 조합. §13(기록 품질)과 독자가 다른 별도 규정 — 사용자 명시 요청.
