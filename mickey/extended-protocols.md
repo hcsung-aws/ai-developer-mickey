@@ -426,7 +426,7 @@ Mickey 22에서 Discovery가 missing_dependencies를 감지했지만 사용자�
 auto_notes/ (G의 입구, 프로젝트 내)
   ↓ 5/5 체크포인트 도달 또는 세션 종료
   ↓
-Knowledge Curator (use_subagent 동기 호출 — 결과 in-band 반환. 실패/미완주 시 메인 세션이 직접 대행, 격리 구조상 항상 안전)
+Knowledge Curator (invoke_curator.py run — curation 락 아래 headless 실행, 완주 판정 디스크 실측. 실패 시 메인 세션이 락 아래서 직접 대행)
   ├── 직접 수정 영역 (프로젝트 로컬만)
   │   └── {project}/context_rule/adaptive.md — 프로젝트 반복 패턴
   │
@@ -443,14 +443,26 @@ Knowledge Curator (use_subagent 동기 호출 — 결과 in-band 반환. 실패/
         └── 그 외 승인분 → Mickey가 staging → 정식 위치 이동 또는 폐기
 ```
 
-### Curator 호출 전송 규약 (M42)
+### Curator 호출 규약 (M43 — 코드 진입점)
 
-Curator 호출은 **use_subagent(동기)** 로만 수행한다. **delegate 사용 금지.**
+Curator 호출은 **invoke_curator.py 실행**으로만 수행한다. **delegate 사용 금지.** use_subagent 직접 호출도 락을 우회하므로 금지.
 
-- 금지 근거 (M42 실측): delegate는 머신 전역 단일 저장소(`<AppData>/kiro-cli/.subagents/`)에 **agent 이름 키**로 상태를 남기고, 결과 수신은 status 폴링뿐 — 상태 파일에 세션 식별자가 없고 `user_notified` 선점 플래그만 있어, **먼저 조회한 세션이 결과를 가로챈다** (crosstalk). 같은 agent를 타 세션이 launch하면 기존 작업이 replace됨
-- use_subagent 안전 근거: 동기 실행 + 결과 in-band 반환(summary 도구) + 실행 아티팩트는 실행별 UUID 키 — 랑데부 저장소 자체가 없어 crosstalk 구조적 불가 (probe 실측: 전역 .subagents 무변화)
-- 알려진 위험 (Kiro #6765): 응답 채널이 60~95초에 끊겨 장시간 작업이 미완주할 수 있음 — **완주 판정은 use_subagent 응답 표면이 아닌 staging 파일 디스크 실측으로**. 실패/미완주 시 메인 세션이 직접 대행 (격리 구조상 안전)
-- 여러 세션의 동시 큐레이션은 안전 (쓰기 대상이 각 프로젝트 로컬 + 글로벌은 promote 락). 단 **같은 프로젝트**를 두 세션이 동시 정리하는 것은 피한다 (staging/adaptive.md 공유)
+```
+python ~/.kiro/mickey/scripts/invoke_curator.py run --project . \
+    --session MICKEY-N-SESSION.md --owner "<프로젝트> Mickey N"
+```
+
+- 코드 강제 지점: 스크립트가 curation 락을 잡지 못하면 Curator는 실행되지 않는다 — 동시 큐레이션 회피가 지시가 아닌 코드로 보장됨 (promote와 동일한 LLM 결정론적 하이브리드)
+- 전송: `kiro-cli chat --agent knowledge-curator --no-interactive` 자식 프로세스, stdout 파이프 in-band 수신. delegate의 전역 랑데부 저장소(`.subagents/` + `user_notified` 선점 = crosstalk 원흉)를 경유하지 않음 (M43 probe 실측: in-band + .subagents 무변화)
+- 완주 판정: 스크립트가 staging 전후 diff를 디스크 실측하여 리포트 출력 (`curator-invoke-report-*.txt`) — 응답 표면 신뢰 금지 규약의 코드화
+- 실패/타임아웃 시: 락 유지(state=held) 상태로 종료 — 메인 세션이 **락 아래서** 직접 대행 후 release
+
+#### curation 락 (mickey_lock 공유 모듈 — promote 락과 코드 통합, 파일은 스코프별 분리)
+
+- 위치: `{프로젝트 staging}/.curation.lock/` (프로젝트 로컬 — mkdir 원자성 + owner.json)
+- **자동 회수 없음**: 선점 락 발견 시 보유자/경과 시간 보고 후 중단(BUSY). 크래시 잔여물일 수 있으니 사람이 확인한 뒤 `--force` 로만 강제 진입 (human-in-the-loop)
+- run 성공 후에도 해제하지 않고 **state=awaiting-merge** 유지 — staging 머지/폐기(Session End 3단계)도 공유 자원 조작이므로. 3단계 완료 후 `invoke_curator.py release` 필수
+- 여러 세션의 동시 큐레이션: 타 프로젝트 병렬은 구조적 안전 (쓰기 대상이 각 프로젝트 로컬 + 글로벌은 promote 락). 같은 프로젝트는 curation 락이 코드로 차단
 
 ### 분기 판단 기준 (Curator 내부)
 
@@ -737,8 +749,9 @@ Tier 3 (`code` 도구) 사용 흔적은 `SESSION.md` Progress 에 기록하여 �
 
 ---
 
-**Version**: 24
-**Last Updated**: 2026-08-19
+**Version**: 25
+**Last Updated**: 2026-08-22
+**Changes (v25)**: §17 Curator 호출 코드화 (ai-developer-mickey M43): use_subagent → invoke_curator.py 유일 진입점. curation 락(프로젝트 로컬, mkdir 원자성, 자동 회수 없음 + --force human-in-the-loop, awaiting-merge 상태 유지)을 호출과 같은 코드 경로에 내장 — 같은 프로젝트 동시 큐레이션을 지시가 아닌 코드로 차단. 전송은 headless 자식 프로세스 stdout in-band (M43 probe: .subagents 무변화). 완주 판정 디스크 실측도 스크립트에 내장. mickey_lock.py로 promote 락과 코드 통합. T1 v20 연동.
 **Changes (v24)**: §17 Curator 호출 전송 규약 신설 (ai-developer-mickey M42): delegate → use_subagent(동기) 전환. 근거: delegate 전역 상태(.subagents, agent 이름 키 + user_notified 선점 + status 폴링)가 session-agnostic이라 멀티 세션 crosstalk/replace 실측. use_subagent는 in-band 반환 + UUID 키로 구조적 안전 (probe 검증). 완주 판정은 staging 디스크 실측 (Kiro #6765 채널 절단 대비), 실패 시 직접 대행. T1 v19와 연동.
 **Changes (v23)**: §21 기호-맥락 병기 커뮤니케이션 신설 (anjin-llm-scenario-poc M9): 사용자 대면 설명에서 내부 기호(D-xxx/OP-x/R-xxx) 첫 등장 시 의미 병기 + 판단 요청 시 목적 사슬 제시 + 복귀 사용자에게 전체 지도 선행 + 결과 보고를 맥락과 조합. §13(기록 품질)과 독자가 다른 별도 규정 — 사용자 명시 요청.
 **Changes (v22)**: §19.2 감지 규칙에 5항 신설 (epic-lore-benchmark M17, 원 발견 동 프로젝트 M7): 로컬 마커 미감지 ≠ 도구 부재 — MCP 도구 목록 노출 시 활용 가능 (Serena 는 `activate_project` 즉시, Graphify 는 대상 프로젝트 `/graphify .` 실행 이력 필요, 타 프로젝트 그래프 로드 상태는 부적합). 마커 중심 서술만 따르면 가용 Tier 1 도구를 놓치고 Tier 3 로 후퇴하는 갭을 봉합. MCP 경유 감지 시 ENVIRONMENT.md "MCP 서버 경유" 병기 의무.

@@ -35,6 +35,10 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
+# 같은 디렉토리에 배치되는 공유 락 모듈 (repo scripts/ 및 ~/.kiro/mickey/scripts/ 동일)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import mickey_lock  # noqa: E402
+
 sys.stdout.reconfigure(encoding="utf-8")
 
 # ── 상수 ──────────────────────────────────────────────────────────
@@ -194,38 +198,22 @@ def node_ids(graph_text: str) -> set:
     return ids
 
 
-# ── 락 (mkdir 원자성) ─────────────────────────────────────────────
+# ── 락 (mickey_lock 공유 모듈 위임 — M43) ─────────────────────────
+# 기존 공개 시그니처(acquire_lock/release_lock/_lock_owner_info/LOCK_STALE_SECONDS)를
+# 보존하는 얇은 래퍼. 메커니즘(mkdir 원자성 + owner.json + stale)은 mickey_lock 소관.
 def acquire_lock(root: Path, owner: str) -> Path:
-    """글로벌 승격 락 획득. stale 락은 1회 강제 해제 후 재시도. 실패 시 RuntimeError."""
-    lock = root / ".promote.lock"
-    for attempt in (1, 2):
-        try:
-            lock.mkdir()  # 원자적: 이미 있으면 FileExistsError
-            (lock / "owner.json").write_text(json.dumps({
-                "owner": owner, "pid": os.getpid(),
-                "acquired_at": datetime.now().isoformat(timespec="seconds"),
-            }, ensure_ascii=False), encoding="utf-8")
-            return lock
-        except FileExistsError:
-            info = _lock_owner_info(lock)
-            age = time.time() - lock.stat().st_mtime
-            if age > LOCK_STALE_SECONDS and attempt == 1:
-                shutil.rmtree(lock, ignore_errors=True)  # 비정상 종료 잔여 락 회수
-                continue
-            raise RuntimeError(
-                f"락 사용 중 (보유자: {info}, 경과 {int(age)}s) — 잠시 후 재시도")
-    raise RuntimeError("락 획득 실패")
+    """글로벌 승격 락 획득. stale 락은 자동 회수 (promote 정책). 실패 시 RuntimeError."""
+    return mickey_lock.acquire(
+        root / ".promote.lock", owner,
+        stale_seconds=LOCK_STALE_SECONDS, auto_reclaim=True)
 
 
 def _lock_owner_info(lock: Path) -> str:
-    try:
-        return json.loads((lock / "owner.json").read_text(encoding="utf-8")).get("owner", "?")
-    except Exception:
-        return "unknown"
+    return mickey_lock.owner_info(lock).get("owner", "unknown")
 
 
 def release_lock(lock: Path):
-    shutil.rmtree(lock, ignore_errors=True)
+    mickey_lock.release(lock)
 
 
 # ── 무결성 검증 (m40_dangling_check 병합 시맨틱 재사용) ───────────
