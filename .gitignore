@@ -19,3 +19,6 @@ __pycache__/
 
 # apply 스크립트가 생성하는 로컬 백업 (git 이력이 원본을 담보하므로 추적 불필요)
 *.bak-*
+
+# Curator 작업 영역 (staging + 락 + 리포트) — 디스크에서만 관리, 커밋 대상 아님
+_curator-staging/

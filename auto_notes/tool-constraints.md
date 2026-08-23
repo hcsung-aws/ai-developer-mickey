@@ -14,7 +14,7 @@
 - v6.3 상태 불일치 발견 (Mickey 7에서 수정)
 
 ## Last Updated
-2026-03-08
+2026-08-23
 
 
 ## execute_pwsh(cmd 계열) 에서 git commit -m 따옴표 소실 (2026-07-16 트랙 분리 세션, 2회 재현)
@@ -50,3 +50,14 @@
 - 증상: `Get-ChildItem | Select-Object ... | Format-Table | Out-String` 이 항목 2건 존재하는데 빈 출력 반환 (execute 계층에서 렌더 소실 추정)
 - 우회: `ForEach-Object { Write-Output (...) }` 로 문자열 직접 조립 — 동일 데이터 정상 출력
 - empty-scan-distrust 재현 사례: 첫 스캔 "비어 있음"을 Measure-Object 카운트(2)로 반증 후 재조회
+
+## 셸 응답 표면 제약 (M43 실측)
+
+- `[`로 시작하는 stdout 라인이 execute 도구 응답 표면에서 소실됨 — probe/apply 리포트에서 3회 재현. 대응: 리포트를 파일로 이중 기록 후 fs_read로 실측 (invoke_curator.py는 이를 내장)
+- PowerShell 리다이렉트(`>`)는 UTF-16 파일 생성 — Get-Content 시 -Encoding Unicode 필요. Python 스크립트가 직접 파일을 쓰면 UTF-8로 일관 가능
+
+## invoke_curator.py (M43 신설, ~/.kiro/mickey/scripts/)
+
+- 사용: `python ~/.kiro/mickey/scripts/invoke_curator.py run --project . --session MICKEY-N-SESSION.md --owner "<프로젝트> Mickey N"`
+- 실전 1회차 (M43): 328초 완주, staging 3건, 직접 수정 0건, 락 awaiting-merge 전이 정상
+- release 필수: staging 처리 후 `... release --project .` — 잊으면 다음 세션 BUSY

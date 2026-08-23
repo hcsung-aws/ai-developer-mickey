@@ -64,7 +64,6 @@ Infrastructure (자기 개선) — 세션 종료 프로토콜의 Curator 경로�
 ~55% (전 작업 완료 시점)
 
 ## Next Steps
-- **Curator 실전 1회차** (D-43 검증 조건): 세션 종료 시 invoke_curator.py run 경로로 수행 — 락→headless→diff 실측→리포트 전 과정 첫 실전. 완료 후 release 필수
-- T1 v20은 다음 세션 부팅부터 활성 (M23 캐시 제약) — 이번 세션 종료는 본좌가 v20 절차 수동 준수
-- M41/M42 인계 잔여: power 트랙 steering 개정 (mickey-power 세션 소관), 글로벌 .bak-m41/m42 백업 정리 (안정 확인 후)
-- auto_notes/tool-constraints.md에 `[` 라인 소실 기록 (세션 종료 일괄 확인 시)
+- (세션 종료 완료) Curator 실전 1회차 성공: run 328초 완주, staging 3건, 직접 수정 0건, promote 3/3 PASS (dangling 0), release 완료 — D-43 검증 조건 충족 (신규 경로 검증 1/5회차)
+- M41/M42 인계 잔여: power 트랙 steering 개정 (mickey-power 세션 소관), 글로벌 .bak-m41/m42/m43 백업 정리 (안정 확인 후)
+- T1 v20은 다음 세션 부팅부터 활성
