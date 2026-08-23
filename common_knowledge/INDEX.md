@@ -40,3 +40,6 @@
 | 지침 예시, 예시 목록 오독, 규범 문서 설계, 측정 가능 기준 | ~/.kiro/mickey/domain/entries/normative-example-list-trap.md | 규범 문서의 괄호 예시는 LLM에게 분류 규칙으로 소비됨 — 예시 대신 측정 가능 기준 |
 | 클러스터 응집도, 허브 효과, aspect 판정, 우연 기대치 | ~/.kiro/mickey/domain/entries/degree-corrected-cluster-cohesion.md | 내부 밀도는 허브 왜곡 — 응집률 vs (k−1)/(N−1) 비교로 aspect/domain 변별 |
 | 멀티 세션 격리, Curator 격리, promote 스크립트 | ~/.kiro/mickey/domain/entries/staged-promotion-write-isolation.md | 공유 가변 자원 쓰기는 결정론적 승격 스크립트만의 권한 |
+| 실패 원인 인용, crosstalk 원흉, 원인 재검증 | ~/.kiro/mickey/domain/entries/mechanism-level-cause-attribution.md | "X가 문제였다" 기억은 메커니즘 수준으로 재검증 후 인용 |
+| Curator 호출, invoke_curator, 세션 종료 프로토콜 | ~/.kiro/mickey/domain/entries/protocol-entrypoint-codification.md | 다단계 프로토콜은 프롬프트 지시가 아닌 단일 스크립트 진입점으로 |
+| mickey_lock, 락 모듈 통합, promote 리팩토링 | ~/.kiro/mickey/domain/entries/signature-preserving-thin-wrapper.md | 공유 모듈 이관 시 시그니처 보존 얇은 래퍼로 위임 |
