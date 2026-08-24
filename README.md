@@ -79,7 +79,9 @@ Mickey 프롬프트는 실제 프로젝트를 거치며 계속 진화합니다:
 | **v8.1** | 🆕 Knowledge Curator subagent + domain/ 활성화 (PROFILE/GRAPH/entries) + Personal Vault → domain/ 전환 |
 | **v9 (PLAN)** | 🆕 3-Tier(R/G/S) + 글로벌 도메인 중심 + knowledge-organization Skill — POSTMORTEM 기반 재설계 (Phase 1~5, 구현은 다음 세션부터) |
 | **v9.1** | 🆕 v9 PLAN 보정+정착: Curator 권한 보정 + Pre-staged Apply 패턴 + T1.5 §17 Knowledge Lifecycle + §18 Activity Metrics — 5주 31세션 실측이 v9 PLAN의 "Curator 폐지" 결정 무효화 |
+| **v9.2** | 외부 코드 분석 도구 통합: Serena/Graphify(Tier 1) + Kiro CLI 내장 `code`(Tier 3 baseline) 감지·안내 + FILE-STRUCTURE 스키마 축소 (상세 분석은 도구 위임) |
 | **v10 (Power Migration)** | 🆕 CLI v2 agent → Kiro v3 Power 마이그레이션: steering 7개(상시 6 + on-demand 1) + 세션 hook/스크립트 + memorygraph 제거(파일 기반 지식 그래프) + install 스크립트 v3 배포 파이프라인 |
+| **v10 이후 (CLI 트랙, T1 v18~v20)** | 🆕 Knowledge Curator 운영 강화 3연작: 글로벌 쓰기 격리(로컬 staging + promote 락) → headless 전송 전환 → 호출 코드화(`invoke_curator.py` 유일 진입점, curation 락 내장). §17 v21~v25 |
 
 > 💡 자세한 변경 이력은 [변경 이력 문서](docs/07-changelog.md)를 참고하세요.
 > 📋 **v9.1 정착 (Mickey 21~22)**: [IMPROVEMENT-PLAN-v9-ADDENDUM.md](IMPROVEMENT-PLAN-v9-ADDENDUM.md) — Curator 권한 보정 + Pre-staged Apply (ADDENDUM 우선)
@@ -111,6 +113,7 @@ cd ai-developer-mickey
 `install.sh` / `install.ps1`이 수행하는 것:
 - Agent JSON → `~/.kiro/agents/` (CLI v2)
 - 글로벌 가이드 → `~/.kiro/mickey/`
+- 세션 스크립트 → `~/.kiro/mickey/scripts/` (`invoke_curator.py`, `promote_knowledge.py`, `mickey_lock.py`)
 - v3 Power → `~/.kiro/powers/installed/power-mickey/` (kiro-cli 2.10 이상일 때. 미만이면 자동으로 건너뜀)
 
 > v3 배포는 `scripts/deploy_power.py`가 담당하며, 기존 설치본을 백업한 뒤 교체합니다. 변경 없이 계획만 보려면 `python scripts/deploy_power.py --dry-run`을 실행하세요.
@@ -121,8 +124,8 @@ cd ai-developer-mickey
 
 | 시나리오 | 실행 방법 | 설명 |
 |----------|----------|------|
-| **CLI v2** | `kiro-cli chat --agent ai-developer-mickey` | v17 프롬프트(agent JSON) 직접 사용. 검증된 안정 경로 |
-| **CLI v3** | `kiro-cli chat` | power-mickey가 자동 인식됨. steering 상시 6 + on-demand 1 로딩 (kiro-cli 2.10+) |
+| **CLI v2** | `kiro-cli chat --agent ai-developer-mickey` | T1 프롬프트(agent JSON, 현재 v20) 직접 사용. 검증된 안정 경로 |
+| **CLI v3** | `kiro-cli chat` | power-mickey가 자동 인식됨 (kiro-cli 2.10+). steering은 POWER.md 온보딩이 `readSteering`으로 pull |
 | **Kiro IDE** | Powers 패널에서 power-mickey 활성 | 동일한 steering을 IDE에서 사용 |
 
 ```bash
@@ -161,8 +164,12 @@ ai-developer-mickey/
 │   ├── knowledge-curator.json    # Knowledge Curator subagent
 │   ├── common_knowledge/   # 지식 관리 예시
 │   └── context_rule/       # 컨텍스트 규칙 예시
+├── scripts/                # 세션·배포 인프라 (invoke_curator, promote_knowledge, deploy_power 등)
+├── mickey/                 # 글로벌 지식(~/.kiro/mickey/)의 repo 미러 — install 배포 소스
 ├── context_rule/           # 이 프로젝트의 컨텍스트 규칙 (Mickey가 자기 개선 시 활용)
 ├── common_knowledge/       # 이 프로젝트의 범용 지식
+├── auto_notes/             # Mickey 자동 관찰 기록 (세션 종료 시 일괄 확인)
+├── session_history/        # 명령/응답 사례 기록 (AI 활용 사례 공유용)
 ├── power-mickey/           # Kiro v3 Power (v10 — CLI v3 + IDE)
 └── godot-pong/            # Godot 리플레이 시스템 코드
 ```
@@ -201,9 +208,9 @@ power-mickey/
 
 | 항목 | Kiro CLI v2 (agent JSON) | Kiro v3 Power |
 |------|--------------------------|---------------|
-| 프롬프트 로딩 | v17 전체 상주 | steering 상시 6 + on-demand 1 + 그래프 노드 pull |
+| 프롬프트 로딩 | T1 전체 상주 (현재 v20) | steering 상시 6 + on-demand 1 — 단, v3는 steering 자동 주입이 없어 POWER.md 온보딩이 `readSteering`으로 pull (실측 F1) + 그래프 노드 pull |
 | 지식 그래프 | 파일 기반 (`~/.kiro/mickey/`) | 동일 (memorygraph MCP 제거) |
-| 세션 관리 | 수동 | CLI v3 hook(`SessionStart`/`Stop`) + 스크립트 |
+| 세션 관리 | 수동 + 세션 스크립트(`invoke_curator.py` 등) | `SessionStart` hook(터미널 v3) + 스크립트. 세션 마감은 "세션 정리" 수동 경로 (Stop hook은 per-response 발화가 실측되어 폐기 — F5) |
 | 사용 환경 | CLI | CLI v3 + Kiro IDE |
 
 ## 🔗 관련 링크

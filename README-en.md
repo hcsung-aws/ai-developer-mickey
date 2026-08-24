@@ -40,7 +40,9 @@ The Mickey prompt continues to evolve through real projects:
 | **v8.1** | Mickey Self-Improvement | Mickey 14-15 | 🆕 Knowledge Curator subagent + domain/ activation (PROFILE/GRAPH/entries) + Personal Vault → domain/ transition |
 | **v9 (PLAN)** | Mickey Self-Improvement | Mickey 20 | 🆕 3-Tier (R/G/S) + Domain-centric global knowledge + knowledge-organization Skill — POSTMORTEM-based redesign (Phase 1~5, implementation from next session) |
 | **v9.1** | Mickey Self-Improvement | Mickey 21-22 | 🆕 v9 PLAN correction+landing: Curator permission fix + Pre-staged Apply + T1.5 §17 Knowledge Lifecycle + §18 Activity Metrics — 5-week 31-session measurement invalidated v9 PLAN's "retire Curator" decision |
+| **v9.2** | Mickey Self-Improvement | Mickey 30-33 | External code-analysis tool integration: Serena/Graphify (Tier 1) + Kiro CLI built-in `code` (Tier 3 baseline) detection/guidance + FILE-STRUCTURE schema reduction (detailed analysis delegated to tools) |
 | **v10 (Power Migration)** | Mickey Self-Improvement | v10 track | 🆕 CLI v2 agent → Kiro v3 Power migration: 7 steering (6 always + 1 on-demand) + session hooks/scripts + memorygraph removed (file-based knowledge graph) + install-script v3 deploy pipeline |
+| **post-v10 (CLI track, T1 v18~v20)** | Mickey Self-Improvement | Mickey 41-43 | 🆕 Knowledge Curator ops-hardening trilogy: global write isolation (local staging + promote lock) → headless transport → codified invocation (`invoke_curator.py` as the single entry point, curation lock built in). §17 v21~v25 |
 
 > 💡 **Key Insight**: AI prompts should not be "write once and done" but **continuously evolved through failure experiences**. See [Prompt Evolution Guide](docs/06-prompt-evolution-en.md) for details.
 
@@ -120,6 +122,7 @@ cd ai-developer-mickey
 What `install.sh` / `install.ps1` does:
 - Agent JSON → `~/.kiro/agents/` (CLI v2)
 - Global guide → `~/.kiro/mickey/`
+- Session scripts → `~/.kiro/mickey/scripts/` (`invoke_curator.py`, `promote_knowledge.py`, `mickey_lock.py`)
 - v3 Power → `~/.kiro/powers/installed/power-mickey/` (when kiro-cli is 2.10+; skipped automatically below that)
 
 > The v3 deploy is handled by `scripts/deploy_power.py`, which backs up the existing install before replacing it. Run `python scripts/deploy_power.py --dry-run` to preview without changes.
@@ -130,8 +133,8 @@ There are three ways to use Mickey:
 
 | Scenario | How to run | Notes |
 |----------|-----------|-------|
-| **CLI v2** | `kiro-cli chat --agent ai-developer-mickey` | Uses the v17 prompt (agent JSON) directly. The verified, stable path |
-| **CLI v3** | `kiro-cli chat` | power-mickey is auto-detected. Loads 6 always + 1 on-demand steering (kiro-cli 2.10+) |
+| **CLI v2** | `kiro-cli chat --agent ai-developer-mickey` | Uses the T1 prompt (agent JSON, currently v20) directly. The verified, stable path |
+| **CLI v3** | `kiro-cli chat` | power-mickey is auto-detected (kiro-cli 2.10+). Steering is pulled by the POWER.md onboarding via `readSteering` |
 | **Kiro IDE** | Activate power-mickey in the Powers panel | Same steering, in the IDE |
 
 ```bash
@@ -156,8 +159,12 @@ ai-developer-mickey/
 │   ├── knowledge-curator.json    # Knowledge Curator subagent
 │   ├── common_knowledge/   # Knowledge management examples
 │   └── context_rule/       # Context rule examples
+├── scripts/                # Session/deploy infrastructure (invoke_curator, promote_knowledge, deploy_power, ...)
+├── mickey/                 # Repo mirror of the global knowledge (~/.kiro/mickey/) — install deploy source
 ├── context_rule/           # This project's context rules (used by Mickey for self-improvement)
 ├── common_knowledge/       # This project's common knowledge
+├── auto_notes/             # Mickey's automatic observation notes (batch-reviewed at session end)
+├── session_history/        # Command/response case records (for sharing AI usage examples)
 ├── power-mickey/           # Kiro v3 Power (v10 — CLI v3 + IDE)
 └── godot-pong/            # Godot replay system code
 ```
@@ -196,9 +203,9 @@ power-mickey/
 
 | Item | Kiro CLI v2 (agent JSON) | Kiro v3 Power |
 |------|--------------------------|---------------|
-| Prompt loading | Full v17 resident | 6 always + 1 on-demand steering + graph-node pull |
+| Prompt loading | Full T1 resident (currently v20) | 6 always + 1 on-demand steering — but v3 has no automatic steering injection, so the POWER.md onboarding pulls them via `readSteering` (measured, F1) + graph-node pull |
 | Knowledge graph | File-based (`~/.kiro/mickey/`) | Same (memorygraph MCP removed) |
-| Session management | Manual | CLI v3 hooks (`SessionStart`/`Stop`) + scripts |
+| Session management | Manual + session scripts (`invoke_curator.py`, ...) | `SessionStart` hook (terminal v3) + scripts. Session close is the manual "wrap up the session" path (Stop hook fired per-response in measurement and was retired — F5) |
 | Environment | CLI | CLI v3 + Kiro IDE |
 
 ## 💡 Key Insights
