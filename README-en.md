@@ -148,6 +148,30 @@ kiro-cli chat --agent ai-developer-mickey   # CLI v2
 - Session log creation (MICKEY-N-SESSION.md)
 - Lesson recording and next session handoff
 
+## 🧠 Personalized Domain Knowledge Graph
+
+Mickey's domain knowledge accumulates in **each user's home (`~/.kiro/mickey/`)**, not in this repository. The repository only provides the starting point (seed); after installation, knowledge grows as each individual's own asset.
+
+```
+~/.kiro/mickey/
+├── extended-protocols.md   # T1.5 detailed protocols (generational — updated by install)
+├── patterns/               # Domain-agnostic approach patterns (cap 7, INDEX map)
+└── domain/
+    ├── INDEX.md            # Trigger → entry map
+    ├── GRAPH.md            # Node/edge relation map (Tags / "when" hints / Path)
+    ├── PROFILE.md          # User decision-style profile (input for Curator routing)
+    └── entries/            # Knowledge bodies — hierarchized as it grows (e.g. entries/cloud/)
+```
+
+How the evolution loop works:
+1. At session end, the Knowledge Curator routes session lessons into R (reasoning rules) / G (domain knowledge) / S (skills/procedures)
+2. Knowledge valid beyond the current project is drafted as a promotion bundle in staging → user approval → `promote_knowledge.py` applies it to the graph with locking and integrity checks (node + relation edges + INDEX trigger)
+3. From the next session on, it is discovered automatically in any project via trigger matching and backlinks
+
+A real-world data point (single developer, measured 2026-08): grown to 131 nodes / 376 edges across 8+ projects. Every piece of knowledge promoted in the last month was added already connected to existing knowledge (0 orphan nodes), with 0 integrity violations (dangling edges / missing paths). See [GRAPH-HEALTH-BASELINE-2026-08-25.md](GRAPH-HEALTH-BASELINE-2026-08-25.md) for how to audit the structure.
+
+> ⚠️ **Personal knowledge is never committed to this repository.** The `mickey/` directory contains only the seed skeleton and 10 educational examples (labeled `[Seed 예시]`), and install uses seed semantics (copy only when missing), so it never overwrites an existing user's knowledge. Full contract: [mickey/README.md](mickey/README.md)
+
 ### Directory Structure
 
 ```
@@ -160,7 +184,7 @@ ai-developer-mickey/
 │   ├── common_knowledge/   # Knowledge management examples
 │   └── context_rule/       # Context rule examples
 ├── scripts/                # Session/deploy infrastructure (invoke_curator, promote_knowledge, deploy_power, ...)
-├── mickey/                 # Repo mirror of the global knowledge (~/.kiro/mickey/) — install deploy source
+├── mickey/                 # Install seed skeleton of the global knowledge store (personal knowledge is never committed — see mickey/README.md contract)
 ├── context_rule/           # This project's context rules (used by Mickey for self-improvement)
 ├── common_knowledge/       # This project's common knowledge
 ├── auto_notes/             # Mickey's automatic observation notes (batch-reviewed at session end)

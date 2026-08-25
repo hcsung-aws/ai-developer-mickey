@@ -153,6 +153,30 @@ kiro-cli chat --agent ai-developer-mickey   # CLI v2
 - **실패 경험을 통해 지속적으로 개선**
 - 각 세션의 교훈을 프롬프트에 반영
 
+## 🧠 개인화 도메인 지식 그래프
+
+Mickey의 도메인 지식은 이 저장소가 아니라 **각 사용자의 홈(`~/.kiro/mickey/`)에서 축적**됩니다. 저장소는 시작점(seed)만 제공하고, 설치 후의 지식은 사용하는 개인이 자기 자산으로 쌓아 나갑니다.
+
+```
+~/.kiro/mickey/
+├── extended-protocols.md   # T1.5 상세 프로토콜 (세대 관리 — install이 갱신)
+├── patterns/               # 도메인 무관 접근법 패턴 (상한 7, INDEX 지도)
+└── domain/
+    ├── INDEX.md            # 트리거 → entry 지도
+    ├── GRAPH.md            # 노드/엣지 관계 맵 (Tags / "언제" 힌트 / Path)
+    ├── PROFILE.md          # 사용자 의사결정 성향 (Curator 분기 판단 입력)
+    └── entries/            # 지식 본체 — 성장하면 카테고리 계층화 (예: entries/cloud/)
+```
+
+동작 방식 (진화 루프):
+1. 세션 종료 시 Knowledge Curator가 세션 교훈을 R(판단 방식)/G(도메인 지식)/S(절차)로 분기
+2. 다른 프로젝트에서도 유효한 지식은 승격 번들로 staging에 초안 → 사용자 승인 → `promote_knowledge.py`가 락·무결성 검증과 함께 그래프에 반영 (노드 + 관계 엣지 + INDEX 트리거)
+3. 다음 세션부터 어느 프로젝트에서든 트리거 매칭과 backlink로 자동 발견됨
+
+실제 운영 사례 (개발자 1인, 2026-08 실측): 8개+ 프로젝트를 거치며 노드 131개 / 엣지 376개 규모로 성장. 최근 한 달간 승격된 신규 지식 전부가 기존 지식과 연결된 상태로 추가되었고(고아 노드 0), 그래프 무결성(끊어진 엣지/경로 결손) 0건을 유지. 구조 건전성 점검 방법은 [GRAPH-HEALTH-BASELINE-2026-08-25.md](GRAPH-HEALTH-BASELINE-2026-08-25.md)를 참고하세요.
+
+> ⚠️ **개인 지식은 저장소에 커밋되지 않습니다.** `mickey/` 디렉토리는 seed 골격과 교육용 예시 10건([Seed 예시] 라벨)뿐이며, install은 seed 시맨틱(미존재 시에만 복사)이라 기존 사용자의 지식을 덮어쓰지 않습니다. 상세 계약: [mickey/README.md](mickey/README.md)
+
 ## 📁 디렉토리 구조
 
 ```
@@ -165,7 +189,7 @@ ai-developer-mickey/
 │   ├── common_knowledge/   # 지식 관리 예시
 │   └── context_rule/       # 컨텍스트 규칙 예시
 ├── scripts/                # 세션·배포 인프라 (invoke_curator, promote_knowledge, deploy_power 등)
-├── mickey/                 # 글로벌 지식(~/.kiro/mickey/)의 repo 미러 — install 배포 소스
+├── mickey/                 # 글로벌 지식 저장소의 설치 seed 골격 (개인 지식은 커밋 금지 — mickey/README.md 계약)
 ├── context_rule/           # 이 프로젝트의 컨텍스트 규칙 (Mickey가 자기 개선 시 활용)
 ├── common_knowledge/       # 이 프로젝트의 범용 지식
 ├── auto_notes/             # Mickey 자동 관찰 기록 (세션 종료 시 일괄 확인)
