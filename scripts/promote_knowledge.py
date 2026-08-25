@@ -31,6 +31,7 @@ import re
 import shutil
 import sys
 import time
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -147,15 +148,20 @@ def section_bounds(lines: list, title: str):
 
 
 def insert_rows(text: str, title: str, rows: list) -> str:
-    """섹션 내 마지막 표 행 뒤에 rows 삽입 (표 중간 공백 라인 허용)."""
+    """섹션 내 마지막 표 행 뒤에 rows 삽입 + 표 내부 빈 줄 제거.
+
+    빈 줄이 표 중간에 누적되면 마크다운 테이블이 분절되므로(M44 감사: Edges 41개),
+    삽입 시점에 표 범위(첫 행~마지막 행)를 compact하게 정규화한다 (M44 개선 A-②).
+    """
     lines = text.splitlines()
     start, end = section_bounds(lines, title)
-    last_pipe = max((i for i in range(start, end) if lines[i].strip().startswith("|")),
-                    default=None)
-    if last_pipe is None:
+    pipes = [i for i in range(start, end) if lines[i].strip().startswith("|")]
+    if not pipes:
         raise ValueError(f"## {title} 섹션에 표 없음")
-    return "\n".join(lines[:last_pipe + 1] + rows + lines[last_pipe + 1:]) + (
-        "\n" if text.endswith("\n") else "")
+    first_pipe, last_pipe = pipes[0], pipes[-1]
+    table = [lines[i] for i in range(first_pipe, last_pipe + 1) if lines[i].strip()]
+    new_lines = lines[:first_pipe] + table + rows + lines[last_pipe + 1:]
+    return "\n".join(new_lines) + ("\n" if text.endswith("\n") else "")
 
 
 def replace_row(text: str, title: str, match_key: str, new_row: str) -> str:
@@ -196,6 +202,50 @@ def node_ids(graph_text: str) -> set:
             if first and first != "ID":
                 ids.add(first)
     return ids
+
+
+def category_graph_file(domain: Path, entry_path: str):
+    """entry가 카테고리 하위(entries/{cat}/...)이고 하위 GRAPH.md가 있으면 그 경로 반환.
+
+    §20 규약상 카테고리 멤버 노드의 정위치는 하위 GRAPH다. promote가 이를 인식하지 못해
+    상위 GRAPH에 직접 등재하던 드리프트(M44 감사 [M] 5건)를 차단한다 (M44 개선 A-①).
+    """
+    parts = Path(entry_path).parts
+    if len(parts) >= 3 and parts[0] == "entries":
+        sub = domain / parts[0] / parts[1] / "GRAPH.md"
+        if sub.exists():
+            return sub
+    return None
+
+
+def edge_endpoints(row: str) -> tuple:
+    """엣지 표 행에서 (From, To) 노드 ID를 추출한다."""
+    cells = [c.strip() for c in row.strip().strip("|").split("|")]
+    return (cells[0], cells[1]) if len(cells) >= 2 else ("", "")
+
+
+def top_hub_ids(graph_texts: list, n: int = 5) -> set:
+    """Edges 표 기준 차수 상위 n개 노드 ID.
+
+    신규 엣지가 전부 최상위 허브로만 향하는 hub-and-spoke 편중(M44 감사: 상위 5 허브가
+    엣지 35% 점유)을 승격 시점에 통지하기 위한 기준 집합 (M44 개선 A-③).
+    """
+    deg = Counter()
+    for text in graph_texts:
+        lines = text.splitlines()
+        try:
+            start, end = section_bounds(lines, "Edges")
+        except ValueError:
+            continue
+        for ln in lines[start:end]:
+            if not ln.strip().startswith("|") or _is_separator_row(ln):
+                continue
+            f, t = edge_endpoints(ln)
+            if f in ("From", ""):
+                continue
+            deg[f] += 1
+            deg[t] += 1
+    return {nid for nid, _ in deg.most_common(n)}
 
 
 # ── 락 (mickey_lock 공유 모듈 위임 — M43) ─────────────────────────
@@ -262,7 +312,8 @@ class Promoter:
         ts = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.backup_dir = root / ".promote-backups" / f"{ts}-{re.sub(r'[^A-Za-z0-9_-]', '_', owner)}"
         self._backed_up = {}     # 원본경로 -> 백업경로
-        self._created = []       # 롤백 시 삭제할 신규 파일
+        self._created = []
+        self._touched_subs = set()  # 이번 승격에서 수정한 하위 카테고리 GRAPH (스탬프 대상)       # 롤백 시 삭제할 신규 파일
 
     # 백업/롤백 -----------------------------------------------------
     def _backup(self, path: Path):
@@ -287,13 +338,17 @@ class Promoter:
         graph_file = self.domain / "GRAPH.md"
         index_file = self.domain / "INDEX.md"
         graph = graph_file.read_text(encoding="utf-8")
+        # 카테고리 entry(entries/{cat}/...)는 하위 GRAPH가 노드의 정위치 (§20 — M44 개선 A-①)
+        sub_file = category_graph_file(self.domain, b.entry_path)
+        sub_text = sub_file.read_text(encoding="utf-8") if sub_file else ""
 
-        # 충돌 검사 (낙관적 동시성 제어)
+        # 충돌 검사 (낙관적 동시성 제어) — 노드 ID는 상위+하위 병합 기준
+        known_ids = node_ids(graph) | (node_ids(sub_text) if sub_file else set())
         if b.mode == "new":
             if entry_file.exists():
                 self.report.append(f"[CONFLICT] {b.path.name}: entry 기존재 ({b.entry_path}) — 스킵")
                 return False
-            if b.entry_id() in node_ids(graph):
+            if b.entry_id() in known_ids:
                 self.report.append(f"[CONFLICT] {b.path.name}: 노드 ID 기존재 ({b.entry_id()}) — 스킵")
                 return False
         else:  # augment
@@ -306,6 +361,20 @@ class Promoter:
                     f"[CONFLICT] {b.path.name}: Base-Hash 불일치 (타 세션 변경 감지) — 스킵, 재큐레이션 필요")
                 return False
 
+        # 허브 편중 통지 (M44 개선 A-③) — 차단이 아닌 경고: 신규 엣지의 상대 끝점이
+        # 전부 최상위 허브면 hub-and-spoke 편중을 키우므로 비허브 peer 연결을 유도.
+        # 허브 5개가 성립할 규모의 그래프에서만 판정 (소형/테스트 그래프 잡음 방지)
+        if b.edge_rows:
+            hubs = top_hub_ids([graph] + ([sub_text] if sub_file else []))
+            others = set()
+            for r in b.edge_rows:
+                ep_from, ep_to = edge_endpoints(r)
+                others.update(x for x in (ep_from, ep_to) if x and x != b.entry_id())
+            if others and len(hubs) >= 5 and others <= hubs:
+                self.report.append(
+                    f"[WARN] {b.path.name}: 신규 엣지가 전부 최상위 허브로만 연결"
+                    f" ({', '.join(sorted(others))}) — 비허브 peer 연결 1개 이상 권장")
+
         # entry 파일
         if b.mode == "new":
             entry_file.parent.mkdir(parents=True, exist_ok=True)
@@ -315,19 +384,42 @@ class Promoter:
             self._backup(entry_file)
             entry_file.write_text(b.entry_body, encoding="utf-8")
 
-        # GRAPH.md: 노드 행 (new=삽입, augment=교체) + 엣지 행 추가
+        # GRAPH: 노드 행 — 카테고리 entry는 하위 GRAPH에 (augment는 노드가 실재하는 그래프에서 교체)
         self._backup(graph_file)
         graph = graph_file.read_text(encoding="utf-8")
+        if sub_file:
+            self._backup(sub_file)
+            self._touched_subs.add(sub_file)
         if b.mode == "new":
-            graph = insert_rows(graph, "Nodes", [b.node_row])
+            if sub_file:
+                sub_text = insert_rows(sub_text, "Nodes", [b.node_row])
+            else:
+                graph = insert_rows(graph, "Nodes", [b.node_row])
         else:
-            graph = replace_row(graph, "Nodes", b.entry_id(), b.node_row)
+            if sub_file and b.entry_id() in node_ids(sub_text):
+                sub_text = replace_row(sub_text, "Nodes", b.entry_id(), b.node_row)
+            else:
+                # 드리프트 호환: 과거 상위에 등재된 카테고리 노드는 상위에서 교체
+                graph = replace_row(graph, "Nodes", b.entry_id(), b.node_row)
+
+        # GRAPH: 엣지 행 — 양 끝점이 하위 그래프 내부면 하위에, 아니면 상위에(cross-category)
         if b.edge_rows:
-            existing = {ln.strip() for ln in graph.splitlines()}
+            existing = {ln.strip() for ln in (graph + "\n" + sub_text).splitlines()}
             fresh = [r for r in b.edge_rows if r.strip() not in existing]  # 중복 엣지 스킵
-            if fresh:
+            if fresh and sub_file:
+                sub_ids = node_ids(sub_text)
+                internal = [r for r in fresh
+                            if all(e in sub_ids for e in edge_endpoints(r) if e)]
+                cross = [r for r in fresh if r not in internal]
+                if internal:
+                    sub_text = insert_rows(sub_text, "Edges", internal)
+                if cross:
+                    graph = insert_rows(graph, "Edges", cross)
+            elif fresh:
                 graph = insert_rows(graph, "Edges", fresh)
         graph_file.write_text(graph, encoding="utf-8")
+        if sub_file:
+            sub_file.write_text(sub_text, encoding="utf-8")
 
         # domain/INDEX.md: 트리거 행 (new=삽입, augment=경로 매칭 행 교체 시도)
         self._backup(index_file)
@@ -342,8 +434,9 @@ class Promoter:
         if b.backlink_row:
             self._add_backlink(b)
 
+        routed = " → 하위 GRAPH 라우팅" if sub_file else ""
         self.report.append(
-            f"[OK] {b.path.name}: {b.mode} {b.entry_path} (엣지 +{len(b.edge_rows)})")
+            f"[OK] {b.path.name}: {b.mode} {b.entry_path} (엣지 +{len(b.edge_rows)}){routed}")
         return True
 
     def _replace_index_row_by_path(self, index: str, b: Bundle):
@@ -375,10 +468,11 @@ class Promoter:
 
     # 마무리 ---------------------------------------------------------
     def finalize_stamps(self, applied: int, edges: int):
-        """GRAPH/INDEX Last Updated를 승격 명의로 갱신."""
+        """GRAPH/INDEX (+수정된 하위 GRAPH) Last Updated를 승격 명의로 갱신."""
         stamp = (f"{datetime.now().strftime('%Y-%m-%d')} ({self.owner} promote — "
                  f"노드 +{applied}, 엣지 +{edges})")
-        for f in (self.domain / "GRAPH.md", self.domain / "INDEX.md"):
+        targets = [self.domain / "GRAPH.md", self.domain / "INDEX.md"] + sorted(self._touched_subs)
+        for f in targets:
             f.write_text(set_last_updated(f.read_text(encoding="utf-8"), stamp),
                          encoding="utf-8")
 
@@ -455,6 +549,12 @@ def main() -> int:
                     b.path.unlink()  # 승격 완료된 staging 정리
             report.append(f"[RESULT] PASS — 승격 {len(applied)}/{len(bundles)}건, "
                           f"무결성 dangling 0")
+            if applied:
+                # M44 개선 D: 글로벌 domain/은 git 미추적 — repo 미러가 유일한 이력·배포 소스.
+                # 미러 동기화 두절(M20~M44 실측) 재발 방지를 위해 승격 성공 시 항상 통지한다.
+                report.append(
+                    "[REMIND] repo 미러 동기화 필요 — ai-developer-mickey/mickey/domain/ 에 "
+                    "이번 승격분 미반영 시 install이 낡은 지식을 배포 (adaptive #3)")
             if len(applied) < len(bundles):
                 exit_code = 1  # CONFLICT 잔여 존재
     finally:

@@ -353,3 +353,211 @@ class TestLockContention:
         assert r.returncode == 2                       # BUSY 전용 종료 코드
         assert "other-session Mickey 9" in r.stdout    # 보유자 식별 가능
         assert (staging / "gd-new-entry.md").exists()  # 아무것도 적용 안 됨
+
+
+# ── M44 개선 A/D: 카테고리 라우팅 · 표 위생 · 허브 경고 · 미러 리마인더 ──
+CLOUD_GRAPH_MD = """# Knowledge Graph — cloud
+
+> 상위: `domain/GRAPH.md` 의 `cloud [ANCHOR]`.
+
+## Nodes
+
+| ID | Title | Tags | Core | Path |
+|----|-------|------|------|------|
+| cloud-existing | 기존 클라우드 | aws | 기존 | entries/cloud/cloud-existing.md |
+
+## Edges
+
+| From | To | Type | Note |
+|------|-----|------|------|
+| cloud-existing | cloud-existing | similar-to | self |
+
+## Last Updated
+2026-07-21 (이전 세션)
+"""
+
+
+def make_cloud_bundle() -> str:
+    """카테고리(entries/cloud/) 하위 entry 승격 번들 — 내부 엣지 1 + cross 엣지 1."""
+    return """# 승격 번들: new-cloud
+> Pre-staged by Knowledge Curator
+
+## Meta
+Mode: new
+Entry-Path: entries/cloud/new-cloud.md
+Source: test-project Mickey 1
+
+<<<ENTRY-BODY
+# 신규 클라우드 엔트리
+
+## Core
+클라우드 테스트 지식.
+ENTRY-BODY>>>
+
+## Graph Node Row
+| new-cloud | 신규 클라우드 | aws | 테스트 | entries/cloud/new-cloud.md |
+
+## Graph Edge Rows
+| new-cloud | cloud-existing | similar-to | 내부 연결 (하위 라우팅 기대) |
+| new-cloud | existing-entry | similar-to | 상위 연결 (cross-category 기대) |
+
+## Index Row
+| 클라우드, 테스트 | entries/cloud/new-cloud.md | 클라우드 테스트 지식 |
+
+## Backlink Row
+"""
+
+
+@pytest.fixture
+def env_with_category(env):
+    """env 위에 cloud 하위 카테고리 그래프를 추가 구성."""
+    groot, project, staging = env
+    cloud = groot / "domain" / "entries" / "cloud"
+    cloud.mkdir(parents=True)
+    (cloud / "GRAPH.md").write_text(CLOUD_GRAPH_MD, encoding="utf-8")
+    (cloud / "cloud-existing.md").write_text("# 기존 클라우드\n", encoding="utf-8")
+    return groot, project, staging
+
+
+class TestCategoryRouting:
+    """M44 개선 A-①: 카테고리 entry의 노드/내부 엣지는 하위 GRAPH로 라우팅."""
+
+    def test_node_routes_to_subgraph(self, env_with_category):
+        groot, project, staging = env_with_category
+        (staging / "gd-new-cloud.md").write_text(make_cloud_bundle(), encoding="utf-8")
+        r = run_promote(project)
+        assert "[RESULT] PASS" in r.stdout
+        parent = (groot / "domain" / "GRAPH.md").read_text(encoding="utf-8")
+        sub = (groot / "domain" / "entries" / "cloud" / "GRAPH.md").read_text(encoding="utf-8")
+        # 노드 행은 하위에만
+        assert "| new-cloud | 신규 클라우드 |" in sub
+        assert "| new-cloud | 신규 클라우드 |" not in parent
+        # 내부 엣지는 하위, cross 엣지는 상위
+        assert "| new-cloud | cloud-existing |" in sub
+        assert "| new-cloud | existing-entry |" in parent
+        assert "하위 GRAPH 라우팅" in r.stdout
+
+    def test_flat_entry_unaffected(self, env_with_category):
+        """카테고리가 아닌 flat entry는 기존 동작 그대로 상위 GRAPH에."""
+        groot, project, staging = env_with_category
+        (staging / "gd-new-entry.md").write_text(make_bundle(), encoding="utf-8")
+        r = run_promote(project)
+        assert "[RESULT] PASS" in r.stdout
+        parent = (groot / "domain" / "GRAPH.md").read_text(encoding="utf-8")
+        assert "| new-entry | 신규 엔트리 |" in parent
+
+    def test_conflict_checks_subgraph_ids(self, env_with_category):
+        """노드 ID 충돌 검사가 하위 그래프 ID까지 병합해서 판정.
+
+        entry 파일 기존재 검사가 먼저 발화하면 목적 사유(노드 ID)가 선점되므로
+        (fail-verdict-cause-preemption), 파일을 지워 노드 ID 검사만 노출시킨다.
+        """
+        groot, project, staging = env_with_category
+        (groot / "domain" / "entries" / "cloud" / "cloud-existing.md").unlink()
+        bundle = make_cloud_bundle().replace("new-cloud", "cloud-existing")
+        (staging / "gd-dup.md").write_text(bundle, encoding="utf-8")
+        r = run_promote(project)
+        assert "[CONFLICT]" in r.stdout and "노드 ID 기존재" in r.stdout
+
+    def test_subgraph_stamped(self, env_with_category):
+        """수정된 하위 GRAPH도 Last Updated 스탬프 갱신."""
+        groot, project, staging = env_with_category
+        (staging / "gd-new-cloud.md").write_text(make_cloud_bundle(), encoding="utf-8")
+        run_promote(project)
+        sub = (groot / "domain" / "entries" / "cloud" / "GRAPH.md").read_text(encoding="utf-8")
+        assert "promote — 노드 +1" in sub
+
+
+class TestTableHygiene:
+    """M44 개선 A-②: insert_rows가 표 내부 빈 줄을 제거해 표 연속성 보장."""
+
+    def test_insert_compacts_blank_lines(self):
+        fragmented = GRAPH_MD.replace(
+            "| existing-entry | 기존 엔트리 | testing | 기존 지식 | entries/existing-entry.md |",
+            "| existing-entry | 기존 엔트리 | testing | 기존 지식 | entries/existing-entry.md |\n\n"
+            "| second-entry | 둘째 | testing | 둘째 지식 | entries/second-entry.md |")
+        out = pk.insert_rows(fragmented, "Nodes", ["| n3 | t | tag | c | entries/n3.md |"])
+        lines = out.splitlines()
+        s, e = pk.section_bounds(lines, "Nodes")
+        pipes = [i for i in range(s, e) if lines[i].strip().startswith("|")]
+        # 표 첫 행~마지막 행 사이에 빈 줄 없음
+        assert all(lines[i].strip() for i in range(pipes[0], pipes[-1] + 1))
+        assert "| n3 |" in out and "| second-entry |" in out
+
+    def test_section_structure_preserved(self):
+        out = pk.insert_rows(GRAPH_MD, "Nodes", ["| n2 | t | tag | c | entries/n2.md |"])
+        assert "## Edges" in out and "## Last Updated" in out
+
+
+class TestHubWarning:
+    """M44 개선 A-③: 신규 엣지가 전부 최상위 허브로만 향하면 경고 (차단 아님)."""
+
+    @staticmethod
+    def _hub_graph() -> str:
+        """허브 5개(h1~h5) + 비허브 1개(leaf)로 구성된 그래프 텍스트."""
+        edges = []
+        hubs = [f"h{i}" for i in range(1, 6)]
+        for i, h in enumerate(hubs):          # 허브끼리 촘촘히 연결해 차수 상승
+            for other in hubs[i + 1:]:
+                edges.append(f"| {h} | {other} | similar-to | 허브 결선 |")
+        edges.append("| leaf | h1 | similar-to | 잎 연결 |")
+        nodes = "\n".join(
+            f"| {n} | 노드 {n} | testing | 코어 | entries/{n}.md |" for n in hubs + ["leaf"])
+        return ("# Knowledge Graph\n\n## Nodes\n\n"
+                "| ID | Title | Tags | Core | Path |\n|----|-------|------|------|------|\n"
+                f"{nodes}\n\n## Edges\n\n"
+                "| From | To | Type | Note |\n|------|-----|------|------|\n"
+                + "\n".join(edges) + "\n\n## Last Updated\n2026-07-21\n")
+
+    def _run(self, tmp_path, monkeypatch, edge_rows: str) -> str:
+        groot = tmp_path / "global"
+        entries = groot / "domain" / "entries"
+        entries.mkdir(parents=True)
+        (groot / "domain" / "GRAPH.md").write_text(self._hub_graph(), encoding="utf-8")
+        (groot / "domain" / "INDEX.md").write_text(INDEX_MD, encoding="utf-8")
+        for n in ["h1", "h2", "h3", "h4", "h5", "leaf"]:
+            (entries / f"{n}.md").write_text(f"# {n}\n", encoding="utf-8")
+        project = tmp_path / "proj"
+        staging = project / "_curator-staging"
+        staging.mkdir(parents=True)
+        bundle = make_bundle(edges=False).replace(
+            "## Graph Edge Rows\n", f"## Graph Edge Rows\n{edge_rows}\n")
+        (staging / "gd-new-entry.md").write_text(bundle, encoding="utf-8")
+        monkeypatch.setenv("MICKEY_GLOBAL_ROOT", str(groot))
+        return run_promote(project).stdout
+
+    def test_warn_when_all_edges_to_hubs(self, tmp_path, monkeypatch):
+        out = self._run(tmp_path, monkeypatch,
+                        "| new-entry | h1 | similar-to | 허브만 |\n"
+                        "| new-entry | h2 | similar-to | 허브만 |")
+        assert "[WARN]" in out and "비허브 peer" in out
+        assert "[RESULT] PASS" in out  # 경고는 차단하지 않음
+
+    def test_no_warn_with_peer_edge(self, tmp_path, monkeypatch):
+        out = self._run(tmp_path, monkeypatch,
+                        "| new-entry | h1 | similar-to | 허브 |\n"
+                        "| new-entry | leaf | similar-to | 비허브 peer |")
+        assert "[WARN]" not in out
+        assert "[RESULT] PASS" in out
+
+    def test_no_warn_on_small_graph(self, env):
+        """허브 5개가 성립하지 않는 소형 그래프에서는 경고하지 않음 (잡음 방지)."""
+        groot, project, staging = env
+        (staging / "gd-new-entry.md").write_text(make_bundle(), encoding="utf-8")
+        out = run_promote(project).stdout
+        assert "[WARN]" not in out
+
+
+class TestMirrorReminder:
+    """M44 개선 D: 승격 성공 시 repo 미러 동기화 리마인더를 리포트에 포함."""
+
+    def test_remind_after_success(self, env):
+        groot, project, staging = env
+        (staging / "gd-new-entry.md").write_text(make_bundle(), encoding="utf-8")
+        out = run_promote(project).stdout
+        assert "[REMIND]" in out and "미러 동기화" in out
+
+    def test_no_remind_when_nothing_applied(self, env):
+        groot, project, staging = env
+        out = run_promote(project).stdout  # 번들 없음
+        assert "[REMIND]" not in out
