@@ -46,6 +46,7 @@ $null = New-Item -ItemType Directory -Force -Path (Join-Path $MickeyDir 'scripts
 Copy-Item (Join-Path $ScriptDir 'scripts\promote_knowledge.py') (Join-Path $MickeyDir 'scripts') -Force
 Copy-Item (Join-Path $ScriptDir 'scripts\mickey_lock.py') (Join-Path $MickeyDir 'scripts') -Force
 Copy-Item (Join-Path $ScriptDir 'scripts\invoke_curator.py') (Join-Path $MickeyDir 'scripts') -Force
+Copy-Item (Join-Path $ScriptDir 'scripts\graph_audit.py') (Join-Path $MickeyDir 'scripts') -Force
 
 # seed 파일: 미존재 시에만 복사 (CURATOR-PROMPT.md 는 위 세대 관리에서 처리됨)
 Copy-SeedFiles (Join-Path $ScriptDir 'mickey\patterns\*.md') (Join-Path $MickeyDir 'patterns')

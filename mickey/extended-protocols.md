@@ -88,6 +88,7 @@ SESSION.md의 각 작업에 검증 가능한 완료 기준을 명시한다.
 5. **auto_notes 사실 데이터 검증**: commands.md의 테스트 수, 파일 경로 등 사실 데이터가 현재 코드와 일치하는지 확인. 교훈/패턴은 5세션 규칙 유지하되, 사실 데이터는 코드 변경이 있었으면 매 세션 확인
 6. **domain entry 파일 크기 스캔** (§20 연동): `~/.kiro/mickey/domain/entries/*.md` 중 하드 상한(400줄) 초과 파일 → Step 2 분할 제안. 소프트 상한(200줄) 초과는 감시 대상으로만 기록
 7. **domain 카테고리 클러스터 스캔** (§20 연동): `domain/GRAPH.md` Nodes 표의 태그 클러스터가 임계값(7개 노드) 이상 → Step 3 카테고리화 후보로 제시. 즉시 재편 강제 아님 (사용자 확인 시 응집 도메인 vs 횡단 관점 판단)
+8. **domain 그래프 무결성 감사** (M44 도구화): `python ~/.kiro/mickey/scripts/graph_audit.py` 실행 — 불변 조건(dangling 엣지/Path 결손)과 정리 후보(orphan/중복 엣지/INDEX 중복 등재/malformed 표 행/카테고리 드리프트/태그 클러스터)를 실측. 불변 조건 위반은 즉시 수술 제안, 정리 후보는 notify. 6·7항의 스캔은 이 도구 출력이 겸한다. 기준점 대조: ai-developer-mickey `GRAPH-HEALTH-BASELINE-*.md` (M44 baseline — "다음에 반영" 류 인계는 실행 주체가 없으면 방치된다는 실측이 도구화 근거)
 
 ### 아카이빙 규칙
 - **대상**: 교훈 승격 리뷰가 완료된 이전 SESSION/HANDOFF 파일
@@ -768,8 +769,9 @@ Tier 3 (`code` 도구) 사용 흔적은 `SESSION.md` Progress 에 기록하여 �
 
 ---
 
-**Version**: 26
-**Last Updated**: 2026-08-22
+**Version**: 27
+**Last Updated**: 2026-08-25
+**Changes (v27)**: §3 세션 시작 체크 8항 신설 (ai-developer-mickey M44, 그래프 전면 감사): graph_audit.py 상비 도구화 — dangling/Path(불변)와 orphan/중복/malformed/드리프트(정리 후보) 실측을 엔트로피 체크 중단점에 배치. 근거: orphan 1건이 "다음 Curator 반영 예정" 인계로 2개월 방치 (forced-breakpoint 원칙 위반 실측). 연동: promote_knowledge.py 카테고리 라우팅 + 표 연속성 + 허브 편중 경고 (개선 A), CURATOR-PROMPT 엣지 편중 방지 규율 (개선 B), promote 미러 동기화 리마인더 (개선 D). baseline: GRAPH-HEALTH-BASELINE-2026-08-25.md
 **Changes (v26)**: §22 PowerShell 원스트라이크 신설 (ai-developer-mickey M43, POSTMORTEM 2026-08-21 개선 후보 ①): 인라인 셸 함정 1회 위반 시 세션 잔여를 .py 스크립트 전용 전환 — 기존 셸 규칙의 강제 장치. 인라인 변형 재시도 금지. 근거: PowerShell execute 계층 함정이 8개 프로젝트 [Protocol] 태그 반복 마찰 1위.
 **Changes (v25)**: §17 Curator 호출 코드화 (ai-developer-mickey M43): use_subagent → invoke_curator.py 유일 진입점. curation 락(프로젝트 로컬, mkdir 원자성, 자동 회수 없음 + --force human-in-the-loop, awaiting-merge 상태 유지)을 호출과 같은 코드 경로에 내장 — 같은 프로젝트 동시 큐레이션을 지시가 아닌 코드로 차단. 전송은 headless 자식 프로세스 stdout in-band (M43 probe: .subagents 무변화). 완주 판정 디스크 실측도 스크립트에 내장. mickey_lock.py로 promote 락과 코드 통합. T1 v20 연동.
 **Changes (v24)**: §17 Curator 호출 전송 규약 신설 (ai-developer-mickey M42): delegate → use_subagent(동기) 전환. 근거: delegate 전역 상태(.subagents, agent 이름 키 + user_notified 선점 + status 폴링)가 session-agnostic이라 멀티 세션 crosstalk/replace 실측. use_subagent는 in-band 반환 + UUID 키로 구조적 안전 (probe 검증). 완주 판정은 staging 디스크 실측 (Kiro #6765 채널 절단 대비), 실패 시 직접 대행. T1 v19와 연동.

@@ -122,7 +122,7 @@ cd ai-developer-mickey
 What `install.sh` / `install.ps1` does:
 - Agent JSON → `~/.kiro/agents/` (CLI v2)
 - Global guide → `~/.kiro/mickey/`
-- Session scripts → `~/.kiro/mickey/scripts/` (`invoke_curator.py`, `promote_knowledge.py`, `mickey_lock.py`)
+- Session scripts → `~/.kiro/mickey/scripts/` (`invoke_curator.py`, `promote_knowledge.py`, `mickey_lock.py`, `graph_audit.py`)
 - v3 Power → `~/.kiro/powers/installed/power-mickey/` (when kiro-cli is 2.10+; skipped automatically below that)
 
 > The v3 deploy is handled by `scripts/deploy_power.py`, which backs up the existing install before replacing it. Run `python scripts/deploy_power.py --dry-run` to preview without changes.

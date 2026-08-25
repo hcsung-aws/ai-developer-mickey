@@ -28,6 +28,7 @@ mkdir -p "$MICKEY_DIR/scripts"
 cp "$SCRIPT_DIR/scripts/promote_knowledge.py" "$MICKEY_DIR/scripts/"
 cp "$SCRIPT_DIR/scripts/mickey_lock.py" "$MICKEY_DIR/scripts/"
 cp "$SCRIPT_DIR/scripts/invoke_curator.py" "$MICKEY_DIR/scripts/"
+cp "$SCRIPT_DIR/scripts/graph_audit.py" "$MICKEY_DIR/scripts/"
 
 # seed 복사: 대상에 같은 이름 파일이 없을 때만 (개인 지식 덮어쓰기 금지)
 copy_seed_glob() { # $1=소스 디렉토리, $2=대상 디렉토리, $3=제외 파일명(옵션)

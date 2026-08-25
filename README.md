@@ -113,7 +113,7 @@ cd ai-developer-mickey
 `install.sh` / `install.ps1`이 수행하는 것:
 - Agent JSON → `~/.kiro/agents/` (CLI v2)
 - 글로벌 가이드 → `~/.kiro/mickey/`
-- 세션 스크립트 → `~/.kiro/mickey/scripts/` (`invoke_curator.py`, `promote_knowledge.py`, `mickey_lock.py`)
+- 세션 스크립트 → `~/.kiro/mickey/scripts/` (`invoke_curator.py`, `promote_knowledge.py`, `mickey_lock.py`, `graph_audit.py`)
 - v3 Power → `~/.kiro/powers/installed/power-mickey/` (kiro-cli 2.10 이상일 때. 미만이면 자동으로 건너뜀)
 
 > v3 배포는 `scripts/deploy_power.py`가 담당하며, 기존 설치본을 백업한 뒤 교체합니다. 변경 없이 계획만 보려면 `python scripts/deploy_power.py --dry-run`을 실행하세요.

@@ -12,6 +12,7 @@
 - Line endings: repo는 LF. Windows native는 `core.autocrlf=input` 권장, WSL↔Windows 파일 공유 시 CRLF 변환 필요
 - Kiro CLI agent 캐시: agent JSON 변경 후 ping 검증은 새 세션 부팅 필요 (M23 발견) — 본 세션 내 검증 불가
 - Context window 효율성 중시 (3-Tier 로딩)
+- **글로벌↔repo 미러 freshness (M44)**: 타 프로젝트 promote는 글로벌만 갱신하므로 repo `mickey/` 미러는 구조적으로 낡는다 — 본 프로젝트 세션 진입 엔트로피 체크 시 `python scripts/m37_mickey_mirror_diff.py` 실측 필수 (M44 실측: domain 미러 M20 이후 두절, GLOBAL_ONLY 227건). 재동기화는 파일별 방향 판정(adaptive #4) 필요 — install 실행 전에는 반드시 선행
 
 ## Key Decisions
 - 시스템 프롬프트 변경 시 3곳 동기화 필수 (활성 agent JSON, repo JSON, 독립 md)
@@ -28,4 +29,4 @@
 - **인계 사항도 새 세션 진입 시 디스크 상태 재확인** — M26 이 dangling staging 5세션 보류로 인계했으나 M27 진입 실측 결과 다른 프로젝트가 이미 정식 위치로 머지 완료. 인계는 "원본"이 아닌 "그 시점 관찰" — 새 세션은 디스크 재스캔으로 정합성 확인 필요 (Mickey 27)
 
 ## Last Updated
-2026-06-23 (Mickey 27)
+2026-08-25 (Mickey 44 — 미러 freshness 제약 추가)
