@@ -43,3 +43,5 @@
 | 실패 원인 인용, crosstalk 원흉, 원인 재검증 | ~/.kiro/mickey/domain/entries/mechanism-level-cause-attribution.md | "X가 문제였다" 기억은 메커니즘 수준으로 재검증 후 인용 |
 | Curator 호출, invoke_curator, 세션 종료 프로토콜 | ~/.kiro/mickey/domain/entries/protocol-entrypoint-codification.md | 다단계 프로토콜은 프롬프트 지시가 아닌 단일 스크립트 진입점으로 |
 | mickey_lock, 락 모듈 통합, promote 리팩토링 | ~/.kiro/mickey/domain/entries/signature-preserving-thin-wrapper.md | 공유 모듈 이관 시 시그니처 보존 얇은 래퍼로 위임 |
+| 서고 계약, mickey/README, 미러 개념 오판 | ~/.kiro/mickey/domain/entries/contract-doc-first-structural-diagnosis.md | M44 미러 두절 오진 → D-44-4 supersede 경위 |
+| 그래프 건전성, GRAPH-HEALTH-BASELINE, 재측정 사이클 | ~/.kiro/mickey/domain/entries/process-fix-over-data-fix-remeasure.md | M44 D-44-1 — baseline 동결 + 개선 A~D 후 재측정 판정 |
