@@ -150,6 +150,7 @@ ENTRY-BODY>>>
 - **Entry-Path**: `entries/[id].md` 또는 기존 카테고리 소속이면 `entries/{category}/[id].md` (신규 카테고리 생성 금지 — §20은 별도 절차)
 - **Graph Node Row**: GRAPH.md Nodes 표 5컬럼(`ID|Title|Tags|Core|Path`)과 정확히 일치. augment 시 기존 행을 대체할 완성형으로 작성
 - **Graph Edge Rows**: 0개 이상. 대상 노드는 GRAPH.md에 실존해야 함 (없는 노드 연결 시 promote가 롤백됨). 관계 유형: extends, contradicts, applies-to, prerequisite, similar-to. 확실하지 않은 관계는 만들지 않음 (precision > recall)
+- **엣지 편중 방지 (M44)**: 연결 후보 탐색을 차수 상위 허브에서 멈추지 말 것. GRAPH.md Tags/Core를 스캔하여 같은 도메인·메커니즘을 공유하는 **비허브 peer 노드를 우선 검토**하고, 확실한 peer 관계가 있으면 1개 이상 포함한다 (신규 엣지가 전부 최상위 허브로만 향하면 promote가 [WARN] 통지 — M44 실측: 상위 5 허브가 전체 엣지 35% 점유). 엣지 사유(근거 1줄)는 "가족 패턴"/"동일 철학" 같은 일반론 단독 금지 — **공유되는 메커니즘이 무엇인지** 구체적으로 기술한다 (mechanism-level-cause-attribution 원칙의 자기 적용)
 - **Backlink Row**: 프로젝트 `common_knowledge/INDEX.md` Domain Links에 들어갈 행 (선택 — 생략 가능)
 - entry ID는 영문 kebab-case. 기존 entry/규칙과 중복이면 새로 만들지 않음 (augment 또는 스킵)
 

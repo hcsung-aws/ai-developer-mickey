@@ -61,7 +61,9 @@ def main():
     print(f"[{'PASS' if match else 'FAIL'}] repo seed md == SoT")
 
     # 보정 3항목 키워드 존재 검증
-    for kw in ("세션 경계 (Session Boundary)", "전체 변경 목록 (누락 금지)", "Last Updated 명의 = 호출 세션"):
+    # 보정 키워드: SoT에 반드시 존재해야 하는 현행 규정 (M44 현행화 — "Last Updated 명의"는
+    # M41 격리 원칙으로 글로벌 스탬프가 promote 소관이 되며 SoT에서 정당 제거됨)
+    for kw in ("세션 경계 (Session Boundary)", "전체 변경 목록 (누락 금지)", "엣지 편중 방지 (M44)"):
         present = kw in md
         ok &= present
         print(f"[{'PASS' if present else 'FAIL'}] 보정 키워드: {kw}")
