@@ -1,20 +1,25 @@
 # Knowledge Graph
 
+> **[Seed 예시]** 이 GRAPH와 `entries/` 10건은 교육·데모용 seed 예시이다 (IMPROVEMENT-PLAN-v10 §8-a).
+> 실제 지식 그래프는 각 사용자 홈 `~/.kiro/mickey/domain/`에서 개인화되어 축적된다 — 개인 지식은 이 저장소에 커밋되지 않는다 (서고 계약: `mickey/README.md`).
+
 ## Nodes
-| ID | Title | Tags | Core |
-|----|-------|------|------|
-| phase-based-decomposition | Phase 기반 점진적 분해 | planning, incremental, verification, decomposition | 큰 목표/복잡한 작업 시 → Phase→Step 분해, 각 단계 E2E 검증 후 진행 |
-| welc-test-harness | WELC Test Harness | testing, safety, refactoring, verification, legacy-code | 기존 코드 수정/리팩토링 시 → 수정 전 동작을 테스트로 캡처하여 회귀 방지 |
-| plan-before-execute | 계획 문서 선행 | planning, execution, efficiency, decision-cost | 영향 범위 넓은 변경 시 → 상세 계획 문서 먼저 작성, 구현 시 판단 제거 |
-| external-benchmarking | 외부 벤치마킹 → 선별 채택 | benchmarking, adoption, external-analysis, selective | 외부 기술/도구 도입 시 → 자기 맥락에서 재해석하여 선별 채택 |
-| tool-and-target-coevolution | 검증 대상과 도구 동시 발전 | testing, coevolution, tooling, verification, incremental | 테스트/도구 개선 시 → 대상과 도구를 함께 발전시켜 검증 범위 확장 |
-| script-to-library-extraction | Script→Library 추출 | architecture, pipeline, library, orchestration, refactoring, reuse | 스크립트 3개+ 조합 필요 시 → 핵심 로직을 함수 추출, 오케스트레이터에서 조합 |
-| passive-over-active-retrieval | Passive > Active 지식 활용 | agent-design, knowledge-management, retrieval, passive-discovery | 지식 활용 설계 시 → Active 검색 의존 제거, Passive 발견 경로(backlink, 힌트) 설계 |
-| forced-breakpoint-execution | 강제 중단점 실행 패턴 | agent-design, automation, execution-timing, breakpoint | 자동화 작업 실행 안 될 때 → 판단 제거, 자연스러운 중단점에 배치 |
-| quantitative-usage-measurement | 정량 활용도 측정 기반 진단 | measurement, postmortem, quantitative, verification, protocol-design | 프로토콜/도구 효과 판단 시 → grep/카운터로 실측, 0%=설계 결함 |
-| knowledge-type-routing | 지식 성격별 활용 경로 분기 | knowledge-management, agent-design, routing, classification, retrieval | 지식 저장소 설계 시 → R(방식)/G(사실)/S(절차) 성격별 활용 경로 분리 |
+
+| ID | Title | Tags | Core | Path |
+|----|-------|------|------|------|
+| phase-based-decomposition | Phase 기반 점진적 분해 | planning, incremental, verification, decomposition | 큰 목표/복잡한 작업 시 → Phase→Step 분해, 각 단계 E2E 검증 후 진행 | entries/phase-based-decomposition.md |
+| welc-test-harness | WELC Test Harness | testing, safety, refactoring, verification, legacy-code | 기존 코드 수정/리팩토링 시 → 수정 전 동작을 테스트로 캡처하여 회귀 방지 | entries/welc-test-harness.md |
+| plan-before-execute | 계획 문서 선행 | planning, execution, efficiency, decision-cost | 영향 범위 넓은 변경 시 → 상세 계획 문서 먼저 작성, 구현 시 판단 제거 | entries/plan-before-execute.md |
+| external-benchmarking | 외부 벤치마킹 → 선별 채택 | benchmarking, adoption, external-analysis, selective | 외부 기술/도구 도입 시 → 자기 맥락에서 재해석하여 선별 채택 | entries/external-benchmarking.md |
+| tool-and-target-coevolution | 검증 대상과 도구 동시 발전 | testing, coevolution, tooling, verification, incremental | 테스트/도구 개선 시 → 대상과 도구를 함께 발전시켜 검증 범위 확장 | entries/tool-and-target-coevolution.md |
+| script-to-library-extraction | Script→Library 추출 | architecture, pipeline, library, orchestration, refactoring, reuse | 스크립트 3개+ 조합 필요 시 → 핵심 로직을 함수 추출, 오케스트레이터에서 조합 | entries/script-to-library-extraction.md |
+| passive-over-active-retrieval | Passive > Active 지식 활용 | agent-design, knowledge-management, retrieval, passive-discovery | 지식 활용 설계 시 → Active 검색 의존 제거, Passive 발견 경로(backlink, 힌트) 설계 | entries/passive-over-active-retrieval.md |
+| forced-breakpoint-execution | 강제 중단점 실행 패턴 | agent-design, automation, execution-timing, breakpoint | 자동화 작업 실행 안 될 때 → 판단 제거, 자연스러운 중단점에 배치 | entries/forced-breakpoint-execution.md |
+| quantitative-usage-measurement | 정량 활용도 측정 기반 진단 | measurement, postmortem, quantitative, verification, protocol-design | 프로토콜/도구 효과 판단 시 → grep/카운터로 실측, 0%=설계 결함 | entries/quantitative-usage-measurement.md |
+| knowledge-type-routing | 지식 성격별 활용 경로 분기 | knowledge-management, agent-design, routing, classification, retrieval | 지식 저장소 설계 시 → R(방식)/G(사실)/S(절차) 성격별 활용 경로 분리 | entries/knowledge-type-routing.md |
 
 ## Edges
+
 | From | To | Type | Reason |
 |------|----|------|--------|
 | phase-based-decomposition | welc-test-harness | applies-to | Phase별 수정 시 각 단계에서 WELC로 기존 동작 보호 |
@@ -33,4 +38,4 @@
 | knowledge-type-routing | forced-breakpoint-execution | applies-to | S(절차)의 실행 시점이 강제 중단점 |
 
 ## Last Updated
-2026-05-14 (Mickey 20)
+2026-08-25 (Mickey 44 — seed 스키마 현행화: Path 컬럼 추가 + [Seed 예시] 라벨. 내용은 M20 seed 그대로)

@@ -549,12 +549,6 @@ def main() -> int:
                     b.path.unlink()  # 승격 완료된 staging 정리
             report.append(f"[RESULT] PASS — 승격 {len(applied)}/{len(bundles)}건, "
                           f"무결성 dangling 0")
-            if applied:
-                # M44 개선 D: 글로벌 domain/은 git 미추적 — repo 미러가 유일한 이력·배포 소스.
-                # 미러 동기화 두절(M20~M44 실측) 재발 방지를 위해 승격 성공 시 항상 통지한다.
-                report.append(
-                    "[REMIND] repo 미러 동기화 필요 — ai-developer-mickey/mickey/domain/ 에 "
-                    "이번 승격분 미반영 시 install이 낡은 지식을 배포 (adaptive #3)")
             if len(applied) < len(bundles):
                 exit_code = 1  # CONFLICT 잔여 존재
     finally:

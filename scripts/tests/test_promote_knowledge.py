@@ -548,16 +548,16 @@ class TestHubWarning:
         assert "[WARN]" not in out
 
 
-class TestMirrorReminder:
-    """M44 개선 D: 승격 성공 시 repo 미러 동기화 리마인더를 리포트에 포함."""
+class TestNoMirrorReminder:
+    """서고 계약 (mickey/README.md): 개인 도메인 지식은 공개 repo에 미러하지 않는다.
 
-    def test_remind_after_success(self, env):
+    M44에서 도입했던 미러 동기화 [REMIND]는 이 계약과 충돌하여 같은 세션에서 철회됨
+    (repo mickey/는 seed 골격 — 승격분을 repo로 나르라는 유도는 계약 위반 유도 장치).
+    """
+
+    def test_no_remind_after_success(self, env):
         groot, project, staging = env
         (staging / "gd-new-entry.md").write_text(make_bundle(), encoding="utf-8")
         out = run_promote(project).stdout
-        assert "[REMIND]" in out and "미러 동기화" in out
-
-    def test_no_remind_when_nothing_applied(self, env):
-        groot, project, staging = env
-        out = run_promote(project).stdout  # 번들 없음
-        assert "[REMIND]" not in out
+        assert "[RESULT] PASS" in out
+        assert "[REMIND]" not in out and "미러" not in out

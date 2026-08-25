@@ -64,14 +64,14 @@ orphan/저연결 해소용 엣지 9건 후보를 M44에서 도출했으나 **의
 - **골격 건강**: 무결성 100%, 신규 노드는 항상 엣지와 함께 추가됨 — §17 승격 번들 + promote 스크립트의 구조적 강제가 작동
 - **질적 편중 (hub-and-spoke화)**: 신규 엣지가 소수 허브로 집중. 원인 = Curator가 승격 시 GRAPH 스캔에서 눈에 띄는 허브와 연결하는 것이 최저비용 경로이기 때문. 상투 사유 21%가 방증. peer 간(비허브) 연결이 구조적으로 빈약 → 개선 B의 표적
 - **드리프트/방치의 공통 원인**: "다음에 반영" 류 인계는 실행 주체가 없으면 방치된다 (orphan 2개월). 감사를 도구화하여 중단점(엔트로피 체크)에 배치 → 개선 C의 표적
-- **미러 두절**: repo `mickey/domain/` 동기화가 M20(5월) 이후 두절 — 성장 이력 소스가 promote 백업(.promote-backups)뿐이었음 → 개선 D의 표적. **미러 동기화 자체(G5)도 보류됨** — install이 낡은 domain 지식을 배포할 리스크 잔존 (다음 install 전 동기화 필요)
+- **미러 두절 → 오판 정정 (M44 후반 supersede)**: repo `mickey/domain/` 갱신 두절은 결함이 아니라 **서고 계약(mickey/README.md)의 설계된 분리**였음 — 개인 지식은 공개 repo에 커밋하지 않고, repo는 seed 골격 + [Seed 예시] 10건만 유지. 성장 이력 소스는 `.promote-backups/`가 담당 (본 분석도 이를 사용). 세대 파일(extended-protocols, CURATOR-PROMPT)만 global↔repo 동기화 대상이며 현재 SAME
 
 ## 반영된 개선 (M44)
 
 - A: promote_knowledge.py — 카테고리 Path 하위 GRAPH 라우팅 + 표 연속성 보장 + 허브 편중 경고
 - B: CURATOR-PROMPT — 엣지 규율 (비허브 peer 1개 이상 + 구체 메커니즘 사유)
 - C: extended-protocols §3 — 그래프 감사 도구 등재 + graph_audit.py 글로벌 배포
-- D: promote 리포트 미러 동기화 리마인더 + 본 프로젝트 엔트로피 체크에 미러 freshness 항목
+- D (M44 후반 재정의): ~~promote 미러 동기화 리마인더~~ → **철회** (서고 계약과 충돌 — 개인 지식은 repo 미러 대상이 아님). 대체: 이력 소스는 `.promote-backups/` 공식화 + repo seed 정합성(스키마 현행화, PROFILE 템플릿화)을 M44에서 수술 완료
 
 ## Last Updated
 2026-08-25 (Mickey 44)
