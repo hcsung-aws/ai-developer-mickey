@@ -20,3 +20,4 @@
 14. **cp949 콘솔에서 execute_cmd 한글 출력이 잘려 보일 수 있음 — PASS/FAIL 판정은 콘솔 출력이 아닌 파일 리다이렉트 후 실측** — Mickey 39, cp949 계열 2회차 (#8 UnicodeEncodeError → 이번 출력 잘림)
 15. **경로 상태를 가진 도구(serena 등)는 세션 시작 시 활성 컨텍스트를 명시 확인 + 첫 쓰기 후 OS 레벨 위치 검증** — Mickey 41, serena create_text_file이 활성 프로젝트 루트(work\kiro 상위)에 오배치 (tool-implicit-root-path-trap 재현 — M44 activate_project 누락으로 3회차 재현, 실행 실패로 즉시 발각)
 16. **repo `scripts/` 수정 시 글로벌 재배포(m43_deploy_global_scripts.py) 실행을 세트로 — 수정만 하고 배포 누락 시 글로벌이 구버전으로 동작** — Mickey 44, 개선 A 반영 후 재배포 누락 (#3 global↔repo 동기화 계열의 역방향 변형)
+17. **"글로벌 배포" 기록/주장 시 deploy 스크립트(m43_deploy_global_scripts.py)의 FILES 목록 등재를 실측 확인 — 목록 미등재 스크립트는 install 경유로만 배포되어 기록과 실상이 어긋남** — Mickey 45, M44가 배포했다고 기록한 graph_audit.py가 FILES 미등재 (#16 계열의 목록 최신성 사각지대)

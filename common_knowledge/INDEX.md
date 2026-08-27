@@ -45,3 +45,5 @@
 | mickey_lock, 락 모듈 통합, promote 리팩토링 | ~/.kiro/mickey/domain/entries/signature-preserving-thin-wrapper.md | 공유 모듈 이관 시 시그니처 보존 얇은 래퍼로 위임 |
 | 서고 계약, mickey/README, 미러 개념 오판 | ~/.kiro/mickey/domain/entries/contract-doc-first-structural-diagnosis.md | M44 미러 두절 오진 → D-44-4 supersede 경위 |
 | 그래프 건전성, GRAPH-HEALTH-BASELINE, 재측정 사이클 | ~/.kiro/mickey/domain/entries/process-fix-over-data-fix-remeasure.md | M44 D-44-1 — baseline 동결 + 개선 A~D 후 재측정 판정 |
+| Curator 실패, invoke_curator 재시도, ModelThrottle | ~/.kiro/mickey/domain/entries/child-process-failure-evidence-preservation.md | 래퍼는 시도별 실패 증거 전문 보존 + 양상 분류 후 재시도 |
+| promote 위생, GRAPH malformed, 표 행 분절 | ~/.kiro/mickey/domain/entries/escape-contract-boundary-enforcement.md | 이스케이프 계약은 경계 코드 강제 + 진단 도구도 소비자 |
