@@ -1,7 +1,7 @@
 # Mickey 45 Session
 
 ## Checkpoint
-[1/5]
+[2/5]
 
 ## Session Meta
 - Type: Maintenance (진화 루프 인프라 진단)
@@ -79,7 +79,13 @@ Infrastructure — 진화 메커니즘(Curator→promote 루프)의 신뢰성이
 - **배포 목록 등재 누락 재발**: M44가 graph_audit을 "글로벌 배포"했다고 기록했으나 m43_deploy_global_scripts.py FILES에는 미등재 — install 경유만 배포됨. adaptive #16의 사각지대 (deploy 스크립트 자체의 목록 최신성)
 
 ## Context Window Status
-~15% (세션 시작)
+~55% (개선 3종 + 문서 반영 + push 시점)
 
 ## Next Steps
-- (사용자 작업 확정 후)
+- **Curator 재시도 효과 관찰**: 다음 실패 발생 시 리포트의 attempt별 stderr 전문으로 원인 즉시 확인 가능 — ModelThrottle 지속 시 retry-delay 상향 검토
+- 루트 SESSION 아카이빙 (M39~43 → sessions/) — 교훈 승격 리뷰 후
+- changelog 백필 (docs/07 v10 이후 + 영문 v9.2) — M43/M44 인계 잔존
+- 자율성 수준 기록 (ENVIRONMENT.md Autonomy Preference — T1 2a 소급)
+- PROJECT-OVERVIEW.md Current Status 노후 (2026-07-15 이후 M41~45 미반영) — 구조 문서 일괄 갱신 세션 후보
+- 재측정 사이클 (M44 인계): 수 주 후 graph_audit + growth 재실행 → baseline 대조. malformed는 M45 수선으로 0이 기대값 (baseline 각주 참조)
+- M43 인계 잔여: Curator 검증 3/5회차, 글로벌 .bak 정리 (m41~m45 누적)

@@ -13,6 +13,7 @@
 - Kiro CLI agent 캐시: agent JSON 변경 후 ping 검증은 새 세션 부팅 필요 (M23 발견) — 본 세션 내 검증 불가
 - Context window 효율성 중시 (3-Tier 로딩)
 - **repo `mickey/` = 설치 seed 골격 (미러 아님, M44 정정)**: 서고 계약(mickey/README.md, 2026-07-04 확정) — 개인 도메인 지식·patterns·PROFILE 실데이터는 공개 repo에 커밋 금지. 예외는 [Seed 예시] 라벨 10건 + 세대 파일(extended-protocols, CURATOR-PROMPT — adaptive #3의 실제 적용 범위, global↔repo hash 동기화 유지). m37_mickey_mirror_diff.py의 대량 GLOBAL_ONLY는 정상 상태이니 세대 파일 diff만 판정 대상
+- **headless Curator는 서비스 스로틀로 간헐 절단 (M45 실측)**: ModelThrottleError "unexpectedly high load"로 자식 kiro-cli가 작업 도중 exit 1 — invoke_curator가 1회 재시도 + attempt별 stderr/stdout 전문 로그 내장. 실패 시 리포트 파일에서 원인 즉시 확인 가능
 
 ## Key Decisions
 - 시스템 프롬프트 변경 시 3곳 동기화 필수 (활성 agent JSON, repo JSON, 독립 md)
@@ -29,4 +30,4 @@
 - **인계 사항도 새 세션 진입 시 디스크 상태 재확인** — M26 이 dangling staging 5세션 보류로 인계했으나 M27 진입 실측 결과 다른 프로젝트가 이미 정식 위치로 머지 완료. 인계는 "원본"이 아닌 "그 시점 관찰" — 새 세션은 디스크 재스캔으로 정합성 확인 필요 (Mickey 27)
 
 ## Last Updated
-2026-08-25 (Mickey 44 — 미러 freshness 제약 추가)
+2026-08-27 (Mickey 45 — headless Curator 스로틀 간헐 절단 제약 추가)
