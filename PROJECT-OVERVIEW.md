@@ -27,26 +27,18 @@ AI Developer Mickey
 
 ## Current Status
 
-### CLI 에이전트
-- **버전**: v9.1 (Curator 권한 보정 + Pre-staged Apply + T1.5 §17 Knowledge Lifecycle + §18 Activity Metrics)
-- **베이스라인**: M21 5주 31세션 측정 (글로벌 domain 참조 2.45/세션, Curator 호출 2.65/세션, auto_notes 참조 5.55/세션)
+### CLI 에이전트 (주 트랙)
+- **버전**: T1 v20 (M43) + T1.5 extended-protocols v27 (M44)
+- **Curator 운영 강화 3연작 완료 (M41~43)**: 글로벌 쓰기 격리(promote_knowledge.py 전담 + 락) → use_subagent 전송 → 호출 코드화(`invoke_curator.py` 유일 진입점 + curation 락 내장)
+- **M45 스로틀 대응**: 간헐 실패 원인 = ModelThrottleError 실측 → invoke 1회 재시도 + attempt별 전문 로그. 신규 경로 검증 3/5회차
+- **그래프 건전성**: GRAPH-HEALTH-BASELINE-2026-08-25 동결 + graph_audit.py 상비화(§3-8). 재측정 사이클 대기 — M46 감사에서 불변 조건 유지 + malformed 0 확인
 
-### Knowledge Curator (M22~M27 진단 사이클)
-- 운영 패턴 도입 후 EmptyResponse 발생 → M22~M27 6세션 진단 진행 중
-- M22: 첫 발견 / M23: agent 캐시 발견 / M24: 변형 A2 / M25: A1 / M26: G3 (누락 키 3개 보충) / M27: **변형 H (전체 차이 흡수, 검증 M28 인계)**
-- 진단 메타 교훈: 측정 도구의 정밀도는 반복 깊이 확장이 필요 (M25 9개 → M26 12개+per-key → M27 deep leaf diff)
-
-### Power Mickey (v10 Power Migration 트랙)
-- **트랙**: CLI v2 agent → v3 Power 마이그레이션. 계획서 `IMPROVEMENT-PLAN-v10-power-migration.md`, 세션 로그 `session_history/YYYY-MM-DD-*` (CLI Mickey N 트랙과 병행)
-- **진행**: Phase 0~5 완료. **v3 런타임 실측 검증 완료 (2026-07-15)** — 계획서 `VERIFICATION-PLAN-v3-power-runtime.md`, 로그 `session_history/2026-07-14-v3-power-runtime-verification.md`. V1~V8 전 항목 닫힘
-- **실측된 v3 소비 모델**: ① steering 자동 주입 없음 — always 도 `readSteering` pull 필수 (POWER.md F1 정정·재배포) ② MCP 는 proxy(`kiro_powers use`) 불가, 직접 마운트(`mcp_<서버>_<도구>`)가 정상 경로 (F2 정정) ③ SessionStart hook 은 터미널 v3(`--agent-engine v3`)에서 발화·stdout 주입 확인, acp-client 는 주입 안 됨 ④ Stop 트리거는 per-response 발화 → stop hook 폐기(F5), 세션 마감은 "세션 정리" 수동 경로로 일원화
-- **다음**: IDE 묶음(최후순위) — ③ Kiro IDE steering 인식 실측 + IDE `.kiro.hook` 정식 규격 실측. 부채: registry stale path, 영문 changelog v9.2 백필, `mickey/domain/entries` 잔재(계획서 §8-a)
-- **검증 기준값**: `verify_power_structure.py` 7/7, `verify_hooks.py` 6/6 (항목 2 는 stop hook **부재** 가드 포함으로 개정됨), `verify_deploy_power.py` 25/25, `verify_serving_sync.py` IN-SYNC
-- 구 실험본(Kiro IDE 0.7+)은 `power-mickey.pre-v10-bak.zip` 로 백업
+### Power Mickey (v10 트랙)
+- v3 런타임 실측 검증 완료 (2026-07-15, V1~V8 전 항목 닫힘). 상세: `IMPROVEMENT-PLAN-v10-power-migration.md` + `docs/09-v3-power-migration.md`
+- 잔여: IDE 묶음(최후순위) + M41 격리 구조 steering 개정 (mickey-power 세션 소관), registry stale path
 
 ### 엔트로피 관리
-- M27 진입 시 SESSION 6건 누적 (M21~M26) → `sessions/` 로 일괄 아카이빙 완료
-- 구조 문서 갱신 (PROJECT-OVERVIEW / FILE-STRUCTURE / project-context) M27 에서 일괄 진행
+- M46: 루트 SESSION M39~45 아카이빙(sessions/) + changelog 백필(v10 이후 CLI 트랙 + 영문 v9.2) + 본 문서 갱신
 
 ## Last Updated
-2026-07-15 (v3 런타임 실측 검증 V1~V8 완료 + F1·F2 문서 정정·재배포 + F5 stop hook 폐기 반영)
+2026-08-28 (Mickey 46 — Current Status 압축 갱신: M41~45 Curator 3연작/baseline/스로틀 대응 반영, M22~27 진단 사이클 등 노후 항목 제거)

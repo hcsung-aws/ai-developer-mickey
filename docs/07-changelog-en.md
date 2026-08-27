@@ -27,7 +27,57 @@
 | v8.1 | 2026-04 | Mickey Self-Improvement | Knowledge Curator subagent + domain/ activation + Personal Vault → domain/ transition |
 | v9 (PLAN) | 2026-05 | Mickey Self-Improvement | 3-Tier (R/G/S) + Domain-centric global knowledge + knowledge-organization Skill — POSTMORTEM-based redesign |
 | v9.1 | 2026-06 | Mickey Self-Improvement | v9 PLAN correction+landing: Curator permission fix + Pre-staged Apply + T1.5 §17/§18 + ADDENDUM-first |
+| v9.2 | 2026-07 | Mickey Self-Improvement | External code-analysis tool integration (Serena/Graphify Tier 1 default + Kiro CLI built-in `code` Tier 3 baseline + `/code init` guidance) + FILE-STRUCTURE schema reduction (Mickey keeps the first-step map only; detailed analysis delegated to tools) |
 | v10 (Power Migration) | 2026-07 | Mickey Self-Improvement | CLI v2 agent (v17) → Kiro v3 Power migration. 7 steering (6 always + 1 on-demand) + session hooks/scripts + file-based knowledge graph (memorygraph removed) + install-script v3 deploy pipeline (version gate 2.10) |
+| Post-v10 (CLI track, T1 v18~v20) | 2026-07~08 | Mickey Self-Improvement | Knowledge Curator operational-hardening trilogy: global-write isolation (local staging + promote lock) → headless transport → codified invocation (`invoke_curator.py` sole entry point with built-in curation lock). §17 v21~v25 + §22 one-strike (v26) + graph-health baseline (v27) + throttle mitigation |
+
+---
+
+## Post-v10 — CLI Track (T1 v18~v20, 2026-07-21 ~ 2026-08-27)
+
+**Project**: Mickey Self-Improvement (Mickey 41~45, CLI track)
+**Status**: Knowledge Curator operational-hardening trilogy + graph-health baseline + throttle mitigation complete
+
+### Background
+
+Running Mickey sessions concurrently across multiple projects became routine, and concurrency issues were measured in practice — risk of concurrent writes to the global knowledge graph by the Curator, cross-session crosstalk in delegate transport, and simultaneous curation within the same project. Across a trilogy of sessions, the direction shifted to **enforcing safety by code rather than by prompt instructions** (the LLM-deterministic hybrid pattern).
+
+### T1 v18 — Curator global-write isolation (M41, 2026-07-21)
+
+- Revoked the Curator's permission to directly modify global `~/.kiro/mickey/` — all promotion candidates are written only to **project-local staging** (gd- promotion bundles)
+- Global application is owned exclusively by `promote_knowledge.py`: lock serialization (mkdir atomicity + owner.json) + Base-Hash optimistic concurrency check + merge-integrity verification with automatic rollback
+- New naming convention for manual backups of global files: `.bak-<project>-m<N>` (identifies the backup creator)
+- T1.5 §17 v21
+
+### T1 v19 — Curator transport switched to use_subagent (M42, 2026-08-08)
+
+- delegate's global rendezvous store (`.subagents/` + agent-name key + `user_notified` claiming) was measured as the root mechanism of multi-session crosstalk → switched to use_subagent (synchronous) with in-band return + UUID keys
+- §18 Activity Metrics re-measured: 11 active projects, 104 sessions, all 4 metrics above thresholds (0 violations)
+- T1.5 §17 v24
+
+### T1 v20 — Codified Curator invocation (M43, 2026-08-19)
+
+- `invoke_curator.py` becomes the **sole invocation entry point**: curation lock (project-local, no auto-reclaim + `--force` human-in-the-loop) + headless transport (`kiro-cli chat --no-interactive` child process, stdout in-band) + completion verdict via on-disk staging diff, all built into one code path
+- promote lock unified in code via the shared `mickey_lock.py` module (lock files remain scope-separated)
+- New §22 PowerShell one-strike rule (T1.5 v26): a single inline-shell trap violation switches the rest of the session to .py-script-only execution — an enforcement device for existing shell rules
+- T1.5 §17 v25
+
+### T1.5 v27 — Graph-health baseline + always-on audit (M44, 2026-08-25)
+
+- Full audit of the global knowledge graph (129 nodes / 373 edges) → frozen as `GRAPH-HEALTH-BASELINE-2026-08-25.md`. Data left untouched; process fixes (promote routing / edge discipline) applied first, verdict deferred to re-measurement (D-44-1)
+- `graph_audit.py` promoted to an always-available tool + registered as entropy-check item §3-8 — placing execution at a forced breakpoint resolves the "apply next time" handoffs that had no executing owner
+- Repository contract reaffirmed (D-44-4): repo `mickey/` is not a mirror but an **install seed skeleton** — personal domain knowledge must not be committed to the public repo; only generation-managed files are synchronized
+
+### Operational stabilization — Curator throttle mitigation (M45, 2026-08-27)
+
+- Root cause of intermittent Curator failures (4 of 8 runs over 2 days) = **ModelThrottleError** (service overload) — confirmed by kiro.log measurement
+- `invoke_curator.py` gained a single retry + full per-attempt stderr/stdout preservation (no more loss of failure evidence)
+- promote pipe hygiene (auto-escaping pipes inside code spans + cell-count fail-fast) + repaired the malformed GRAPH row + fixed the graph_audit INDEX parser
+
+### References
+
+- Session logs: `sessions/MICKEY-41-SESSION.md` ~ `sessions/MICKEY-45-SESSION.md`
+- Related global entries: staged-promotion-write-isolation, protocol-entrypoint-codification, child-process-failure-evidence-preservation, escape-contract-boundary-enforcement
 
 ---
 
@@ -75,6 +125,55 @@ Port the v17 prompt (CLI agent JSON) into the Kiro v3 Power format (steering + P
 - Port matrix (100% traceability): `docs/v2-to-v3-mapping.md`
 - Full narrative: `docs/09-v3-power-migration-en.md`
 - Session logs: `session_history/2026-07-04~13-mickey-v10-migration-*.md`
+
+---
+
+## v9.2 (2026-07-01)
+
+**Project**: Mickey Self-Improvement (Mickey 32)
+**Status**: External code-analysis tool integration + FILE-STRUCTURE schema reduction
+
+### Background
+
+- Serena/Graphify usage spread across other projects (`back-to-basic-modernize`, `ai-dlc-gravity`, `8bit-aws-game-development-studio`, etc.)
+- Mickey's `FILE-STRUCTURE.md` Key Files (per-file roles) and Brownfield Phase 2 (relationship/structure analysis) formed an overlap zone with external tools' symbol analysis + architecture graphs
+- User direction: "Mickey's structural analysis is limited to first-step situational awareness; detailed analysis is delegated to tools"
+
+### Major Changes
+
+1. **New T1.5 §19 External Code Analysis Integration**
+   - Established a 3-tier tool system:
+     - **Tier 1 (Default)**: Serena, Graphify — auto-referenced when detected
+     - **Tier 2 (User-Selected)**: other tools adopted after user confirmation
+     - **Tier 3 (Baseline)**: Kiro CLI built-in `code` (tree-sitter + optional LSP) — **always active, with `/code init` guidance**
+   - The "No-Tool" case is removed (the built-in `code` tool is always available)
+   - Codified detection rules + per-tier Mickey roles + combination principles + activation commands
+
+2. **T1.5 §1 Brownfield Phase 2 reduced**
+   - Before: Mickey performed file/component relationship analysis directly → produced `auto_notes/structure.md`
+   - After: method chosen by tier detection (Tier 1/2 → `structure-ref.md` with a 2–3 line map only; Tier 3 → summary in `structure.md` using the built-in `code` tool)
+   - Quality gate relaxed: either `structure.md` or `structure-ref.md` suffices
+
+3. **T1 SESSION PROTOCOL extended**
+   - New First Session Step 4a: detect code-analysis tools + present choices + guide `/code init`
+   - Continuing Session entropy check gains a §19 item (detection-state consistency)
+
+4. **T1 DOCUMENT SCHEMA — FILE-STRUCTURE.md schema reduction**
+   - Required: Directory Tree (depth 2), Mickey Docs Locations, Code Analysis Tools (§19 detection results), Steering Trigger, Last Updated
+   - Optional: Key Files, File Statistics, Project Structure Pattern (replaced by tool output when Tier 1/2 is detected; keeping them is recommended when only Tier 3 is in use)
+
+### Verification
+
+- **safe-batch-replace, 10th generation**: Phase A (3 extended-protocols edits) + Phase B (4 agent JSON edits) all PASS
+- **Hash verification**: repo ↔ global synchronized on both sides
+  - extended-protocols: `CB6221C6E3E17F47...` → `9B3CEB740450AD2E...`
+  - agent JSON: `86E6A50F7B96E9B6...` → `CA01690E894A2DF2...`
+- Backups: `.m32-bak` (4 files, rollback possible)
+
+### Effective from the next session
+
+- Step 4a runs automatically at First Session start in other projects (tool detection + `/code init` guidance)
+- Entering a Brownfield project: Phase 2 → tool-first reference
 
 ---
 

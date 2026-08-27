@@ -27,6 +27,55 @@
 | v9.1 | 2026-06 | Mickey 자기 개선 | v9 PLAN 보정+정착: Curator 권한 보정 + Pre-staged Apply + T1.5 §17/§18 + ADDENDUM 우선 |
 | v9.2 | 2026-07 | Mickey 자기 개선 | 외부 코드 분석 도구 통합 (Serena/Graphify Tier 1 default + Kiro CLI 내장 code Tier 3 baseline + `/code init` 유도) + FILE-STRUCTURE 스키마 축소 (Mickey는 first-step 지도만, 상세 분석은 도구 위임) |
 | v10 (Power Migration) | 2026-07 | Mickey 자기 개선 | CLI v2 agent(v17) → Kiro v3 Power 마이그레이션. steering 7개(상시 6 + on-demand 1) + 세션 hook/스크립트 + 파일 기반 지식 그래프(memorygraph 제거) + install 스크립트 v3 배포 파이프라인(버전 게이트 2.10) |
+| v10 이후 (CLI 트랙, T1 v18~v20) | 2026-07~08 | Mickey 자기 개선 | Knowledge Curator 운영 강화 3연작: 글로벌 쓰기 격리(로컬 staging + promote 락) → headless 전송 전환 → 호출 코드화(`invoke_curator.py` 유일 진입점, curation 락 내장). §17 v21~v25 + §22 원스트라이크(v26) + 그래프 건전성 baseline(v27) + 스로틀 대응 |
+
+---
+
+## v10 이후 — CLI 트랙 (T1 v18~v20, 2026-07-21 ~ 2026-08-27)
+
+**프로젝트**: Mickey 자기 개선 (Mickey 41~45, CLI 트랙)
+**상태**: Knowledge Curator 운영 강화 3연작 + 그래프 건전성 baseline + 스로틀 대응 완료
+
+### 배경
+
+여러 프로젝트에서 Mickey 세션을 동시에 운영하는 멀티 세션 병행이 일상화되면서 동시성 문제가 실측됨 — Curator의 글로벌 지식 그래프 동시 쓰기 충돌 위험, delegate 전송의 세션 간 crosstalk, 같은 프로젝트 동시 큐레이션. 3연작에 걸쳐 **"프롬프트 지시가 아닌 코드로 안전성을 강제"**하는 방향으로 전환 (LLM 결정론적 하이브리드 패턴).
+
+### T1 v18 — Curator 글로벌 쓰기 격리 (M41, 2026-07-21)
+
+- Curator의 글로벌 `~/.kiro/mickey/` 직접 수정 권한 회수 — 모든 승격 후보를 **프로젝트 로컬 staging**(gd- 승격 번들)에만 작성
+- 글로벌 반영은 `promote_knowledge.py` 전담: 락 직렬화(mkdir 원자성 + owner.json) + Base-Hash 낙관적 동시성 검증 + 병합 무결성 검사/자동 롤백
+- 글로벌 파일 수동 백업 네이밍 규약 `.bak-<project>-m<N>` 신설 (백업 주체 식별)
+- T1.5 §17 v21
+
+### T1 v19 — Curator 전송 use_subagent 전환 (M42, 2026-08-08)
+
+- delegate의 전역 랑데부 저장소(`.subagents/` + agent 이름 키 + `user_notified` 선점)가 멀티 세션 crosstalk의 근본 메커니즘으로 실측 → in-band 반환 + UUID 키의 use_subagent(동기)로 전환
+- §18 Activity Metrics 재실측: 활성 11 프로젝트 104세션, 4개 지표 전부 임계값 상회 (위반 0)
+- T1.5 §17 v24
+
+### T1 v20 — Curator 호출 코드화 (M43, 2026-08-19)
+
+- `invoke_curator.py`가 **유일한 호출 진입점**: curation 락(프로젝트 로컬, 자동 회수 없음 + `--force` human-in-the-loop) + headless 전송(`kiro-cli chat --no-interactive` 자식 프로세스, stdout in-band) + 완주 판정 staging diff 디스크 실측을 한 코드 경로에 내장
+- `mickey_lock.py` 공유 락 모듈로 promote 락과 코드 통합 (락 파일은 스코프별 분리)
+- §22 PowerShell 원스트라이크 신설 (T1.5 v26): 인라인 셸 함정 1회 위반 시 세션 잔여를 .py 스크립트 전용으로 전환 — 기존 셸 규칙의 강제 장치
+- T1.5 §17 v25
+
+### T1.5 v27 — 그래프 건전성 baseline + 감사 상비화 (M44, 2026-08-25)
+
+- 글로벌 지식 그래프 전면 감사 (129노드/373엣지) → `GRAPH-HEALTH-BASELINE-2026-08-25.md` 동결. 데이터는 수정하지 않고 프로세스 교정(promote 라우팅/엣지 규율) 후 재측정으로 판정 (D-44-1)
+- `graph_audit.py` 상비 도구화 + 엔트로피 체크 §3 8항 등재 — "다음에 반영" 인계의 실행 주체 부재를 중단점 배치로 해소
+- 서고 계약 재확인 (D-44-4): repo `mickey/`는 미러가 아닌 **설치 seed 골격** — 개인 도메인 지식은 공개 repo에 커밋 금지, 세대 파일만 동기화 대상
+
+### 운영 안정화 — Curator 스로틀 대응 (M45, 2026-08-27)
+
+- Curator 간헐 실패(2일 8회 중 4회)의 원인 = **ModelThrottleError** (서비스 과부하) — kiro.log 실측으로 규명
+- `invoke_curator.py`에 1회 재시도 + attempt별 stderr/stdout 전문 보존 (실패 증거 유실 방지)
+- promote 파이프 위생 (코드 스팬 내 파이프 자동 이스케이프 + 셀 수 fail-fast) + GRAPH malformed 행 수선 + graph_audit INDEX 파서 수정
+
+### 참고
+
+- 세션 로그: `sessions/MICKEY-41-SESSION.md` ~ `sessions/MICKEY-45-SESSION.md`
+- 관련 글로벌 entry: staged-promotion-write-isolation, protocol-entrypoint-codification, child-process-failure-evidence-preservation, escape-contract-boundary-enforcement
 
 ---
 
