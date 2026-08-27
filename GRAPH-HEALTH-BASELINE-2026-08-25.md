@@ -29,7 +29,7 @@ python scripts/m44_edge_semantics.py    # 엣지 타입/허브 집중/상투 사
 | 저연결 (차수 1) | **4** (installer-seed-semantics, focus-preclick-input-leakage, mechanism-level-cause-attribution, xray-transaction-search-query-path) | 관찰 — 개선 B 후 자연 보강되는지 확인 |
 | 중복 엣지 쌍 | **4** (npm-audit↔packager, cdk-cjs↔packager, supersede↔plan-before-execute, supersede↔phase-based) | 정리 후보 (보류) |
 | INDEX 중복 등재 | **3** (powershell-curl-escape ×3, packager ×2, supersede ×2) | 정리 후보 (보류) |
-| malformed 표 행 | **1** (installer-auth 노드 Core 셀 미이스케이프 `\|\|`) | 정리 후보 (보류) |
+| malformed 표 행 | **1** (installer-auth 노드 Core 셀 미이스케이프 `\|\|`) | 정리 후보 (보류) → **M45 수선 완료 (2026-08-27)**: 해당 행 `\|` 이스케이프 (백업 GRAPH.md.bak-ai-developer-mickey-m45). 동시에 재발 방지 프로세스 교정 — promote 파이프 정규화+셀 수 검증, CURATOR-PROMPT 이스케이프 규율, graph_audit INDEX 파서 이스케이프 존중. 재측정 시 이 항목은 0이 기대값 |
 | 표 내부 빈 줄 (상위 GRAPH) | Nodes **9** / Edges **41** | 개선 A-② 후 증가 멈추는지 확인 |
 | cloud 드리프트 (상위 등재 + cloud Path) | **5** (appconfig ×2, cloudfront ×2, cdk-context-lookup) | 개선 A-① 후 신규 발생 0 확인 |
 | 평균 차수 (병합 그래프, [J]) | **5.78** (종료 시점 5.74 — 상위 GRAPH 단독 기준은 7/23 6.36 → 5.95 완만 하락) | 관찰 — 하락 멈춤/반등이 개선 신호 |

@@ -13,7 +13,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 REPO_SCRIPTS = Path(__file__).resolve().parent
 GLOBAL_SCRIPTS = Path.home() / ".kiro" / "mickey" / "scripts"
-FILES = ["promote_knowledge.py", "mickey_lock.py", "invoke_curator.py"]
+FILES = ["promote_knowledge.py", "mickey_lock.py", "invoke_curator.py", "graph_audit.py"]
 
 
 def sha(p: Path) -> str:

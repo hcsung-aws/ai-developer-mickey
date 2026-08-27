@@ -170,14 +170,87 @@ class TestRunFlow:
         assert "TIMEOUT" in capsys.readouterr().out
 
     def test_curator_failure_keeps_lock(self, project, monkeypatch):
+        """전 시도 실패 시 락 유지 + 재시도 횟수만큼 재실행 (M45)."""
+        calls = []
+
+        def _fail(cmd, **kw):
+            # --version 프로브는 시도 횟수에 세지 않음
+            if "--version" not in cmd:
+                calls.append(1)
+            return SimpleNamespace(returncode=1, stdout="", stderr="throttle err")
+
         monkeypatch.setattr(ic.shutil, "which", lambda _: "kiro-cli")
-        monkeypatch.setattr(
-            ic.subprocess, "run",
-            lambda *a, **k: SimpleNamespace(returncode=1, stdout="", stderr="err"))
+        monkeypatch.setattr(ic.subprocess, "run", _fail)
         rc = ic.do_run(project, project / "MICKEY-9-SESSION.md",
-                       "tester", False, "knowledge-curator", 60)
+                       "tester", False, "knowledge-curator", 60,
+                       retries=1, retry_delay=0)
         assert rc == 1
+        assert len(calls) == 2  # 원 시도 + 재시도 1회
         assert ml.status(ic.lock_dir(project))["state"] == "held"
+
+    def test_retry_succeeds_on_second_attempt(self, project, monkeypatch, capsys):
+        """1차 exit 1(스로틀 절단 모사) → 2차 성공이면 COMPLETED (M45)."""
+        state = {"n": 0}
+
+        def _flaky(cmd, cwd=None, **kw):
+            if "--version" in cmd:
+                return SimpleNamespace(returncode=0, stdout="kiro-cli 2.11", stderr="")
+            state["n"] += 1
+            if state["n"] == 1:
+                return SimpleNamespace(returncode=1, stdout="partial",
+                                       stderr="ModelThrottleError: high load")
+            p = Path(cwd) / "_curator-staging" / "gd-retry.md"
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text("b", encoding="utf-8")
+            return SimpleNamespace(returncode=0, stdout="curator ok", stderr="")
+
+        monkeypatch.setattr(ic.shutil, "which", lambda _: "kiro-cli")
+        monkeypatch.setattr(ic.subprocess, "run", _flaky)
+        rc = ic.do_run(project, project / "MICKEY-9-SESSION.md",
+                       "tester", False, "knowledge-curator", 60,
+                       retries=1, retry_delay=0)
+        assert rc == 0
+        assert ml.status(ic.lock_dir(project))["state"] == "awaiting-merge"
+        out = capsys.readouterr().out
+        assert "[RETRY]" in out and "+ gd-retry.md" in out
+
+    def test_report_preserves_stderr_and_env_evidence(self, project, monkeypatch):
+        """실패 리포트에 stderr 전문 + 환경 증거(버전/명령)가 남는다 (M45 진단 공백 봉합)."""
+        def _fail(cmd, **kw):
+            if "--version" in cmd:
+                return SimpleNamespace(returncode=0, stdout="kiro-cli 2.11", stderr="")
+            return SimpleNamespace(returncode=1, stdout="cut off mid-run",
+                                   stderr="ModelThrottleError: unexpectedly high load")
+
+        monkeypatch.setattr(ic.shutil, "which", lambda _: "kiro-cli")
+        monkeypatch.setattr(ic.subprocess, "run", _fail)
+        ic.do_run(project, project / "MICKEY-9-SESSION.md",
+                  "tester", False, "knowledge-curator", 60,
+                  retries=0, retry_delay=0)
+        reports = list(ic.staging_dir(project).glob("curator-invoke-report-*.txt"))
+        assert reports
+        body = reports[0].read_text(encoding="utf-8")
+        assert "ModelThrottleError: unexpectedly high load" in body  # stderr 전문
+        assert "attempt 1 stderr" in body
+        assert "kiro-cli: kiro-cli 2.11" in body                     # 환경 증거
+        assert "command: " in body
+
+    def test_timeout_partial_output_recorded(self, project, monkeypatch):
+        """타임아웃 시에도 부분 stdout/stderr가 리포트에 보존된다 (M45)."""
+        def _timeout(cmd, **kw):
+            raise subprocess.TimeoutExpired(cmd="kiro-cli", timeout=60,
+                                            output=b"partial out",
+                                            stderr=b"partial err")
+        monkeypatch.setattr(ic.shutil, "which", lambda _: "kiro-cli")
+        monkeypatch.setattr(ic.subprocess, "run", _timeout)
+        rc = ic.do_run(project, project / "MICKEY-9-SESSION.md",
+                       "tester", False, "knowledge-curator", 60,
+                       retries=1, retry_delay=0)
+        assert rc == 1  # 타임아웃은 재시도하지 않고 중단
+        body = next(iter(ic.staging_dir(project).glob(
+            "curator-invoke-report-*.txt"))).read_text(encoding="utf-8")
+        assert "partial out" in body and "partial err" in body
+        assert "[TIMEOUT]" in body
 
     def test_release_is_idempotent(self, project):
         assert ic.do_release(project) == 0  # 락 없어도 성공

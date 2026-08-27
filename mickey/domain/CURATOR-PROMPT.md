@@ -110,6 +110,11 @@ Mode: new
 Entry-Path: entries/[id].md
 Source: {project-name} Mickey {N}
 
+## Overlap Check
+- 스캔 근거: GRAPH.md Tags/Core에서 [사용한 검색 키워드/태그]
+- [기존 entry ID] | [판정: 신규 유지 / augment / 링크만] | [겹치는 메커니즘 vs 다른 메커니즘 1줄]
+- 종합 판정: new|augment|skip — [1줄 근거]
+
 <<<ENTRY-BODY
 # [제목]
 
@@ -149,10 +154,12 @@ ENTRY-BODY>>>
 - **Mode**: 신규 entry는 `new`. 기존 entry 보강은 `augment` + `Base-Hash: pending` 줄 추가 (Mickey가 승격 전 실제 해시로 스탬프) + ENTRY-BODY에 **보강 반영된 전체 본문** 기재
 - **Entry-Path**: `entries/[id].md` 또는 기존 카테고리 소속이면 `entries/{category}/[id].md` (신규 카테고리 생성 금지 — §20은 별도 절차)
 - **Graph Node Row**: GRAPH.md Nodes 표 5컬럼(`ID|Title|Tags|Core|Path`)과 정확히 일치. augment 시 기존 행을 대체할 완성형으로 작성
+- **표 셀 파이프 이스케이프 (M45)**: 표 행(Node/Edge/Index/Backlink) 셀 내부의 `|` 문자는 반드시 `\|`로 이스케이프 — 특히 코드 스팬 내 `\|\| true`, `a \|\| b` 류. 미이스케이프 파이프는 셀을 분절시켜 malformed 행이 됨 (2026-07-24 유입 실측, M44 감사 [L]). promote가 코드 스팬 내부는 자동 정규화하나 그 외 셀 수 이상은 번들 전체를 거부한다
 - **Graph Edge Rows**: 0개 이상. 대상 노드는 GRAPH.md에 실존해야 함 (없는 노드 연결 시 promote가 롤백됨). 관계 유형: extends, contradicts, applies-to, prerequisite, similar-to. 확실하지 않은 관계는 만들지 않음 (precision > recall)
 - **엣지 편중 방지 (M44)**: 연결 후보 탐색을 차수 상위 허브에서 멈추지 말 것. GRAPH.md Tags/Core를 스캔하여 같은 도메인·메커니즘을 공유하는 **비허브 peer 노드를 우선 검토**하고, 확실한 peer 관계가 있으면 1개 이상 포함한다 (신규 엣지가 전부 최상위 허브로만 향하면 promote가 [WARN] 통지 — M44 실측: 상위 5 허브가 전체 엣지 35% 점유). 엣지 사유(근거 1줄)는 "가족 패턴"/"동일 철학" 같은 일반론 단독 금지 — **공유되는 메커니즘이 무엇인지** 구체적으로 기술한다 (mechanism-level-cause-attribution 원칙의 자기 적용)
 - **Backlink Row**: 프로젝트 `common_knowledge/INDEX.md` Domain Links에 들어갈 행 (선택 — 생략 가능)
 - entry ID는 영문 kebab-case. 기존 entry/규칙과 중복이면 새로 만들지 않음 (augment 또는 스킵)
+- **Overlap Check (중첩 분석 의무, M9)**: 번들마다 `## Overlap Check` 섹션 필수 — GRAPH.md Tags/Core를 스캔해 최근접 기존 entry 후보(최소 2개, 진짜 없으면 "해당 없음" + 스캔 키워드 명시)를 나열하고, 각각 신규 유지/augment/링크 판정과 근거(겹치는 메커니즘 vs 다른 메커니즘)를 1줄씩 기록한다. "중복이면 만들지 않음" 판단의 **과정을 가시화**하는 장치 — 근거 없는 신규 entry 생성 금지. promote 파서는 이 섹션을 무시하므로 형식 안전 (기계 파싱 대상 아님, Mickey 검수용)
 
 #### ck-/cr-/pat-/remember- 파일 본문 형식
 
@@ -240,6 +247,7 @@ Curator 출력을 받은 Mickey는 사용자 응답에 따라 다음 처리:
 | "보류" | staging 유지 (다음 세션 시작 시 dangling으로 재제시) |
 
 - promote가 CONFLICT를 보고하면 해당 번들은 staging에 남음 — Mickey가 사용자에게 보고 후 재큐레이션 또는 폐기 결정
+- **gd- 번들 제시 전 Overlap Check 교차 검증 (M9)**: Mickey가 GRAPH.md/INDEX를 직접 스캔해 번들의 중첩 판정(신규/augment/링크)이 타당한지 확인 후 사용자에게 제시한다. 누락된 근접 entry 발견 시 Links/Edge 보강 또는 augment 전환을 먼저 수행. Overlap Check 섹션이 없는 번들(구버전 Curator 산출)은 Mickey가 교차 검증으로 대체
 - dangling 항목이 3세션 이상 보류되면 Mickey가 "자동 폐기 후보" 로 알림 후 폐기
 
 ## 주의사항

@@ -561,3 +561,79 @@ class TestNoMirrorReminder:
         out = run_promote(project).stdout
         assert "[RESULT] PASS" in out
         assert "[REMIND]" not in out and "미러" not in out
+
+
+class TestRowHygiene:
+    """M45: 표 행 파이프 위생 — `|| true` 미이스케이프 malformed 행(2026-07-24 유입,
+    M44 감사 [L]) 재발 차단. 코드 스팬 내부는 정규화, 그 외 셀 수 이상은 쓰기 전 거부."""
+
+    # 단위: escape_pipes_in_code_spans -------------------------------
+    def test_escape_pipes_inside_code_span(self):
+        row = "| id | 요약 | tags | `|| true` 은닉 금지 | entries/id.md |"
+        fixed = pk.escape_pipes_in_code_spans(row)
+        assert "`\\|\\| true`" in fixed
+        # 코드 스팬 밖의 표 구분자는 건드리지 않음
+        assert len(pk.split_cells(fixed)) == 5
+
+    def test_escape_preserves_already_escaped(self):
+        row = "| a | `\\|\\| true` | b |"
+        assert pk.escape_pipes_in_code_spans(row) == row
+
+    def test_escape_leaves_rows_without_code_span(self):
+        row = "| a | b | c |"
+        assert pk.escape_pipes_in_code_spans(row) == row
+
+    # 단위: split_cells / validate_cell_count ------------------------
+    def test_split_cells_respects_escaped_pipes(self):
+        assert pk.split_cells("| a | b `\\|` c | d |") == ["a", "b `\\|` c", "d"]
+
+    def test_validate_rejects_wrong_cell_count(self):
+        with pytest.raises(ValueError, match="셀 수"):
+            pk.validate_cell_count("| a | b | c |", 5, "ctx")
+
+    # 통합: parse_bundle ----------------------------------------------
+    def _bundle_with_node_row(self, node_row: str) -> str:
+        return make_bundle().replace(
+            "| new-entry | 신규 엔트리 | testing | 테스트용 | entries/new-entry.md |",
+            node_row)
+
+    def test_parse_normalizes_code_span_pipes(self, tmp_path):
+        """코드 스팬 내 `||`는 파싱 시점에 \\|로 정규화되어 통과 (malformed 재발 차단)."""
+        raw = self._bundle_with_node_row(
+            "| new-entry | 신규 엔트리 | testing | `|| true` 은닉 금지 (M45) | entries/new-entry.md |")
+        f = tmp_path / "gd-new-entry.md"
+        f.write_text(raw, encoding="utf-8")
+        b = pk.parse_bundle(f)
+        assert "`\\|\\| true`" in b.node_row
+        assert len(pk.split_cells(b.node_row)) == 5
+
+    def test_parse_rejects_raw_pipe_outside_code_span(self, tmp_path):
+        """코드 스팬 밖 미이스케이프 파이프는 의도 불명 — 디스크 쓰기 전 거부."""
+        raw = self._bundle_with_node_row(
+            "| new-entry | 신규 엔트리 | testing | cmd1 || cmd2 주의 | entries/new-entry.md |")
+        f = tmp_path / "gd-new-entry.md"
+        f.write_text(raw, encoding="utf-8")
+        with pytest.raises(ValueError, match="셀 수"):
+            pk.parse_bundle(f)
+
+    def test_parse_validates_edge_and_index_rows(self, tmp_path):
+        """엣지(4)/인덱스(3) 행도 동일 검증 대상."""
+        raw = make_bundle().replace(
+            "| new-entry | existing-entry | similar-to | 테스트 연결 |",
+            "| new-entry | existing-entry | similar-to | a || b 사유 |")
+        f = tmp_path / "gd-new-entry.md"
+        f.write_text(raw, encoding="utf-8")
+        with pytest.raises(ValueError, match="Graph Edge Rows"):
+            pk.parse_bundle(f)
+
+    def test_promote_e2e_with_code_span_pipe(self, env):
+        """E2E: 코드 스팬 파이프 번들이 정규화되어 GRAPH에 온전한 5셀 행으로 안착."""
+        groot, project, staging = env
+        raw = self._bundle_with_node_row(
+            "| new-entry | 신규 엔트리 | testing | `|| true` 함정 | entries/new-entry.md |")
+        (staging / "gd-new-entry.md").write_text(raw, encoding="utf-8")
+        out = run_promote(project).stdout
+        assert "[RESULT] PASS" in out
+        graph = (groot / "domain" / "GRAPH.md").read_text(encoding="utf-8")
+        row = next(l for l in graph.splitlines() if l.startswith("| new-entry |"))
+        assert len(pk.split_cells(row)) == 5 and "\\|\\| true" in row

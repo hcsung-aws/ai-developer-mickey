@@ -71,12 +71,16 @@ def parse_graph(text: str):
 
 
 def parse_index_entry_paths(text: str) -> list[str]:
-    """INDEX.md Domain Map 표에서 '파일' 컬럼(entries/... 또는 patterns/...)을 순서대로 수집."""
+    """INDEX.md Domain Map 표에서 '파일' 컬럼(entries/... 또는 patterns/...)을 순서대로 수집.
+
+    셀 분해는 이스케이프(\\|)를 존중해야 한다 — 트리거 셀에 `\\|\\| true` 같은
+    이스케이프 파이프가 있으면 naive split이 경로 셀 위치를 밀어 오탐을 만든다 (M45).
+    """
     paths = []
     for line in text.splitlines():
         if not line.startswith("|"):
             continue
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        cells = [c.strip() for c in re.split(r"(?<!\\)\|", line.strip().strip("|"))]
         if len(cells) >= 3 and cells[1] not in ("파일", "하위 GRAPH") and not re.match(r"^[-\s]+$", cells[1]):
             if "entries/" in cells[1] or "patterns/" in cells[1]:
                 paths.append(cells[1])

@@ -105,14 +105,19 @@ def parse_bundle(path: Path) -> Bundle:
                 elif key == "base-hash":
                     b.base_hash = val
         elif line.strip().startswith("|") and not _is_separator_row(line):
+            # M45: 코드 스팬 내 파이프 정규화 → 셀 수 검증 (쓰기 전 fail-fast)
+            row = escape_pipes_in_code_spans(line.rstrip())
+            if section in EXPECTED_CELLS:
+                validate_cell_count(row, EXPECTED_CELLS[section],
+                                    f"{path.name} [{section}]")
             if section == "Graph Node Row" and not b.node_row:
-                b.node_row = line.rstrip()
+                b.node_row = row
             elif section == "Graph Edge Rows":
-                b.edge_rows.append(line.rstrip())
+                b.edge_rows.append(row)
             elif section == "Index Row" and not b.index_row:
-                b.index_row = line.rstrip()
+                b.index_row = row
             elif section == "Backlink Row" and not b.backlink_row:
-                b.backlink_row = line.rstrip()
+                b.backlink_row = row
 
     # 필수 필드 검증
     if b.mode not in ("new", "augment"):
@@ -131,6 +136,46 @@ def parse_bundle(path: Path) -> Bundle:
 def _is_separator_row(line: str) -> bool:
     """표 구분선(|---|---|) 여부."""
     return bool(re.match(r"^\|[\s\-|]+\|\s*$", line.strip()))
+
+
+# ── 표 행 위생 (M45): 파이프 정규화 + 셀 수 검증 ──────────────────
+# 배경: `|| true` 미이스케이프 노드 행이 GRAPH 표 셀을 분절 (2026-07-24 유입,
+# M44 감사 [L] malformed + [G] INDEX 대조 오탐의 근인). 정규화 가능한 것은
+# 코드로 고치고, 나머지는 어떤 디스크 쓰기도 일어나기 전에 거부한다 (fail-fast).
+EXPECTED_CELLS = {
+    "Graph Node Row": 5,    # | ID | 요약 | Tags | 언제 | Path |
+    "Graph Edge Rows": 4,   # | From | To | Type | 사유 |
+    "Index Row": 3,         # | 트리거 | 파일 | 요약 |
+    "Backlink Row": 3,      # | 키워드 | Domain Entry | 힌트 |
+}
+_CODE_SPAN = re.compile(r"`[^`]+`")
+
+
+def escape_pipes_in_code_spans(row: str) -> str:
+    """인라인 코드 스팬(`...`) 내부의 미이스케이프 `|`를 `\\|`로 정규화.
+
+    코드 스팬 안의 파이프는 표 구분자가 아님이 명백하므로 결정론적으로 고칠 수 있다.
+    (스팬 밖의 미이스케이프 파이프는 의도를 알 수 없어 validate에서 거부만 한다)
+    """
+    def _fix(m):
+        return re.sub(r"(?<!\\)\|", r"\\|", m.group(0))
+    return _CODE_SPAN.sub(_fix, row)
+
+
+def split_cells(row: str) -> list:
+    """이스케이프(\\|)를 보존하며 표 행을 셀 리스트로 분해."""
+    parts = re.split(r"(?<!\\)\|", row.strip())
+    # 정상 행은 |로 시작/종료 → 양끝 빈 조각 제거
+    return [c.strip() for c in parts[1:-1]] if len(parts) >= 3 else []
+
+
+def validate_cell_count(row: str, expected: int, context: str):
+    """셀 수가 스키마와 다르면 ValueError — 셀 내부 미이스케이프 파이프 의심."""
+    n = len(split_cells(row))
+    if n != expected:
+        raise ValueError(
+            f"{context}: 표 행 셀 수 {n} ≠ 기대 {expected} — 셀 내부의 '|'는 "
+            f"'\\|'로 이스케이프 필요 (특히 코드 스팬 밖). 행: {row[:120]}")
 
 
 # ── 마크다운 표 조작 (섹션 한정, 결정론적) ────────────────────────

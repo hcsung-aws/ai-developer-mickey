@@ -44,6 +44,8 @@ import mickey_lock  # noqa: E402
 
 DEFAULT_AGENT = "knowledge-curator"
 DEFAULT_TIMEOUT = 1800          # Curator 1회 실행 상한 (초) — 무한 대기 방지
+DEFAULT_RETRIES = 1             # 비정상 종료(exit≠0) 시 재시도 횟수 (M45 — ModelThrottle 간헐 실패 실측 대응)
+DEFAULT_RETRY_DELAY = 60        # 재시도 전 대기 (초) — 서비스 부하 완화 시간
 STALE_HINT_SECONDS = 1800       # 이 시간 지난 락은 크래시 잔여물일 가능성 안내
 
 # staging 내부에 있지만 큐레이션 산출물이 아닌 것들 (diff 계산에서 제외)
@@ -125,8 +127,52 @@ def build_prompt(project: Path, session: Path) -> str:
     )
 
 
+def _cli_version(exe: str) -> str:
+    """kiro-cli 버전 실측 — 실패 리포트의 환경 증거 (M45: CLI 갱신 직후 실패 다발 실측).
+
+    조회 실패가 본 실행을 막아서는 안 되므로 예외는 문자열로 흡수한다.
+    """
+    try:
+        p = subprocess.run([exe, "--version"], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=30)
+        return (p.stdout or p.stderr or "").strip() or f"(빈 출력, exit {p.returncode})"
+    except Exception as e:  # noqa: BLE001
+        return f"(조회 실패: {e})"
+
+
+def _to_text(v) -> str:
+    """TimeoutExpired.stdout/stderr는 버전에 따라 bytes/None — 항상 str로 정규화."""
+    if v is None:
+        return ""
+    return v.decode("utf-8", errors="replace") if isinstance(v, bytes) else v
+
+
+def _attempt(exe: str, agent: str, prompt: str, project: Path, timeout: int) -> dict:
+    """Curator 1회 실행. 타임아웃 포함 모든 결과를 dict로 반환 (증거 유실 금지 — M45).
+
+    실패 원인 진단을 위해 stderr와 (타임아웃 시) 부분 출력까지 전부 보존한다.
+    """
+    started = time.time()
+    try:
+        proc = subprocess.run(
+            [exe, "chat", "--agent", agent, "--no-interactive", prompt],
+            cwd=str(project), capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=timeout,
+        )
+        return {"returncode": proc.returncode, "elapsed": int(time.time() - started),
+                "stdout": proc.stdout or "", "stderr": proc.stderr or "",
+                "timed_out": False}
+    except subprocess.TimeoutExpired as e:
+        # 강제 종료 직전까지의 부분 출력도 진단 증거로 보존
+        return {"returncode": None, "elapsed": int(time.time() - started),
+                "stdout": _to_text(e.stdout), "stderr": _to_text(e.stderr),
+                "timed_out": True}
+
+
 def do_run(project: Path, session: Path, owner: str, force: bool,
-           agent: str, timeout: int) -> int:
+           agent: str, timeout: int,
+           retries: int = DEFAULT_RETRIES,
+           retry_delay: int = DEFAULT_RETRY_DELAY) -> int:
     exe = shutil.which("kiro-cli")
     if not exe:
         print("[FAIL] kiro-cli 실행 파일을 찾을 수 없음")
@@ -141,43 +187,63 @@ def do_run(project: Path, session: Path, owner: str, force: bool,
         return rc
 
     staging = staging_dir(project)
-    report = [f"# Curator invoke report — {datetime.now().isoformat(timespec='seconds')}",
-              f"project: {project}", f"session: {session.name}", f"owner: {owner}"]
+    run_started = time.time()
+    prompt = build_prompt(project, session)
+    # 스냅샷을 환경 조회보다 먼저 — 조회 부작용이 diff 기준선을 오염시키지 않도록
     before = snapshot(staging)
 
-    # 2) headless 실행 (stdout 파이프 = in-band 수신, 타임아웃 강제 상한)
-    started = time.time()
-    try:
-        proc = subprocess.run(
-            [exe, "chat", "--agent", agent, "--no-interactive",
-             build_prompt(project, session)],
-            cwd=str(project), capture_output=True, text=True,
-            encoding="utf-8", errors="replace", timeout=timeout,
-        )
-        elapsed = int(time.time() - started)
-        report.append(f"exit: {proc.returncode}, elapsed: {elapsed}s")
-        curator_out = proc.stdout or ""
-    except subprocess.TimeoutExpired:
-        # 타임아웃: 락은 유지 (state=held) — 메인 세션이 락 아래서 직접 대행
-        report.append(f"[TIMEOUT] {timeout}s 초과 — 프로세스 강제 종료. "
-                      f"락 유지 중이므로 직접 대행 후 release 할 것")
-        _finish_report(staging, report, extra_out="")
-        return 1
+    # 실행 환경 증거 (M45: 실패 원인 추적에 필요한 맥락을 리포트에 전부 남긴다)
+    report = [f"# Curator invoke report — {datetime.now().isoformat(timespec='seconds')}",
+              f"project: {project}", f"session: {session.name}", f"owner: {owner}",
+              f"command: {exe} chat --agent {agent} --no-interactive <prompt {len(prompt)} chars>",
+              f"kiro-cli: {_cli_version(exe)}",
+              f"timeout: {timeout}s, retries: {retries}, retry-delay: {retry_delay}s"]
+
+    # 2) headless 실행 + 재시도 (M45: ModelThrottle "unexpectedly high load"로
+    #    자식 kiro-cli가 작업 도중 exit 1로 절단되는 간헐 실패 실측 → 1회 재시도가 정답)
+    attempts = []
+    prev_snap = before
+    for i in range(1, retries + 2):
+        stamp = datetime.now().strftime("%H:%M:%S")
+        r = _attempt(exe, agent, prompt, project, timeout)
+        attempts.append(r)
+        # 시도별 staging diff — 부분 산출물(절단 시점) 추적용
+        now_snap = snapshot(staging)
+        step = diff_lines(prev_snap, now_snap)
+        prev_snap = now_snap
+        report.append(f"## attempt {i}/{retries + 1} — {stamp} 시작")
+        report.append(f"exit: {r['returncode']}, elapsed: {r['elapsed']}s, "
+                      f"timed_out: {r['timed_out']}, "
+                      f"stdout: {len(r['stdout'])} chars, stderr: {len(r['stderr'])} chars")
+        report.append(f"attempt staging diff ({len(step)}건):")
+        report.extend(step if step else ["  (변화 없음)"])
+        if r["timed_out"]:
+            # 타임아웃(30분 hang)은 스로틀 절단과 양상이 다름 — 무인 재시도 없이 중단
+            report.append(f"[TIMEOUT] {timeout}s 초과 — 프로세스 강제 종료. "
+                          f"재시도하지 않음. 락 유지 중이므로 직접 대행 후 release 할 것")
+            break
+        if r["returncode"] == 0:
+            break
+        if i <= retries:
+            report.append(f"[RETRY] exit {r['returncode']} — {retry_delay}s 대기 후 재시도 "
+                          f"(간헐 스로틀 대응). 직전 시도의 부분 산출물은 staging에 잔존할 수 있음")
+            time.sleep(retry_delay)
 
     # 3) 완주 판정 = 디스크 실측 (응답 표면 아닌 staging diff — §17 규약의 코드화)
+    last = attempts[-1]
     after = snapshot(staging)
     changes = diff_lines(before, after)
     adaptive = project / "context_rule" / "adaptive.md"
     adaptive_note = ""
-    if adaptive.exists() and adaptive.stat().st_mtime > started:
+    if adaptive.exists() and adaptive.stat().st_mtime > run_started:
         adaptive_note = "  * context_rule/adaptive.md (Curator 직접 수정 감지)"
 
-    report.append(f"staging diff ({len(changes)}건):")
+    report.append(f"staging diff (전체 {len(changes)}건):")
     report.extend(changes if changes else ["  (변화 없음)"])
     if adaptive_note:
         report.append(adaptive_note)
 
-    ok = proc.returncode == 0
+    ok = (not last["timed_out"]) and last["returncode"] == 0
     if ok:
         # 락을 해제하지 않고 머지 대기 상태로 전환 — 3단계 완료 후 release
         mickey_lock.set_state(lock_dir(project), "awaiting-merge")
@@ -187,8 +253,20 @@ def do_run(project: Path, session: Path, owner: str, force: bool,
         report.append("[RESULT] FAILED — 락 유지 중 (state=held). "
                       "직접 대행 가능, 완료 후 release")
 
-    _finish_report(staging, report, extra_out=curator_out)
+    _finish_report(staging, report, extra_out=_attempts_transcript(attempts))
     return 0 if ok else 1
+
+
+def _attempts_transcript(attempts: list) -> str:
+    """시도별 stderr/stdout 전문을 리포트 말미에 보존 (M45 — 진단 증거 유실 방지).
+
+    기존에는 stderr를 캡처만 하고 버려서 실패 원인을 kiro 로그에서 역추적해야 했다.
+    """
+    parts = []
+    for i, r in enumerate(attempts, 1):
+        parts.append(f"## attempt {i} stderr\n" + (r["stderr"] or "(비어 있음)"))
+        parts.append(f"## attempt {i} stdout\n" + (r["stdout"] or "(비어 있음)"))
+    return "\n\n".join(parts)
 
 
 def _finish_report(staging: Path, report: list, extra_out: str):
@@ -236,6 +314,10 @@ def main() -> int:
                     help="선점 락 무시하고 강제 진입 (사람 확인 후에만)")
     ap.add_argument("--agent", default=DEFAULT_AGENT)
     ap.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
+    ap.add_argument("--retries", type=int, default=DEFAULT_RETRIES,
+                    help="exit≠0 시 재시도 횟수 (기본 1 — 간헐 스로틀 대응, M45)")
+    ap.add_argument("--retry-delay", type=int, default=DEFAULT_RETRY_DELAY,
+                    help="재시도 전 대기 초 (기본 60)")
     args = ap.parse_args()
 
     project = Path(args.project).resolve()
@@ -252,7 +334,8 @@ def main() -> int:
         print("[FAIL] run 은 --session 필수")
         return 3
     return do_run(project, Path(args.session).resolve(), owner,
-                  args.force, args.agent, args.timeout)
+                  args.force, args.agent, args.timeout,
+                  retries=args.retries, retry_delay=args.retry_delay)
 
 
 if __name__ == "__main__":
