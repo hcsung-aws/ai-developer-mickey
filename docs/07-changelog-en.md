@@ -275,6 +275,50 @@ POSTMORTEM-2026-05-14 confirmed v8.1 failure (0% usage outside self-improvement)
 
 ---
 
+## v8.1 (2026-04-19)
+
+**Project**: Mickey Self-Improvement (Mickey 14-15)
+
+### Key Change: Knowledge Curator + domain/ activation
+
+Actually implement the domain/ system that v8 had only designed, and build an automatic curation pipeline through a dedicated subagent.
+
+### Major Changes
+
+1. **Knowledge Curator subagent (`examples/knowledge-curator.json`)**
+   - A dedicated agent that takes the work context and performs storage judgment → curation → relationship wiring
+   - 3-step execution: storage judgment → curation (entry creation + GRAPH.md update) → PROFILE update proposal
+   - Storage criteria: centered on the user's "decisions" and "tendencies" (plain facts excluded)
+
+2. **domain/ system activation**
+   - `PROFILE.md`: user domain profile (Decision Style, Relationship Preferences, etc.)
+   - `GRAPH.md`: relationship map (Nodes table + Edges table, O(1) access)
+   - `entries/`: individual knowledge items (decision context + relationship links included)
+   - `CURATOR-PROMPT.md`: the subagent prompt source
+
+3. **Personal Vault → domain/ transition**
+   - Switched from Obsidian-MCP-based Personal Vault search to domain/GRAPH.md-based search
+   - Interface-independence principle: the domain/ canonical format is the source of truth; external tools are adapters
+   - Session End lesson-promotion target changed from Personal Vault to domain/
+
+4. **T1 protocol updates (v14)**
+   - During Session: added Knowledge Curator invocation rules (piggybacking on session-log triggers)
+   - During Session: added domain/ knowledge search rules (GRAPH.md keyword/tag matching)
+   - Continuing Session 1a: added domain/GRAPH.md to the T1.5 loading targets
+
+5. **install.sh extension**
+   - Deploys knowledge-curator.json
+   - Synchronizes the whole domain/ directory (PROFILE.md, GRAPH.md, entries/)
+
+### Design Decisions
+
+- No size limit for domain/ — handled by structuring for O(1) access (GRAPH.md 100-line threshold)
+- Subagent invocation: start synchronous (use_subagent), switch to delegate (async) after stabilization
+- patterns/ (core principles, cap 7) and domain/ (practical knowledge, uncapped) run in parallel — a difference in abstraction level
+- Mickey's role is limited to passing context + relaying results; storage judgment, curation, and relationship wiring all belong to the subagent
+
+---
+
 ## v8 (2026-03-26)
 
 **Project**: Mickey Self-Improvement (Mickey 12)

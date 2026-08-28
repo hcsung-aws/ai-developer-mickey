@@ -1,7 +1,7 @@
 # Mickey 46 Session
 
 ## Checkpoint
-[3/5]
+[4/5]
 
 ## Session Meta
 - Type: Maintenance (엔트로피 정리 + 구조 문서 백필)
@@ -41,6 +41,8 @@ Infrastructure — 세션 연속성(아카이빙/구조 문서)과 진화 루프
 - **changelog 백필** (커밋 a1749b4): 한글 07에 "v10 이후 — CLI 트랙 (T1 v18~v20)" 섹션+표 행 (M41 격리 / M42 use_subagent / M43 코드화 / M44 baseline+§3 v27 / M45 스로틀 대응). 영문 07-en에 v9.2 + Post-v10 섹션+표 행. 부수 발견: **영문판 v8.1 섹션 원래 부재** (표에는 존재) — 백필 후보로 기록만
 - **PROJECT-OVERVIEW Current Status 압축 갱신**: M22~27 진단 사이클 등 노후 제거, M41~46 반영, 44줄 (T2 가드 이내). v3 실측 상세는 docs/09 + VERIFICATION-PLAN에 보존됨
 - **글로벌 .bak 정리 (사용자 승인)**: 전수 조사(m46_scan_global_baks.py, 38건 발견) → 본 프로젝트 명의 m41~m45 13건 명시 목록 삭제(m46_delete_baks.py, 원본 실존 확인 내장) → 13/13 DEL + 잔존 본 명의 .bak 0건 검증. 안정성 근거: v27 해시 동기 + Curator 3회 완주 + graph_audit 불변 PASS + T1 v20 다세션 정상 부팅
+- **영문 changelog v8.1 섹션 백필**: 한글 원문 번역 이식 (v9와 v8 사이 삽입) — 영문판 섹션 결손 해소
+- **구식 네이밍 .bak 정리 (사용자 승인)**: m24~m37 계열 9건 삭제 (m46_delete_legacy_baks.py — knowledge-curator.json.m24~m29/m37/m37-toolfix 8 + ai-developer-mickey.json.m32-bak 1) → 9/9 DEL. agents/ 잔존 7건은 전부 보존 의도분(pre-v10-bak 2) 또는 타 명의(mickey3/4/6, m2-20260721, skill-resources)
 
 ### In Progress
 - (없음)
@@ -50,6 +52,7 @@ Infrastructure — 세션 연속성(아카이빙/구조 문서)과 진화 루프
 
 ## Key Decisions
 - D-46-1 (사용자): .bak 정리 승인 13건 전부 삭제. 범위 밖 보류: 타 프로젝트 명의 4건(anjin-m9, epic-lore-m17, bvt-vision-lab-m9, back-to-basic-m18 — ownership 규약상 해당 프로젝트 소관) + 구식 네이밍 12건(knowledge-curator.json.m24~m37 계열 6, m058f5f-bak 4, agents mickey3/4/6 등) + 의도 보존본(pre-v10-bak 2)
+- D-46-2 (사용자): 구식 네이밍 m24~m37 계열 9건 추가 삭제 승인 (영문 v8.1 백필과 함께). m058f5f-bak 4건(타 세션 명의)과 pre-v10-bak(보존 의도)은 계속 제외
 
 ## Files Modified
 - sessions/ ← MICKEY-39~45 SESSION/HANDOFF 13파일 (git mv)
@@ -67,6 +70,5 @@ Infrastructure — 세션 연속성(아카이빙/구조 문서)과 진화 루프
 ~40% (과업 3종 완료 시점)
 
 ## Next Steps
-- m46 스크립트 + SESSION 커밋
 - M45 인계 잔여: 자율성 수준 기록(ENVIRONMENT.md), Curator 검증 4/5회차(세션 종료 시), 재시도 분기 실전 검증 대기, 재측정 사이클, agent-design k=12 분류 후보
-- 신규 후보: 영문 changelog v8.1 섹션 백필, INDEX 중복 등재 3건 정리, 구식 네이밍 .bak 12건 정리 (별도 승인 필요)
+- 신규 후보: INDEX 중복 등재 3건 정리, domain/ 내 m058f5f-bak 4건 처분(타 세션 명의 — 1개월+ 경과, 확인 후 정리 가능)
