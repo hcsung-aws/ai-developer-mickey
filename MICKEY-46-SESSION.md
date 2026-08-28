@@ -49,6 +49,12 @@ Infrastructure — 세션 연속성(아카이빙/구조 문서)과 진화 루프
 ### In Progress
 - (없음)
 
+### Session End 기록
+- **Curator 검증 4/5회차 PASS**: invoke_curator run 1차 완주 (458초, 재시도 미발동), git diff 의도 외 변경 0, adaptive 직접 수정 0, staging gd- 3건 산출
+- **승격 3/3 PASS** (사용자 "전체"): 신규 destructive-target-strict-matching (엣지 +3) + augment 2건 (process-fix 예외 2종 확립 / shared-file-drift count-1 가드 채널). Base-Hash 스탬프는 m45 스크립트 재사용
+- **승격 후 재감사**: 불변 조건 유지 + [G] 중복 1 (기대값) — Curator 검수 노트의 append 우려는 기우, promote augment가 행 대체로 정상 처리됨을 실측
+- curation 락 release 완료. auto_notes/ 변경 없음
+
 ### Blocked
 - (없음)
 
@@ -71,8 +77,8 @@ Infrastructure — 세션 연속성(아카이빙/구조 문서)과 진화 루프
 - [Protocol] **count-1 가드가 멀티 세션 drift를 실전 포착**: 글로벌 INDEX 수술 스크립트의 가드(스탬프 count=0)가 아침 로딩 이후 타 프로젝트 promote 발생을 감지, 무변경 중단 — shared-file-session-drift-reread + safe-batch-replace 조합의 실증. 수정 대상 행뿐 아니라 스탬프류 부속 치환도 가드 대상에 포함한 것이 감지 지점이 됨
 
 ## Context Window Status
-~40% (과업 3종 완료 시점)
+~50% (세션 종료 시점 — 과업 5종 완료: 아카이빙 + changelog 백필 2회 + .bak 정리 2회 + INDEX 병합 수술)
 
 ## Next Steps
-- M45 인계 잔여: 자율성 수준 기록(ENVIRONMENT.md), Curator 검증 4/5회차(세션 종료 시), 재시도 분기 실전 검증 대기, 재측정 사이클, agent-design k=12 분류 후보
-- 신규 후보: INDEX 중복 등재 3건 정리, domain/ 내 m058f5f-bak 4건 처분(타 세션 명의 — 1개월+ 경과, 확인 후 정리 가능)
+- M45 인계 잔여: 자율성 수준 기록(ENVIRONMENT.md), 재시도 분기 실전 검증 대기, 재측정 사이클(baseline 각주 2건 반영: malformed 0 + INDEX 중복 1이 기대값), agent-design k=12 분류 후보
+- 신규 후보: domain/ 내 m058f5f-bak 4건 처분(타 세션 명의 — 1개월+ 경과), INDEX.md.bak-ai-developer-mickey-m46 백업 정리 (안정 확인 후 후속 세션)
