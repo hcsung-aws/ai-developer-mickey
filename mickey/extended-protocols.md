@@ -627,6 +627,12 @@ Continuing Session 에서 감지 결과가 이전 세션과 다르면 변경 사
 - 상세 코드 관계 질문 → 감지된 도구 결과 참조 안내
 - Brownfield Phase 2 → `structure-ref.md` (도구 참조 + 2~3줄 지도)
 
+**Serena 세션 활성화 규약 (M47 — fail-closed)**:
+- Serena MCP 서버는 `--project` 기동 인자 **없이** 운용한다 (agent JSON / 글로벌 mcp.json 공통). 기동 인자로 프로젝트를 고정하면 설정 계층 override(agent JSON > 글로벌)에 하드코딩이 숨어 모든 세션이 같은 디렉토리로 낙착될 수 있다 (M47 실측: 한 달 반 동안 전 세션이 조상 디렉토리 `work\kiro`로 오지정 → 타 프로젝트 세션 파일 유실)
+- 세션 시작 시 Serena 사용 전에 반드시: ① `activate_project <프로젝트 루트 절대 경로>` 명시 실행 → ② `get_current_config`(또는 activate 응답)로 활성 프로젝트가 세션 프로젝트와 일치함을 확인. **활성화 확인 전 Serena 쓰기 도구(create_text_file 등) 사용 금지**
+- 활성화가 안 된 상태의 도구 에러는 정상 동작(fail-closed)이다 — 조용히 엉뚱한 프로젝트에 쓰는 것(fail-wrong)을 막기 위한 설계이므로, 에러를 우회하지 말고 활성화부터 수행
+- 다중 세션(동시 1~10) 안전 근거: 활성 프로젝트는 serena 프로세스별 상태(세션마다 독립), `.serena/`는 프로젝트별 — 서로 다른 프로젝트의 동시 세션은 구조적으로 격리됨. 단 `~/.serena/serena_config.yml`(등록 목록)은 머신 전역 공유이므로 세션 실행 중 수동 편집 금지
+
 **Tier 2 (사용자 확인 후 도입)**:
 새 도구 도입 전 사용자에게 다음 3가지 명시적으로 제시:
 - **이유**: Serena/Graphify/내장 `code` 외에 왜 필요한가 (커버 영역 차이)
@@ -769,8 +775,9 @@ Tier 3 (`code` 도구) 사용 흔적은 `SESSION.md` Progress 에 기록하여 �
 
 ---
 
-**Version**: 27
-**Last Updated**: 2026-08-25
+**Version**: 28
+**Last Updated**: 2026-09-04
+**Changes (v28)**: §19.3 Serena 세션 활성화 규약 신설 (ai-developer-mickey M47): `--project` 기동 인자 폐지(fail-closed) + 세션 시작 activate_project 의무화 + 활성화 확인 전 쓰기 도구 금지. 근거: agent JSON 하드코딩 `--project work\kiro`가 글로벌 mcp.json을 override하여 전 세션 활성 프로젝트 오지정 (M46 인계 가설 "상대 경로 . 해석" 기각 — 실제 원인은 설정 계층 override, 프로세스 cmdline 실측으로 입증). 다중 세션 격리 근거 병기.
 **Changes (v27)**: §3 세션 시작 체크 8항 신설 (ai-developer-mickey M44, 그래프 전면 감사): graph_audit.py 상비 도구화 — dangling/Path(불변)와 orphan/중복/malformed/드리프트(정리 후보) 실측을 엔트로피 체크 중단점에 배치. 근거: orphan 1건이 "다음 Curator 반영 예정" 인계로 2개월 방치 (forced-breakpoint 원칙 위반 실측). 연동: promote_knowledge.py 카테고리 라우팅 + 표 연속성 + 허브 편중 경고 (개선 A), CURATOR-PROMPT 엣지 편중 방지 규율 (개선 B), promote 미러 동기화 리마인더 (개선 D). baseline: GRAPH-HEALTH-BASELINE-2026-08-25.md
 **Changes (v26)**: §22 PowerShell 원스트라이크 신설 (ai-developer-mickey M43, POSTMORTEM 2026-08-21 개선 후보 ①): 인라인 셸 함정 1회 위반 시 세션 잔여를 .py 스크립트 전용 전환 — 기존 셸 규칙의 강제 장치. 인라인 변형 재시도 금지. 근거: PowerShell execute 계층 함정이 8개 프로젝트 [Protocol] 태그 반복 마찰 1위.
 **Changes (v25)**: §17 Curator 호출 코드화 (ai-developer-mickey M43): use_subagent → invoke_curator.py 유일 진입점. curation 락(프로젝트 로컬, mkdir 원자성, 자동 회수 없음 + --force human-in-the-loop, awaiting-merge 상태 유지)을 호출과 같은 코드 경로에 내장 — 같은 프로젝트 동시 큐레이션을 지시가 아닌 코드로 차단. 전송은 headless 자식 프로세스 stdout in-band (M43 probe: .subagents 무변화). 완주 판정 디스크 실측도 스크립트에 내장. mickey_lock.py로 promote 락과 코드 통합. T1 v20 연동.
