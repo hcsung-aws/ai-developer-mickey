@@ -72,8 +72,9 @@ M48 인계 3항목 수행 (사용자 지시 순서 3→1→2): serena 최종 확
 - [Protocol] §22 원스트라이크 1회 발동 — execute_cmd에 cmd 문법(`if exist`) 사용했으나 실제 셸은 PowerShell (ParserError). 단일 단순 명령(Test-Path)으로 대체. 잔여 셸 작업은 .py 스크립트 우선
 
 ## Context Window Status
-세션 시작 ~25% 추정
+세션 종료 시점 ~55% 추정
 
-## Next Steps
-- M48 인계 3항목 + 아카이빙 완료 — 추가 지시 대기
-- 세션 종료 시 Curator 호출 + 변경분 커밋
+## Next Steps (M50 — 사용자 지시, 2026-09-06)
+1. **그래프 전체 검토 + 기록 분석**: 글로벌 지식 그래프(175노드/515엣지)가 의도대로 동작하는지 파악 — graph_audit 결과 + 세션 기록(참조/승격 이력) 분석
+2. **개선 작업 (트리 구조 정리 포함)**: graph_audit [I] 태그 클러스터 11건(agent-design k=12, qa-automation k=12, distrust k=10, mcp k=10, windows k=8 등 도메인 후보 다수) → §20 Step 3 카테고리화 파이프라인 검토, [E] 중복 엣지 6쌍, [G] INDEX 중복 1건, [M] cloud 하위 미이관 5건, [C] orphan 1(cloud anchor — 구조적 정상 여부 확인)
+3. **사용 패턴 기반 개선 분석**: 의도대로 동작하지 않는 경우 + 의도대로여도 실제 사용 패턴(참조 빈도, 허브 편중 — deploy-output-distrust 차수 59)을 바탕으로 개선점 도출 → 필요 시 개선 진행
