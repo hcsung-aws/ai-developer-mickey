@@ -82,6 +82,11 @@ Through this project, you will learn:
 - **[v10: From CLI Agent to Kiro v3 Power](docs/09-v3-power-migration-en.md)** - Migration narrative and design decisions
   - [한글](docs/09-v3-power-migration.md)
 
+### Knowledge Graph + Tool Integration 🆕
+
+- **[Knowledge Graph + Code Analysis Tools: Expectations vs. Measured Results](docs/10-knowledge-graph-and-tools-en.md)** - What we expected from the knowledge graph and code-analysis tools (Serena/Graphify/`code`) vs. what actually happened — 13 cases including failures
+  - [한글](docs/10-knowledge-graph-and-tools.md)
+
 ### AI Perspective
 
 - [Mickey from AI's Perspective](docs/ai-perspective-en.md) - AI's postmortem and practical guide
@@ -168,7 +173,9 @@ How the evolution loop works:
 2. Knowledge valid beyond the current project is drafted as a promotion bundle in staging → user approval → `promote_knowledge.py` applies it to the graph with locking and integrity checks (node + relation edges + INDEX trigger)
 3. From the next session on, it is discovered automatically in any project via trigger matching and backlinks
 
-A real-world data point (single developer, measured 2026-08): grown to 131 nodes / 376 edges across 8+ projects. Every piece of knowledge promoted in the last month was added already connected to existing knowledge (0 orphan nodes), with 0 integrity violations (dangling edges / missing paths). See [GRAPH-HEALTH-BASELINE-2026-08-25.md](GRAPH-HEALTH-BASELINE-2026-08-25.md) for how to audit the structure.
+A real-world data point (single developer, measured 2026-09): grown to **175 nodes / 515 edges** across 10+ projects (vs. 131/376 a month earlier — with 0 integrity violations (dangling edges / missing paths) maintained throughout the growth). Average degree is 5.89, meaning new knowledge is added already connected to existing knowledge. See [GRAPH-HEALTH-BASELINE-2026-08-25.md](GRAPH-HEALTH-BASELINE-2026-08-25.md) for how to audit the structure.
+
+> 📊 **How the effects we expected from the knowledge graph and code-analysis tool integration actually turned out** — including the recovery from measured 0% usage to 2.45 references per session, and a tool incident that stayed latent for seven weeks. 13 cases including failures: [Knowledge Graph + Tool Integration: Expectations vs. Measured Results](docs/10-knowledge-graph-and-tools-en.md)
 
 > ⚠️ **Personal knowledge is never committed to this repository.** The `mickey/` directory contains only the seed skeleton and 10 educational examples (labeled `[Seed 예시]`), and install uses seed semantics (copy only when missing), so it never overwrites an existing user's knowledge. Full contract: [mickey/README.md](mickey/README.md)
 

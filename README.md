@@ -48,8 +48,9 @@
 | [지식 관리 시스템](docs/05-knowledge-management.md) | 재사용 가능한 지식 구축 |
 | [프롬프트 진화](docs/06-prompt-evolution.md) | v2.0 → v5.0 진화 과정 |
 | [변경 이력](docs/07-changelog.md) | 버전별 변경사항 |
-| [진화 인사이트](docs/08-evolution-insight.md) | 🆕 "AI를 잘 쓰는 법"이 어떻게 진화해 왔는가 |
-| [v3 Power 마이그레이션](docs/09-v3-power-migration.md) | 🆕 CLI v2 agent → Kiro v3 Power 이전의 서사와 설계 결정 |
+| [진화 인사이트](docs/08-evolution-insight.md) | "AI를 잘 쓰는 법"이 어떻게 진화해 왔는가 |
+| [v3 Power 마이그레이션](docs/09-v3-power-migration.md) | CLI v2 agent → Kiro v3 Power 이전의 서사와 설계 결정 |
+| [지식 그래프 + 도구 통합: 기대와 실측](docs/10-knowledge-graph-and-tools.md) | 🆕 지식 그래프와 코드 분석 도구(Serena/Graphify/code)에 기대한 효과 vs 실측 결과 — 사례 13건 (실패 사례 포함) |
 
 ### 실전 사례
 
@@ -173,7 +174,9 @@ Mickey의 도메인 지식은 이 저장소가 아니라 **각 사용자의 홈(
 2. 다른 프로젝트에서도 유효한 지식은 승격 번들로 staging에 초안 → 사용자 승인 → `promote_knowledge.py`가 락·무결성 검증과 함께 그래프에 반영 (노드 + 관계 엣지 + INDEX 트리거)
 3. 다음 세션부터 어느 프로젝트에서든 트리거 매칭과 backlink로 자동 발견됨
 
-실제 운영 사례 (개발자 1인, 2026-08 실측): 8개+ 프로젝트를 거치며 노드 131개 / 엣지 376개 규모로 성장. 최근 한 달간 승격된 신규 지식 전부가 기존 지식과 연결된 상태로 추가되었고(고아 노드 0), 그래프 무결성(끊어진 엣지/경로 결손) 0건을 유지. 구조 건전성 점검 방법은 [GRAPH-HEALTH-BASELINE-2026-08-25.md](GRAPH-HEALTH-BASELINE-2026-08-25.md)를 참고하세요.
+실제 운영 사례 (개발자 1인, 2026-09 실측): 10여 개 프로젝트를 거치며 **노드 175개 / 엣지 515개** 규모로 성장 (한 달 전 131/376 대비 — 성장 중에도 그래프 무결성(끊어진 엣지/경로 결손) 0건 유지). 평균 차수 5.89로 신규 지식이 기존 지식과 연결된 채 추가되고 있습니다. 구조 건전성 점검 방법은 [GRAPH-HEALTH-BASELINE-2026-08-25.md](GRAPH-HEALTH-BASELINE-2026-08-25.md)를 참고하세요.
+
+> 📊 **지식 그래프와 코드 분석 도구 통합에 기대했던 효과가 실제로 어떻게 나타났는지** — 활용도 0% 측정에서 세션당 2.45회 참조로 회복된 과정, 7주 잠복 도구 사고 등 실패 사례 포함 13건의 사례 분석: [지식 그래프 + 도구 통합: 기대와 실측](docs/10-knowledge-graph-and-tools.md)
 
 > ⚠️ **개인 지식은 저장소에 커밋되지 않습니다.** `mickey/` 디렉토리는 seed 골격과 교육용 예시 10건([Seed 예시] 라벨)뿐이며, install은 seed 시맨틱(미존재 시에만 복사)이라 기존 사용자의 지식을 덮어쓰지 않습니다. 상세 계약: [mickey/README.md](mickey/README.md)
 
