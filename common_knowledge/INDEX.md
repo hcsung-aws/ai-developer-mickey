@@ -50,3 +50,4 @@
 | .bak 정리, 글로벌 백업 삭제, 엔트로피 정리 | ~/.kiro/mickey/domain/entries/destructive-target-strict-matching.md | 삭제 대상 선정 엄격 매칭 + 조사/삭제 이중 구조 |
 | Base-Hash 자동 기입, placeholder 후처리, invoke_curator backfill | ~/.kiro/mickey/domain/entries/incomputable-field-placeholder-backfill.md | LLM 산출 불가 필드는 코드 후처리 기입 + drift 시 pending 유지로 CONFLICT 계약 보존 |
 | PowerShell 리다이렉트 mojibake, cp949 파일화, 리포트 직접 기록 | ~/.kiro/mickey/domain/entries/windows-cp949-artifact-ascii-defense.md | 셸 리다이렉트 대신 Python이 직접 utf-8 파일 기록 (4 발현 지점 카탈로그) |
+| 지식 그래프 가치 평가, 실패 봉합, 기대 vs 실측 | ~/.kiro/mickey/domain/entries/structural-sealing-over-reuse.md | docs/10 사례 13건 분석의 메타 결론 — 재사용보다 봉합 |
