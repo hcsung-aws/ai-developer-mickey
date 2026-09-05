@@ -119,6 +119,97 @@ def fake_kiro(staging_writes):
     return _run
 
 
+# ── Base-Hash 자동 기입 (M48) ─────────────────────────────────────
+def make_bundle(staging: Path, name: str, entry_path: str,
+                base_hash: str = "pending") -> Path:
+    """promote 번들 형식의 최소 Meta를 가진 gd- 번들 생성."""
+    staging.mkdir(parents=True, exist_ok=True)
+    p = staging / name
+    p.write_text(
+        "## Meta\n"
+        "Mode: augment\n"
+        f"Entry-Path: {entry_path}\n"
+        "Source: test M1\n"
+        f"Base-Hash: {base_hash}\n",
+        encoding="utf-8")
+    return p
+
+
+class TestFillPendingBasehash:
+    @pytest.fixture
+    def env(self, tmp_path, monkeypatch):
+        """글로벌 루트 격리 (promote와 동일한 MICKEY_GLOBAL_ROOT 규약)."""
+        groot = tmp_path / "global"
+        (groot / "domain" / "entries").mkdir(parents=True)
+        monkeypatch.setenv("MICKEY_GLOBAL_ROOT", str(groot))
+        staging = tmp_path / "_curator-staging"
+        return SimpleNamespace(groot=groot, staging=staging)
+
+    def test_fills_hash_when_entry_unchanged(self, env):
+        import hashlib
+        entry = env.groot / "domain" / "entries" / "foo.md"
+        entry.write_text("entry body", encoding="utf-8")
+        bundle = make_bundle(env.staging, "gd-foo.md", "entries/foo.md")
+        lines = ic.fill_pending_basehash(env.staging, time.time() + 1)
+        expected = hashlib.sha256(entry.read_bytes()).hexdigest()
+        assert f"Base-Hash: {expected}" in bundle.read_text(encoding="utf-8")
+        assert any("기입" in l for l in lines)
+
+    def test_keeps_pending_on_real_drift(self, env):
+        """큐레이션 시작 후 entry 수정 = 타 세션 drift — 기입 금지 (CONFLICT 계약 보존)."""
+        entry = env.groot / "domain" / "entries" / "foo.md"
+        entry.write_text("entry body", encoding="utf-8")
+        bundle = make_bundle(env.staging, "gd-foo.md", "entries/foo.md")
+        run_started = entry.stat().st_mtime - 10  # entry가 시작 이후 수정된 상황
+        lines = ic.fill_pending_basehash(env.staging, run_started)
+        assert "Base-Hash: pending" in bundle.read_text(encoding="utf-8")
+        assert any("drift" in l for l in lines)
+
+    def test_keeps_pending_when_entry_missing(self, env):
+        bundle = make_bundle(env.staging, "gd-none.md", "entries/none.md")
+        lines = ic.fill_pending_basehash(env.staging, time.time())
+        assert "Base-Hash: pending" in bundle.read_text(encoding="utf-8")
+        assert any("대상 없음" in l for l in lines)
+
+    def test_skips_bundle_without_pending(self, env):
+        entry = env.groot / "domain" / "entries" / "foo.md"
+        entry.write_text("entry body", encoding="utf-8")
+        bundle = make_bundle(env.staging, "gd-foo.md", "entries/foo.md",
+                             base_hash="abc123")
+        lines = ic.fill_pending_basehash(env.staging, time.time() + 1)
+        assert lines == []
+        assert "Base-Hash: abc123" in bundle.read_text(encoding="utf-8")
+
+    def test_rejects_bad_entry_path(self, env):
+        """entries/ 밖 또는 상위 탈출 경로는 기입 거부 (promote 검증과 동일 규약)."""
+        bundle = make_bundle(env.staging, "gd-evil.md", "entries/../../etc/x.md")
+        lines = ic.fill_pending_basehash(env.staging, time.time() + 1)
+        assert "Base-Hash: pending" in bundle.read_text(encoding="utf-8")
+        assert any("이상" in l for l in lines)
+
+    def test_run_flow_fills_hash_and_reports(self, project, monkeypatch, tmp_path, capsys):
+        """run 통합: 가짜 Curator가 pending 번들 산출 → run이 해시 기입 + 리포트 기록."""
+        import hashlib
+        groot = tmp_path / "g"
+        entries = groot / "domain" / "entries"
+        entries.mkdir(parents=True)
+        (entries / "foo.md").write_text("entry body", encoding="utf-8")
+        monkeypatch.setenv("MICKEY_GLOBAL_ROOT", str(groot))
+
+        bundle_body = ("## Meta\nMode: augment\nEntry-Path: entries/foo.md\n"
+                       "Source: t\nBase-Hash: pending\n")
+        monkeypatch.setattr(ic.shutil, "which", lambda _: "kiro-cli")
+        monkeypatch.setattr(ic.subprocess, "run",
+                            fake_kiro([("gd-foo.md", bundle_body)]))
+        rc = ic.do_run(project, project / "MICKEY-9-SESSION.md",
+                       "tester", False, "knowledge-curator", 60)
+        assert rc == 0
+        expected = hashlib.sha256(b"entry body").hexdigest()
+        written = (ic.staging_dir(project) / "gd-foo.md").read_text(encoding="utf-8")
+        assert f"Base-Hash: {expected}" in written
+        assert "Base-Hash 자동 기입" in capsys.readouterr().out
+
+
 class TestRunFlow:
     def test_run_full_flow_awaiting_merge(self, project, monkeypatch, capsys):
         monkeypatch.setattr(ic.shutil, "which", lambda _: "kiro-cli")

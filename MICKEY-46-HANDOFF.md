@@ -6,6 +6,24 @@
 
 ## Next Steps (Mickey 47+)
 
+- **【최상위 해결 과제 — 외부 기입: aws-ai-shift-mysql workshop Mickey 8, 2026-09-03】**
+  **Serena 활성 프로젝트가 상위 디렉토리(work\kiro)로 잡히는 문제 원인 규명 + 해결**
+  - 사고 실측: workshop Mickey 8 세션 시작 시 Serena 활성 프로젝트가 'kiro'(=`C:\Users\hcsung\work\kiro`)
+    상태 → `create_text_file`이 그 루트의 기존 `MICKEY-8-SESSION.md`를 덮어씀 (원본 사본 없음, 유실).
+    tool-implicit-root-path-trap 계열 사고의 실피해 발생 사례
+  - 원인 증거 (실측): 글로벌 `~/.kiro/settings/mcp.json`의 serena 기동 인자가
+    `["start-mcp-server", "--project", "."]` — **상대 경로 "."** 는 MCP 서버 기동 cwd 기준.
+    이번 세션 cwd는 `work\kiro\aws-ai-shift-mysql`(Serena 미등록)이었고 활성 프로젝트는
+    `work\kiro`로 낙착됨. `work\kiro`에 `.serena/` 디렉토리 실존 확인 — "." 해석이
+    조상 디렉토리의 프로젝트 마커로 낙착되는 메커니즘 추정 (검증 필요)
+  - 해결 방향 후보: ① `--project .` 제거 + 세션 시작 activate_project 의무화(프로토콜 §19 연동)
+    ② 워크스페이스별 `.kiro/settings/mcp.json`에 절대 경로 고정 ③ Serena 쪽 기본 프로젝트 비활성 옵션 조사
+  - 참고: `domain/entries/tool-implicit-root-path-trap.md` (stdio 기동 인자는 절대 경로 고정)
+- **【미아 세션 파일 2건 처분 — 위 과제와 함께 처리】** `work\kiro` 루트에 타 프로젝트 세션 파일 방치:
+  - `work\kiro\MICKEY-7-SESSION.md` → **bvt-anjin-comparison** 소속 (2026-07-07 Maintenance 세션)
+  - `work\kiro\MICKEY-24-SESSION.md` → **epic-lore-benchmark** 소속 (2026-08-26, M5 W4c clone 시나리오 골격)
+  - 둘 다 위 함정(활성 프로젝트 오지정)의 과거 발생 흔적으로 추정 — 소속 프로젝트 이동/삭제 결정 필요
+  - (workshop Mickey 8이 오기록한 `work\kiro\MICKEY-8-SESSION.md`는 지문 확인 후 삭제 완료)
 - **Curator 검증 5/5회차** (다음 세션 종료 시 — 통과하면 git diff 보고 옵션화)
 - M45 인계 잔여: 자율성 수준 기록 (ENVIRONMENT.md Autonomy Preference — T1 2a 소급), Curator 재시도 분기 실전 검증 대기 (다음 실패 시 attempt 구조 확인)
 - 재측정 사이클: baseline 각주 **2건** 반영해 대조 — malformed 0 + INDEX 중복 1이 기대값

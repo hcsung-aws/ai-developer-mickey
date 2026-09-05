@@ -29,6 +29,8 @@
 종료 코드: 0=성공, 1=실행 실패/타임아웃, 2=락 선점(BUSY), 3=환경 오류
 """
 import argparse
+import hashlib
+import os
 import shutil
 import subprocess
 import sys
@@ -96,6 +98,57 @@ def diff_lines(before: dict, after: dict) -> list:
     for rel in sorted(set(before) & set(after)):
         if before[rel] != after[rel]:
             lines.append(f"  * {rel} (수정)")
+    return lines
+
+
+# ── Base-Hash 자동 기입 (M48 — Curator/promote 형식 계약의 결정론 보완) ──
+def global_root() -> Path:
+    """글로벌 지식 루트 (promote_knowledge.global_root 와 동일 규약 — 테스트 격리용 env 지원)."""
+    env = os.environ.get("MICKEY_GLOBAL_ROOT")
+    return Path(env) if env else Path.home() / ".kiro" / "mickey"
+
+
+def fill_pending_basehash(staging: Path, run_started: float) -> list:
+    """augment 번들의 `Base-Hash: pending` 을 대상 entry의 실제 sha256으로 기입.
+
+    배경 (M47 CONFLICT 오탐): Curator(LLM)는 sha256을 계산할 수 없어 pending
+    마커를 남기는데, promote의 낙관적 동시성 대조는 실제 해시를 요구한다 —
+    번들 형식 계약과 Curator 능력의 불일치를 결정론 코드로 메운다
+    (LLM 결정론적 하이브리드 패턴).
+
+    안전 조건: 대상 entry가 큐레이션 시작(run_started) 이후 수정됐다면 타 세션의
+    실제 drift — 기입하지 않고 pending 유지하여 promote가 CONFLICT 스킵으로
+    재큐레이션을 유도하게 둔다 (기존 계약 보존).
+    반환: 리포트용 라인 목록 (처리 없으면 빈 목록).
+    """
+    entries_root = global_root() / "domain"
+    lines = []
+    for bundle in sorted(staging.glob("gd-*.md")):
+        text = bundle.read_text(encoding="utf-8")
+        if "Base-Hash: pending" not in text:
+            continue
+        # Meta 섹션의 Entry-Path 파싱 (promote 파서와 동일한 Key: value 규약)
+        entry_path = None
+        for line in text.splitlines():
+            if line.strip().lower().startswith("entry-path:"):
+                entry_path = line.split(":", 1)[1].strip()
+                break
+        if not entry_path or not entry_path.startswith("entries/") or ".." in entry_path:
+            lines.append(f"  ! {bundle.name}: Entry-Path 이상({entry_path!r}) — pending 유지")
+            continue
+        entry = entries_root / entry_path
+        if not entry.exists():
+            # augment 대상 부재는 promote가 CONFLICT로 잡을 사안 — 여기선 손대지 않음
+            lines.append(f"  ! {bundle.name}: 대상 없음({entry_path}) — pending 유지")
+            continue
+        if entry.stat().st_mtime >= run_started:
+            lines.append(f"  ! {bundle.name}: 대상이 큐레이션 시작 후 수정됨 — 실제 drift, pending 유지")
+            continue
+        digest = hashlib.sha256(entry.read_bytes()).hexdigest()
+        bundle.write_text(
+            text.replace("Base-Hash: pending", f"Base-Hash: {digest}"),
+            encoding="utf-8")
+        lines.append(f"  = {bundle.name}: Base-Hash 기입 ({digest[:16]}…)")
     return lines
 
 
@@ -229,7 +282,14 @@ def do_run(project: Path, session: Path, owner: str, force: bool,
                           f"(간헐 스로틀 대응). 직전 시도의 부분 산출물은 staging에 잔존할 수 있음")
             time.sleep(retry_delay)
 
-    # 3) 완주 판정 = 디스크 실측 (응답 표면 아닌 staging diff — §17 규약의 코드화)
+    # 3) Base-Hash 자동 기입 (M48) — 완주 판정 전, 산출 번들의 pending 마커를
+    #    실제 해시로 보정 (실패 시도의 부분 산출물도 직접 대행 경로에서 재사용되므로 수행)
+    basehash_lines = fill_pending_basehash(staging, run_started)
+    if basehash_lines:
+        report.append(f"Base-Hash 자동 기입 ({len(basehash_lines)}건):")
+        report.extend(basehash_lines)
+
+    # 4) 완주 판정 = 디스크 실측 (응답 표면 아닌 staging diff — §17 규약의 코드화)
     last = attempts[-1]
     after = snapshot(staging)
     changes = diff_lines(before, after)

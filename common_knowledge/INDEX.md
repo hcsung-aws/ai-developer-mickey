@@ -48,3 +48,5 @@
 | Curator 실패, invoke_curator 재시도, ModelThrottle | ~/.kiro/mickey/domain/entries/child-process-failure-evidence-preservation.md | 래퍼는 시도별 실패 증거 전문 보존 + 양상 분류 후 재시도 |
 | promote 위생, GRAPH malformed, 표 행 분절 | ~/.kiro/mickey/domain/entries/escape-contract-boundary-enforcement.md | 이스케이프 계약은 경계 코드 강제 + 진단 도구도 소비자 |
 | .bak 정리, 글로벌 백업 삭제, 엔트로피 정리 | ~/.kiro/mickey/domain/entries/destructive-target-strict-matching.md | 삭제 대상 선정 엄격 매칭 + 조사/삭제 이중 구조 |
+| Base-Hash 자동 기입, placeholder 후처리, invoke_curator backfill | ~/.kiro/mickey/domain/entries/incomputable-field-placeholder-backfill.md | LLM 산출 불가 필드는 코드 후처리 기입 + drift 시 pending 유지로 CONFLICT 계약 보존 |
+| PowerShell 리다이렉트 mojibake, cp949 파일화, 리포트 직접 기록 | ~/.kiro/mickey/domain/entries/windows-cp949-artifact-ascii-defense.md | 셸 리다이렉트 대신 Python이 직접 utf-8 파일 기록 (4 발현 지점 카탈로그) |
